@@ -1,0 +1,1559 @@
+// Responsive Design System for Dental Clinic Management
+// Following development rules: All device compatibility (PC, Tablet, Smartphone)
+
+// ================================
+// 1. BREAKPOINTS & MIXINS
+// ================================
+
+$breakpoints: (
+  'mobile-small': 320px,
+  'mobile': 375px,
+  'mobile-large': 414px,
+  'tablet-small': 768px,
+  'tablet': 1024px,
+  'desktop': 1200px,
+  'desktop-large': 1440px,
+  'desktop-xl': 1920px
+);
+
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+@mixin mobile-only {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin touch-device {
+  @media (pointer: coarse) {
+    @content;
+  }
+}
+
+// ================================
+// 2. TOUCH-FRIENDLY SIZING
+// ================================
+
+// Minimum touch target size: 44px x 44px (Apple HIG & Material Design)
+$touch-target-min: 44px;
+$touch-target-comfortable: 48px;
+
+.touch-target {
+  min-width: $touch-target-min;
+  min-height: $touch-target-min;
+  
+  @include touch-device {
+    min-width: $touch-target-comfortable;
+    min-height: $touch-target-comfortable;
+  }
+}
+
+// ================================
+// 3. NAVIGATION SYSTEM
+// ================================
+
+.navbar {
+  &-desktop {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      
+      .nav-link {
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+        
+        &:hover {
+          background: #f8f9fa;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+  
+  &-tablet {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      
+      .nav-tabs {
+        display: flex;
+        padding: 1rem;
+        gap: 1rem;
+        
+        .nav-tab {
+          @extend .touch-target;
+          padding: 0.75rem 1.5rem;
+          background: #f8f9fa;
+          border: none;
+          border-radius: 8px;
+          color: #333;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &.active {
+            background: #007bff;
+            color: white;
+          }
+          
+          &:hover:not(.active) {
+            background: #e9ecef;
+          }
+        }
+      }
+    }
+  }
+  
+  &-mobile {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: block;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      
+      .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        
+        .logo {
+          font-size: 1.25rem;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .hamburger-menu {
+          @extend .touch-target;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem;
+          
+          .hamburger-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            
+            .line {
+              width: 20px;
+              height: 2px;
+              background: #333;
+              transition: all 0.3s;
+            }
+          }
+          
+          &.active .hamburger-lines {
+            .line:nth-child(1) {
+              transform: rotate(45deg) translate(5px, 5px);
+            }
+            .line:nth-child(2) {
+              opacity: 0;
+            }
+            .line:nth-child(3) {
+              transform: rotate(-45deg) translate(7px, -6px);
+            }
+          }
+        }
+      }
+      
+      .mobile-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+        z-index: 1000;
+        
+        &.open {
+          max-height: 400px;
+        }
+        
+        .mobile-nav-links {
+          padding: 1rem 0;
+          
+          .mobile-nav-link {
+            display: block;
+            padding: 1rem;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            
+            @extend .touch-target;
+            
+            &:hover {
+              background: #f8f9fa;
+            }
+            
+            &.active {
+              background: #e3f2fd;
+              color: #1976d2;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ================================
+// 4. LAYOUT SYSTEMS
+// ================================
+
+.responsive-layout {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  
+  &.mobile-layout {
+    padding: 0.5rem;
+    
+    .container {
+      padding: 0;
+      margin: 0;
+    }
+  }
+  
+  &.tablet-layout {
+    padding: 1rem;
+    
+    .container {
+      max-width: 90%;
+      margin: 0 auto;
+    }
+  }
+  
+  &.desktop-layout {
+    padding: 2rem;
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+}
+
+// ================================
+// 5. PATIENT LIST LAYOUTS
+// ================================
+
+.patient-list-container {
+  .patient-desktop-table {
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include desktop-only {
+      display: table;
+      width: 100%;
+      border-collapse: collapse;
+      
+      th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+      }
+      
+      tbody tr:hover {
+        background: #f5f5f5;
+      }
+    }
+  }
+  
+  .patient-cards {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      
+      .patient-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .patient-name {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+        
+        .patient-kana {
+          color: #666;
+          margin-bottom: 0.75rem;
+        }
+        
+        .patient-contact {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          font-size: 0.9rem;
+          color: #777;
+        }
+        
+        .patient-actions {
+          margin-top: 1rem;
+          display: flex;
+          gap: 0.5rem;
+          
+          .btn {
+            @extend .touch-target;
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+  
+  .patient-mobile-list {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: block;
+      
+      .patient-mobile-item {
+        background: #fff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 1rem;
+        position: relative;
+        
+        @extend .touch-target;
+        
+        &:active {
+          background: #f5f5f5;
+        }
+        
+        .patient-primary-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 0.5rem;
+          
+          .patient-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+          }
+          
+          .patient-id {
+            font-size: 0.8rem;
+            color: #999;
+          }
+        }
+        
+        .patient-secondary-info {
+          font-size: 0.9rem;
+          color: #666;
+          
+          .patient-kana {
+            margin-bottom: 0.25rem;
+          }
+          
+          .patient-contact {
+            font-size: 0.8rem;
+            color: #777;
+          }
+        }
+        
+        .patient-actions {
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          
+          .chevron-right {
+            width: 16px;
+            height: 16px;
+            color: #ccc;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ================================
+// 6. APPOINTMENT CALENDAR LAYOUTS
+// ================================
+
+.appointment-calendar-container {
+  .calendar-week-view {
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include desktop-only {
+      display: grid;
+      grid-template-columns: auto repeat(7, 1fr);
+      gap: 1px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      
+      .time-slot {
+        background: #f8f9fa;
+        padding: 0.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #666;
+      }
+      
+      .day-header {
+        background: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+        
+        .day-name {
+          display: block;
+          font-size: 0.8rem;
+          color: #666;
+        }
+        
+        .day-number {
+          display: block;
+          font-size: 1.2rem;
+          color: #333;
+        }
+      }
+      
+      .appointment-slot {
+        background: #fff;
+        min-height: 60px;
+        position: relative;
+        
+        .appointment-block {
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          right: 2px;
+          background: #e3f2fd;
+          border-radius: 4px;
+          padding: 0.5rem;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          }
+          
+          &.status-booked { background: #e3f2fd; }
+          &.status-confirmed { background: #e8f5e8; }
+          &.status-cancelled { background: #ffebee; }
+          &.status-visited { background: #f3e5f5; }
+        }
+      }
+    }
+  }
+  
+  .calendar-day-view {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: block;
+      
+      .day-view-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .nav-button {
+          @extend .touch-target;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 50%;
+          
+          &:hover {
+            background: #f0f0f0;
+          }
+        }
+        
+        .current-date {
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+      }
+      
+      .time-slots-container {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .time-slot-row {
+          display: flex;
+          border-bottom: 1px solid #f0f0f0;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .time-label {
+            width: 80px;
+            padding: 1rem;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+          }
+          
+          .appointment-area {
+            flex: 1;
+            min-height: 60px;
+            position: relative;
+            
+            .appointment-block {
+              @extend .touch-target;
+              position: absolute;
+              top: 4px;
+              left: 4px;
+              right: 4px;
+              bottom: 4px;
+              border-radius: 6px;
+              padding: 0.75rem;
+              cursor: pointer;
+              transition: all 0.2s;
+              
+              &.touch-friendly {
+                min-height: $touch-target-comfortable;
+              }
+              
+              &:active {
+                transform: scale(0.98);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .appointment-mobile-list {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: block;
+      
+      .mobile-date-navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .date-nav-button {
+          @extend .touch-target;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.75rem;
+          border-radius: 50%;
+          
+          &:active {
+            background: #f0f0f0;
+          }
+        }
+        
+        .current-date-mobile {
+          font-size: 1.1rem;
+          font-weight: 600;
+          text-align: center;
+        }
+      }
+      
+      .appointment-mobile-items {
+        .appointment-mobile-item {
+          background: #fff;
+          border-bottom: 1px solid #e0e0e0;
+          padding: 1rem;
+          
+          @extend .touch-target;
+          
+          &:active {
+            background: #f5f5f5;
+          }
+          
+          .appointment-time {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+          }
+          
+          .appointment-patient {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 0.25rem;
+          }
+          
+          .appointment-type {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+          }
+          
+          .appointment-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            
+            &.status-booked { background: #e3f2fd; color: #1976d2; }
+            &.status-confirmed { background: #e8f5e8; color: #2e7d32; }
+            &.status-cancelled { background: #ffebee; color: #d32f2f; }
+            &.status-visited { background: #f3e5f5; color: #7b1fa2; }
+          }
+        }
+        
+        .no-appointments {
+          text-align: center;
+          padding: 3rem 1rem;
+          color: #999;
+          
+          .empty-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+          }
+          
+          .empty-text {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+          }
+          
+          .empty-subtext {
+            font-size: 0.9rem;
+            color: #bbb;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ================================
+// 7. FORM LAYOUTS
+// ================================
+
+.responsive-form {
+  .standard-form {
+    @include mobile-only {
+      display: none;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      
+      @include tablet-only {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .form-group {
+        flex: 1;
+        
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          color: #333;
+        }
+        
+        input, select, textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 1rem;
+          
+          @include tablet-only {
+            padding: 1rem;
+            font-size: 1.1rem;
+          }
+          
+          &:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+          }
+        }
+      }
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+      
+      @include tablet-only {
+        justify-content: stretch;
+        
+        .btn {
+          flex: 1;
+        }
+      }
+    }
+  }
+  
+  .mobile-stepper-form {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: block;
+      
+      .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+        
+        .step {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #e0e0e0;
+          color: #999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 500;
+          font-size: 0.9rem;
+          position: relative;
+          
+          &:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            width: 40px;
+            height: 2px;
+            background: #e0e0e0;
+            transform: translateY(-50%);
+          }
+          
+          &.completed {
+            background: #4caf50;
+            color: white;
+            
+            &::after {
+              background: #4caf50;
+            }
+          }
+          
+          &.active {
+            background: #007bff;
+            color: white;
+          }
+        }
+      }
+      
+      .step-content {
+        min-height: 300px;
+        
+        .step-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+          text-align: center;
+        }
+        
+        .form-group {
+          margin-bottom: 1.5rem;
+          
+          label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: #333;
+            font-size: 1.1rem;
+          }
+          
+          input, select, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            
+            @extend .touch-target;
+            
+            &:focus {
+              outline: none;
+              border-color: #007bff;
+              box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+            }
+          }
+          
+          select {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23666' d='m2 0l2 3h-4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            appearance: none;
+          }
+        }
+      }
+      
+      .step-navigation {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        
+        .btn-back {
+          flex: 1;
+          @extend .touch-target;
+          background: #f8f9fa;
+          color: #333;
+          border: 1px solid #ddd;
+        }
+        
+        .btn-next, .btn-submit {
+          flex: 2;
+          @extend .touch-target;
+          background: #007bff;
+          color: white;
+          border: none;
+        }
+        
+        .btn {
+          padding: 1rem;
+          border-radius: 8px;
+          font-size: 1.1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:active {
+            transform: translateY(1px);
+          }
+          
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ================================
+// 8. BUTTON STYLES
+// ================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  }
+  
+  &.btn-mobile {
+    @include mobile-only {
+      @extend .touch-target;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      width: 100%;
+      
+      &.btn-large {
+        padding: 1.25rem 2rem;
+        font-size: 1.2rem;
+      }
+    }
+  }
+  
+  &.btn-tablet {
+    @include tablet-only {
+      @extend .touch-target;
+      padding: 0.75rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 6px;
+    }
+  }
+  
+  &.btn-desktop {
+    @include desktop-only {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+    }
+  }
+  
+  // Color variants
+  &.btn-primary {
+    background: #007bff;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #0056b3;
+    }
+    
+    &:active {
+      background: #004085;
+    }
+  }
+  
+  &.btn-secondary {
+    background: #6c757d;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #545b62;
+    }
+  }
+  
+  &.btn-success {
+    background: #28a745;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #1e7e34;
+    }
+  }
+  
+  &.btn-danger {
+    background: #dc3545;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #bd2130;
+    }
+  }
+  
+  &.btn-outline {
+    background: transparent;
+    border-color: currentColor;
+    
+    &:hover:not(:disabled) {
+      background: currentColor;
+      color: white;
+    }
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ================================
+// 9. CLOCKING INTERFACE
+// ================================
+
+.clocking-interface {
+  .clocking-desktop-view {
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include desktop-only {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      
+      .clocking-controls {
+        .current-time {
+          font-size: 3rem;
+          font-weight: 300;
+          text-align: center;
+          margin-bottom: 2rem;
+          color: #333;
+        }
+        
+        .clocking-buttons {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          
+          .clocking-btn {
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+            
+            &.clock-in {
+              background: #28a745;
+              color: white;
+              
+              &:hover {
+                background: #1e7e34;
+                transform: translateY(-2px);
+              }
+            }
+            
+            &.clock-out {
+              background: #dc3545;
+              color: white;
+              
+              &:hover {
+                background: #bd2130;
+                transform: translateY(-2px);
+              }
+            }
+            
+            &.break-start {
+              background: #ffc107;
+              color: #333;
+              
+              &:hover {
+                background: #d39e00;
+              }
+            }
+            
+            &.break-end {
+              background: #17a2b8;
+              color: white;
+              
+              &:hover {
+                background: #117a8b;
+              }
+            }
+          }
+        }
+        
+        .current-status {
+          margin-top: 2rem;
+          padding: 1rem;
+          background: #f8f9fa;
+          border-radius: 8px;
+          text-align: center;
+          
+          .status-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+          }
+          
+          .status-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+          }
+        }
+      }
+      
+      .clocking-history {
+        .history-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          
+          h3 {
+            margin: 0;
+            font-size: 1.25rem;
+          }
+          
+          .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            
+            .filter-btn {
+              padding: 0.25rem 0.75rem;
+              font-size: 0.9rem;
+              border-radius: 16px;
+              background: #f8f9fa;
+              color: #333;
+              border: 1px solid #ddd;
+              
+              &.active {
+                background: #007bff;
+                color: white;
+              }
+            }
+          }
+        }
+        
+        .history-table {
+          width: 100%;
+          border-collapse: collapse;
+          
+          th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          
+          th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+          
+          tbody tr:hover {
+            background: #f5f5f5;
+          }
+        }
+      }
+    }
+  }
+  
+  .clocking-tablet-view {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: block;
+      
+      .current-time-large {
+        font-size: 4rem;
+        font-weight: 300;
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+      
+      .clocking-btn-large {
+        @extend .touch-target;
+        display: block;
+        width: 100%;
+        padding: 2rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:active {
+          transform: scale(0.98);
+        }
+      }
+      
+      .clocking-history-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+        
+        .history-card {
+          background: #fff;
+          border-radius: 8px;
+          padding: 1.5rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          
+          .card-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+          }
+          
+          .card-times {
+            .time-entry {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 0.25rem;
+              font-size: 0.9rem;
+              
+              .time-type {
+                color: #666;
+              }
+              
+              .time-value {
+                font-weight: 500;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .clocking-mobile-view {
+    @include desktop-only {
+      display: none;
+    }
+    
+    @include tablet-only {
+      display: none;
+    }
+    
+    @include mobile-only {
+      display: block;
+      text-align: center;
+      
+      .current-time-mobile {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+      
+      .current-date-mobile {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 2rem;
+      }
+      
+      .clocking-btn-mobile {
+        @extend .touch-target;
+        display: block;
+        width: 100%;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        
+        &:active {
+          transform: scale(0.95);
+        }
+        
+        &.clock-in {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+        }
+        
+        &.clock-out {
+          background: linear-gradient(135deg, #dc3545, #fd7e14);
+          color: white;
+        }
+        
+        &.break-start {
+          background: linear-gradient(135deg, #ffc107, #fd7e14);
+          color: #333;
+        }
+        
+        &.break-end {
+          background: linear-gradient(135deg, #17a2b8, #6610f2);
+          color: white;
+        }
+      }
+      
+      .gps-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        
+        .gps-icon {
+          width: 16px;
+          height: 16px;
+          
+          &.enabled {
+            color: #28a745;
+          }
+          
+          &.disabled {
+            color: #dc3545;
+          }
+        }
+        
+        .gps-text {
+          &.enabled {
+            color: #28a745;
+          }
+          
+          &.disabled {
+            color: #dc3545;
+          }
+        }
+      }
+      
+      .clocking-history-minimal {
+        margin-top: 2rem;
+        
+        .history-header {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          text-align: left;
+        }
+        
+        .history-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          background: #fff;
+          border-bottom: 1px solid #e0e0e0;
+          
+          .history-left {
+            .history-date {
+              font-size: 0.9rem;
+              color: #666;
+            }
+            
+            .history-type {
+              font-size: 0.8rem;
+              color: #999;
+            }
+          }
+          
+          .history-right {
+            text-align: right;
+            
+            .history-time {
+              font-size: 1rem;
+              font-weight: 500;
+            }
+            
+            .history-duration {
+              font-size: 0.8rem;
+              color: #666;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ================================
+// 10. UTILITY CLASSES
+// ================================
+
+.touch-friendly {
+  @include touch-device {
+    @extend .touch-target;
+  }
+}
+
+.no-horizontal-scroll {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.swipe-enabled {
+  touch-action: pan-x;
+  user-select: none;
+}
+
+// Hide scrollbar but maintain functionality
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+}
+
+// Safe area support for notched devices
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+// Bottom navigation for mobile
+.bottom-navigation {
+  @include mobile-only {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    z-index: 1000;
+    
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem 0.5rem;
+      text-decoration: none;
+      color: #666;
+      transition: color 0.2s;
+      
+      @extend .touch-target;
+      
+      &.active {
+        color: #007bff;
+      }
+      
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 0.25rem;
+      }
+      
+      .nav-label {
+        font-size: 0.7rem;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Add padding for bottom navigation
+.content-with-bottom-nav {
+  @include mobile-only {
+    padding-bottom: 80px;
+  }
+}

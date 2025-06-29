@@ -1,0 +1,227 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  RUBY_VERSION: 3.3.0
+  NODE_VERSION: 18
+  POSTGRES_PASSWORD: postgres
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dental_system_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ env.RUBY_VERSION }}
+        bundler-cache: true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        bundle install --jobs 4 --retry 3
+        npm install
+
+    - name: Setup database
+      env:
+        RAILS_ENV: test
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/dental_system_test
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:migrate
+
+    - name: Run RuboCop
+      run: bundle exec rubocop --parallel
+
+    - name: Run RSpec tests
+      env:
+        RAILS_ENV: test
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/dental_system_test
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec_results.xml
+
+    - name: Generate test coverage
+      env:
+        RAILS_ENV: test
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/dental_system_test
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        bundle exec rspec --format html --out tmp/rspec_results.html
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          tmp/rspec_results.xml
+          tmp/rspec_results.html
+          coverage/
+
+    - name: Security scan with Brakeman
+      run: |
+        bundle exec brakeman --format json --output tmp/brakeman_results.json
+        bundle exec brakeman --format html --output tmp/brakeman_results.html
+
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan
+        path: |
+          tmp/brakeman_results.json
+          tmp/brakeman_results.html
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t dental_system:${{ github.sha }} .
+        docker tag dental_system:${{ github.sha }} dental_system:latest
+
+    - name: Test Docker image
+      run: |
+        docker run --rm dental_system:${{ github.sha }} rails --version
+
+    - name: Save Docker image
+      run: docker save dental_system:${{ github.sha }} | gzip > dental_system.tar.gz
+
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: dental_system.tar.gz
+
+  deploy:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download Docker image
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-image
+
+    - name: Set up Ruby for Capistrano
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ env.RUBY_VERSION }}
+        bundler-cache: true
+
+    - name: Setup SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/dental_system_lightsail.pem
+        chmod 600 ~/.ssh/dental_system_lightsail.pem
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to production
+      env:
+        LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        REDIS_URL: ${{ secrets.REDIS_URL }}
+        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+        LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
+        LINE_CHANNEL_TOKEN: ${{ secrets.LINE_CHANNEL_TOKEN }}
+      run: |
+        bundle exec cap production deploy
+
+    - name: Run post-deploy health check
+      run: |
+        sleep 30
+        curl -f https://${{ secrets.DOMAIN_NAME }}/up || exit 1
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Deployment to production successful"
+        # Send notification to monitoring system
+
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Deployment to production failed"
+        # Send alert to monitoring system
+
+  performance_test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Run performance tests
+      env:
+        BASE_URL: https://${{ secrets.DOMAIN_NAME }}
+      run: |
+        k6 run --out json=performance_results.json test/performance/load_test.js
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: performance_results.json

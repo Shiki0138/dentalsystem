@@ -1,0 +1,25 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:grid md:grid-cols-3 md:gap-6">
+    <div class="md:col-span-1">
+      <div class="px-4 sm:px-0">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">新規患者登録</h3>
+        <p class="mt-1 text-sm text-gray-600">
+          患者の基本情報を入力してください。<br>
+          氏名とフリガナは必須項目です。
+        </p>
+        <div class="mt-6">
+          <p class="text-sm text-gray-500">
+            <strong>重複チェック機能</strong><br>
+            登録時に類似する患者情報を自動的に検出し、重複登録を防ぎます。
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-5 md:col-span-2 md:mt-0">
+      <div class="shadow sm:overflow-hidden sm:rounded-md">
+        <%= render 'form', patient: @patient %>
+      </div>
+    </div>
+  </div>
+</div>

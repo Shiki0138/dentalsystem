@@ -1,0 +1,116 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">給与管理</h1>
+    <div class="flex gap-2">
+      <%= link_to "CSV出力", export_admin_payrolls_path(month: @month, format: :csv), 
+          class: "bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition" %>
+      <%= button_to "一括計算", calculate_all_admin_payrolls_path, 
+          method: :post, 
+          params: { month: @month },
+          data: { confirm: "#{@month.strftime('%Y年%m月')}の給与を一括計算しますか？" },
+          class: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition" %>
+    </div>
+  </div>
+  
+  <!-- Month Navigation -->
+  <div class="bg-white rounded-lg shadow mb-6 p-4">
+    <div class="flex items-center justify-between">
+      <%= link_to admin_payrolls_path(month: @month - 1.month), 
+          class: "text-blue-600 hover:text-blue-800" do %>
+        <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        前月
+      <% end %>
+      
+      <h2 class="text-xl font-semibold"><%= @month.strftime('%Y年%m月') %></h2>
+      
+      <%= link_to admin_payrolls_path(month: @month + 1.month), 
+          class: "text-blue-600 hover:text-blue-800" do %>
+        次月
+        <svg class="w-5 h-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">対象人数</p>
+      <p class="text-2xl font-bold text-gray-800"><%= @summary[:total_employees] %>人</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">総支給額</p>
+      <p class="text-2xl font-bold text-gray-800">¥<%= number_with_delimiter(@summary[:total_gross]) %></p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">控除額合計</p>
+      <p class="text-2xl font-bold text-red-600">¥<%= number_with_delimiter(@summary[:total_deductions]) %></p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">差引支給額</p>
+      <p class="text-2xl font-bold text-green-600">¥<%= number_with_delimiter(@summary[:total_net]) %></p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">承認待ち</p>
+      <p class="text-2xl font-bold text-yellow-600"><%= @summary[:draft_count] %>件</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm text-gray-600">支払済み</p>
+      <p class="text-2xl font-bold text-blue-600"><%= @summary[:paid_count] %>件</p>
+    </div>
+  </div>
+  
+  <!-- Payroll Table -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            従業員
+          </th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            勤務時間
+          </th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            総支給額
+          </th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            控除額
+          </th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            差引支給額
+          </th>
+          <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            ステータス
+          </th>
+          <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            アクション
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% @payrolls.each do |payroll| %>
+          <%= turbo_frame_tag payroll do %>
+            <%= render 'payroll_row', payroll: payroll %>
+          <% end %>
+        <% end %>
+        
+        <% if @payrolls.empty? %>
+          <tr>
+            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+              給与データがありません
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

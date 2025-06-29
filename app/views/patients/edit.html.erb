@@ -1,0 +1,44 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:grid md:grid-cols-3 md:gap-6">
+    <div class="md:col-span-1">
+      <div class="px-4 sm:px-0">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">患者情報編集</h3>
+        <p class="mt-1 text-sm text-gray-600">
+          患者番号: <%= @patient.patient_number %>
+        </p>
+        <div class="mt-6">
+          <p class="text-sm text-gray-500">
+            <strong>登録日</strong><br>
+            <%= l(@patient.created_at, format: :long) %>
+          </p>
+          <p class="mt-2 text-sm text-gray-500">
+            <strong>最終更新日</strong><br>
+            <%= l(@patient.updated_at, format: :long) %>
+          </p>
+          <% if @patient.appointments.any? %>
+            <p class="mt-2 text-sm text-gray-500">
+              <strong>予約件数</strong><br>
+              <%= @patient.appointments.count %>件
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-5 md:col-span-2 md:mt-0">
+      <div class="shadow sm:overflow-hidden sm:rounded-md">
+        <%= render 'form', patient: @patient %>
+      </div>
+      
+      <div class="mt-6 flex justify-end">
+        <%= link_to "この患者を削除", patient_path(@patient), 
+            method: :delete,
+            data: { 
+              confirm: "本当に削除しますか？この操作は取り消せません。",
+              disable_with: "削除中..."
+            },
+            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200" %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>歯科クリニック管理システム</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="歯科クリニック予約・業務管理システム">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    
+    <%= hotwire_livereload_tags if Rails.env.development? %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    
+    <!-- Tailwind CSS CDN for development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Responsive meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4F46E5">
+  </head>
+
+  <body class="bg-gray-50 antialiased">
+    <%= yield %>
+  </body>
+</html>

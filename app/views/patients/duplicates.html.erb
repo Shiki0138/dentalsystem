@@ -1,0 +1,89 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        重複患者チェック
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        <%= @patient.name %> (患者番号: <%= @patient.patient_number %>) の重複候補
+      </p>
+    </div>
+    
+    <% if @duplicates.any? %>
+      <div class="border-t border-gray-200">
+        <div class="bg-yellow-50 px-4 py-5 sm:px-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">
+                <%= @duplicates.count %>件の重複候補が見つかりました
+              </h3>
+              <div class="mt-2 text-sm text-yellow-700">
+                <p>同一人物の可能性がある患者情報です。マージ機能を使用して統合できます。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <ul class="divide-y divide-gray-200">
+          <% @duplicates.each do |duplicate| %>
+            <li class="px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center">
+                    <p class="text-sm font-medium text-indigo-600 truncate">
+                      <%= link_to duplicate.name, patient_path(duplicate), class: "hover:text-indigo-900" %>
+                    </p>
+                    <p class="ml-2 text-sm text-gray-500">
+                      (患者番号: <%= duplicate.patient_number %>)
+                    </p>
+                  </div>
+                  <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-3">
+                    <div class="text-sm text-gray-500">
+                      <span class="font-medium">カナ:</span> <%= duplicate.name_kana %>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      <span class="font-medium">電話:</span> <%= duplicate.phone || "未登録" %>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      <span class="font-medium">メール:</span> <%= duplicate.email || "未登録" %>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-sm text-gray-500">
+                    <span class="font-medium">最終来院日:</span> 
+                    <%= duplicate.appointments.maximum(:appointment_date) ? l(duplicate.appointments.maximum(:appointment_date)) : "来院歴なし" %>
+                    <span class="ml-4">
+                      <span class="font-medium">予約数:</span> <%= duplicate.appointments.count %>件
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                  <%= form_with url: merge_patients_path, method: :post, local: true do |f| %>
+                    <%= f.hidden_field :patient_id, value: @patient.id %>
+                    <%= f.hidden_field :target_id, value: duplicate.id %>
+                    <%= f.submit "この患者にマージ", 
+                        data: { confirm: "#{@patient.name}を#{duplicate.name}にマージします。この操作は取り消せません。よろしいですか？" },
+                        class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+                  <% end %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <p class="text-sm text-gray-500">重複する患者情報は見つかりませんでした。</p>
+      </div>
+    <% end %>
+    
+    <div class="bg-gray-50 px-4 py-3 text-right sm:px-6">
+      <%= link_to "患者詳細に戻る", patient_path(@patient), 
+          class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+    </div>
+  </div>
+</div>

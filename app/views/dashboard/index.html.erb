@@ -1,0 +1,364 @@
+<%= turbo_frame_tag "dashboard" do %>
+  <div class="min-h-screen bg-gray-50" data-controller="dashboard">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900">管理者ダッシュボード</h1>
+          <div class="flex items-center space-x-2 sm:space-x-4">
+            <span class="text-xs sm:text-sm text-gray-500 hidden sm:inline" data-dashboard-target="lastUpdate"><%= l(Time.current, format: :long) %></span>
+            <button type="button" 
+                    data-action="click->dashboard#refresh"
+                    data-dashboard-target="refreshButton"
+                    class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 shadow-sm text-xs sm:text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span class="hidden sm:inline">更新</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-8">
+        <!-- Today's Total -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">本日の予約</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= @stats[:today_total] %>件</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">完了</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= @stats[:today_completed] %>件</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancelled -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">キャンセル</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= @stats[:today_cancelled] %>件</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">今後の予約</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= @stats[:upcoming_count] %>件</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Patients -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">総患者数</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= number_with_delimiter(@stats[:total_patients]) %>人</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Patients -->
+        <div class="bg-white overflow-hidden rounded-lg shadow">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">今月の新患</dt>
+                  <dd class="text-lg font-semibold text-gray-900"><%= @stats[:new_patients_this_month] %>人</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two columns layout -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Today's Appointments -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">本日の予約</h3>
+          </div>
+          <div class="overflow-hidden">
+            <% if @today_appointments.any? %>
+              <div class="divide-y divide-gray-200">
+                <% @today_appointments.each do |appointment| %>
+                  <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                          <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-200">
+                            <span class="text-sm font-medium leading-none text-gray-700"><%= appointment.patient.name[0] %></span>
+                          </span>
+                        </div>
+                        <div class="ml-4">
+                          <p class="text-sm font-medium text-gray-900"><%= appointment.patient.name %></p>
+                          <p class="text-sm text-gray-500"><%= l(appointment.appointment_date, format: :time) %></p>
+                        </div>
+                      </div>
+                      <div class="flex items-center">
+                        <% status_color = case appointment.status
+                           when 'booked' then 'bg-blue-100 text-blue-800'
+                           when 'visited' then 'bg-green-100 text-green-800'
+                           when 'cancelled' then 'bg-red-100 text-red-800'
+                           else 'bg-gray-100 text-gray-800'
+                           end %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_color %>">
+                          <%= t("appointment.status.#{appointment.status}") %>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="px-4 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">本日の予約はありません</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">今後の予約</h3>
+          </div>
+          <div class="overflow-hidden">
+            <% if @upcoming_appointments.any? %>
+              <div class="divide-y divide-gray-200">
+                <% @upcoming_appointments.each do |appointment| %>
+                  <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                          <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-200">
+                            <span class="text-sm font-medium leading-none text-gray-700"><%= appointment.patient.name[0] %></span>
+                          </span>
+                        </div>
+                        <div class="ml-4">
+                          <p class="text-sm font-medium text-gray-900"><%= appointment.patient.name %></p>
+                          <p class="text-sm text-gray-500"><%= l(appointment.appointment_date, format: :long) %></p>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <%= link_to "詳細", appointment_path(appointment), class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="px-4 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">今後の予約はありません</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-8">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">クイックアクション</h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <%= link_to new_appointment_path, class: "relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500" do %>
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="absolute inset-0" aria-hidden="true"></span>
+              <p class="text-sm font-medium text-gray-900">新規予約</p>
+            </div>
+          <% end %>
+
+          <%= link_to patients_path, class: "relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500" do %>
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="absolute inset-0" aria-hidden="true"></span>
+              <p class="text-sm font-medium text-gray-900">患者管理</p>
+            </div>
+          <% end %>
+
+          <%= link_to staff_index_path, class: "relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500" do %>
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="absolute inset-0" aria-hidden="true"></span>
+              <p class="text-sm font-medium text-gray-900">勤怠管理</p>
+            </div>
+          <% end %>
+
+          <%= link_to admin_reports_path, class: "relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500" do %>
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="absolute inset-0" aria-hidden="true"></span>
+              <p class="text-sm font-medium text-gray-900">レポート</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="mt-8">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">統計情報</h3>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <!-- Weekly Appointments Chart -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h4 class="text-base font-medium text-gray-900 mb-4">週間予約推移</h4>
+            <div data-controller="chart"
+                 data-chart-type-value="bar"
+                 data-chart-title-value="週間予約数"
+                 data-chart-data-value='[
+                   {"label": "月", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week..Date.current.beginning_of_week).count %>},
+                   {"label": "火", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week + 1.day..Date.current.beginning_of_week + 1.day).count %>},
+                   {"label": "水", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week + 2.days..Date.current.beginning_of_week + 2.days).count %>},
+                   {"label": "木", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week + 3.days..Date.current.beginning_of_week + 3.days).count %>},
+                   {"label": "金", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week + 4.days..Date.current.beginning_of_week + 4.days).count %>},
+                   {"label": "土", "value": <%= Appointment.where(appointment_date: Date.current.beginning_of_week + 5.days..Date.current.beginning_of_week + 5.days).count %>}
+                 ]'
+                 class="w-full">
+            </div>
+          </div>
+
+          <!-- Status Distribution Chart -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h4 class="text-base font-medium text-gray-900 mb-4">予約ステータス分布</h4>
+            <div data-controller="chart"
+                 data-chart-type-value="pie"
+                 data-chart-title-value="ステータス別予約数"
+                 data-chart-data-value='[
+                   {"label": "予約済", "value": <%= Appointment.where(status: "booked").count %>},
+                   {"label": "診察済", "value": <%= Appointment.where(status: "visited").count %>},
+                   {"label": "キャンセル", "value": <%= Appointment.where(status: "cancelled").count %>},
+                   {"label": "完了", "value": <%= Appointment.where(status: "done").count %>}
+                 ]'
+                 class="w-full">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="mt-8 bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">パフォーマンス指標</h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="border-l-4 border-green-500 pl-4">
+            <p class="text-sm font-medium text-gray-500">予約充填率</p>
+            <p class="mt-1 text-2xl font-semibold text-gray-900">
+              <%= (@stats[:today_total].to_f / 20 * 100).round(1) %>%
+            </p>
+            <p class="mt-1 text-xs text-gray-500">1日最大20件</p>
+          </div>
+          <div class="border-l-4 border-blue-500 pl-4">
+            <p class="text-sm font-medium text-gray-500">平均診療時間</p>
+            <p class="mt-1 text-2xl font-semibold text-gray-900">45分</p>
+            <p class="mt-1 text-xs text-gray-500">目標: 60分以内</p>
+          </div>
+          <div class="border-l-4 border-yellow-500 pl-4">
+            <p class="text-sm font-medium text-gray-500">キャンセル率</p>
+            <p class="mt-1 text-2xl font-semibold text-gray-900">
+              <%= @stats[:today_total] > 0 ? (@stats[:today_cancelled].to_f / @stats[:today_total] * 100).round(1) : 0 %>%
+            </p>
+            <p class="mt-1 text-xs text-gray-500">目標: 5%以下</p>
+          </div>
+          <div class="border-l-4 border-purple-500 pl-4">
+            <p class="text-sm font-medium text-gray-500">新患獲得率</p>
+            <p class="mt-1 text-2xl font-semibold text-gray-900">
+              <%= (@stats[:new_patients_this_month].to_f / @stats[:total_patients] * 100).round(1) %>%
+            </p>
+            <p class="mt-1 text-xs text-gray-500">今月の新規患者</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+<% end %>
+
+<%= turbo_stream_from "dashboard" %>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>予約作成エラー通知</title>
+  <style>
+    body { font-family: 'Hiragino Sans', sans-serif; line-height: 1.6; }
+    .header { background-color: #dc2626; color: white; padding: 15px; }
+    .content { padding: 20px; }
+    .error-box { background-color: #fef2f2; border: 1px solid #fecaca; padding: 15px; margin: 15px 0; }
+    .mail-info { background-color: #f3f4f6; padding: 15px; margin: 15px 0; }
+    .code { background-color: #1f2937; color: #f9fafb; padding: 10px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🚨 予約作成エラー - 緊急対応が必要</h1>
+  </div>
+  
+  <div class="content">
+    <p>メールからの自動予約作成でエラーが発生しました。手動での対応が必要です。</p>
+    
+    <div class="mail-info">
+      <h3>📧 元メール情報</h3>
+      <ul>
+        <li><strong>送信者:</strong> <%= @error_details[:mail_from] %></li>
+        <li><strong>件名:</strong> <%= @error_details[:mail_subject] %></li>
+        <li><strong>受信日時:</strong> <%= @error_details[:mail_date] %></li>
+      </ul>
+    </div>
+    
+    <div class="error-box">
+      <h3>⚠️ エラー詳細</h3>
+      <p><strong>エラーメッセージ:</strong> <%= @error_details[:message] %></p>
+      
+      <% if @error_details[:backtrace].present? %>
+        <p><strong>スタックトレース（最初の10行）:</strong></p>
+        <div class="code">
+          <% @error_details[:backtrace].each do |line| %>
+            <%= line %><br>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <div style="margin-top: 30px; padding: 15px; background-color: #eff6ff; border: 1px solid #bfdbfe;">
+      <h3>📋 対応手順</h3>
+      <ol>
+        <li>元メールの内容を確認し、予約情報を手動で抽出してください</li>
+        <li>管理画面から手動で予約を作成してください</li>
+        <li>エラーの原因を特定し、メールパーサーの改善を検討してください</li>
+        <li>同様のエラーが頻発する場合は、新しいパーサールールの追加を検討してください</li>
+      </ol>
+    </div>
+    
+    <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">
+      このメールは自動送信されています。<br>
+      発生時刻: <%= Time.current.strftime('%Y-%m-%d %H:%M:%S') %>
+    </p>
+  </div>
+</body>
+</html>

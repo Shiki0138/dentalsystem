@@ -1,0 +1,22 @@
+ja:
+  appointment:
+    status:
+      booked: "予約済"
+      visited: "診察済"
+      cancelled: "キャンセル"
+      no_show: "無断欠席"
+      done: "完了"
+      paid: "精算済"
+  
+  time:
+    formats:
+      default: "%Y年%m月%d日 %H:%M"
+      long: "%Y年%m月%d日(%a) %H:%M"
+      short: "%m/%d %H:%M"
+      time: "%H:%M"
+  
+  date:
+    formats:
+      default: "%Y年%m月%d日"
+      long: "%Y年%m月%d日(%a)"
+      short: "%m/%d"

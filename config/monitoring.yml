@@ -1,0 +1,128 @@
+# 監視システム設定 - UptimeRobot & Grafana Cloud
+monitoring:
+  uptime_robot:
+    # UptimeRobot設定（無料プラン）
+    monitors:
+      - name: "Dental System Main"
+        url: "https://dental-system.yourdomain.com/up"
+        type: "HTTP"
+        interval: 300  # 5分間隔
+        timeout: 30
+        alerts:
+          - email: "admin@yourdomain.com"
+          - slack: "webhook_url"
+      
+      - name: "Dental System API"
+        url: "https://dental-system.yourdomain.com/api/v1/health"
+        type: "HTTP"
+        interval: 300
+        timeout: 30
+        
+      - name: "Database Connection"
+        url: "https://dental-system.yourdomain.com/health/db"
+        type: "HTTP"
+        interval: 600  # 10分間隔
+        timeout: 30
+
+  grafana_cloud:
+    # Grafana Cloud無料枠設定
+    agent:
+      # Prometheus metrics
+      prometheus:
+        global:
+          scrape_interval: 15s
+        scrape_configs:
+          - job_name: 'dental-system'
+            static_configs:
+              - targets: ['web:3000']
+            metrics_path: '/metrics'
+            scrape_interval: 30s
+            
+          - job_name: 'postgres'
+            static_configs:
+              - targets: ['db:5432']
+            metrics_path: '/metrics'
+            
+          - job_name: 'redis'
+            static_configs:
+              - targets: ['redis:6379']
+            metrics_path: '/metrics'
+            
+          - job_name: 'sidekiq'
+            static_configs:
+              - targets: ['sidekiq:3000']
+            metrics_path: '/sidekiq/metrics'
+
+      # Loki logs
+      loki:
+        positions_directory: '/tmp/positions'
+        server:
+          http_listen_port: 3101
+        scrape_configs:
+          - job_name: rails
+            static_configs:
+              - targets:
+                  - localhost
+                labels:
+                  job: rails
+                  __path__: /app/log/*.log
+                  
+          - job_name: nginx
+            static_configs:
+              - targets:
+                  - localhost
+                labels:
+                  job: nginx
+                  __path__: /var/log/nginx/*.log
+
+  alerts:
+    # アラート設定
+    rules:
+      - name: "High Error Rate"
+        condition: "error_rate > 0.05"  # エラー率5%超過
+        for: "5m"
+        actions:
+          - email: "admin@yourdomain.com"
+          - slack: "#{slack_webhook_url}"
+          
+      - name: "High Response Time"
+        condition: "response_time_95p > 2000"  # 95パーセンタイル2秒超過
+        for: "10m"
+        actions:
+          - email: "admin@yourdomain.com"
+          
+      - name: "Database Connection Issues"
+        condition: "db_connection_failures > 10"
+        for: "5m"
+        actions:
+          - email: "admin@yourdomain.com"
+          - pagerduty: "#{pagerduty_key}"
+          
+      - name: "Sidekiq Queue Backup"
+        condition: "sidekiq_queue_size > 1000"
+        for: "15m"
+        actions:
+          - email: "admin@yourdomain.com"
+
+  sla_targets:
+    # SLA目標値（仕様書準拠）
+    uptime: 99.9  # 99.9%稼働率
+    response_time_95p: 1000  # 95パーセンタイル1秒以内
+    error_rate: 0.01  # エラー率1%以下
+    
+production:
+  # 本番環境固有設定
+  log_level: :info
+  log_format: :json
+  
+  # メトリクス収集
+  prometheus_exporter:
+    enabled: true
+    port: 9394
+    
+  # ヘルスチェックエンドポイント
+  health_checks:
+    - database
+    - redis
+    - sidekiq
+    - external_apis

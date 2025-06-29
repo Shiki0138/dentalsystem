@@ -1,0 +1,133 @@
+<div class="max-w-md mx-auto mt-8 px-4">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6">
+      <h1 class="text-2xl font-bold text-center">勤怠打刻</h1>
+      <p class="text-center mt-2 text-blue-100">
+        <%= l(Time.current, format: :long) %>
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <%= turbo_frame_tag "status_display" do %>
+        <%= render 'status', employee: @employee %>
+      <% end %>
+      
+      <%= turbo_frame_tag "clocking_form" do %>
+        <div class="mt-6">
+          <%= form_with model: [@employee, @clocking], data: { turbo: true } do |form| %>
+            <% if @clocking.errors.any? %>
+              <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                <p class="font-bold">エラーが発生しました:</p>
+                <ul class="list-disc list-inside">
+                  <% @clocking.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <% if !@employee.clocked_in? %>
+                <%= button_tag type: 'submit', name: 'clocking[clock_type]', value: 'clock_in',
+                    class: "bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg" do %>
+                  <div class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>出勤</span>
+                  </div>
+                <% end %>
+              <% else %>
+                <%= button_tag type: 'submit', name: 'clocking[clock_type]', value: 'clock_out',
+                    class: "bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg" do %>
+                  <div class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>退勤</span>
+                  </div>
+                <% end %>
+              <% end %>
+              
+              <% if @employee.clocked_in? && !@employee.on_break? %>
+                <%= button_tag type: 'submit', name: 'clocking[clock_type]', value: 'break_start',
+                    class: "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg" do %>
+                  <div class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>休憩開始</span>
+                  </div>
+                <% end %>
+              <% elsif @employee.on_break? %>
+                <%= button_tag type: 'submit', name: 'clocking[clock_type]', value: 'break_end',
+                    class: "bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg" do %>
+                  <div class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>休憩終了</span>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+            
+            <div class="mt-4">
+              <%= form.text_area :notes, rows: 2, placeholder: "メモ（任意）", 
+                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+            </div>
+            
+            <% if detect_mobile? %>
+              <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <label class="flex items-center">
+                  <%= check_box_tag :use_location, true, true, class: "mr-2" %>
+                  <span class="text-sm text-gray-700">位置情報を記録する</span>
+                </label>
+              </div>
+              
+              <%= hidden_field_tag :latitude %>
+              <%= hidden_field_tag :longitude %>
+              <%= hidden_field_tag :accuracy %>
+            <% end %>
+            
+            <%= form.hidden_field :clocked_at, value: Time.current %>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <div class="mt-6 pt-6 border-t border-gray-200">
+        <%= link_to "打刻履歴を見る", employee_clockings_path(@employee), 
+            class: "block text-center text-blue-600 hover:text-blue-800 font-medium" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if detect_mobile? %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const useLocationCheckbox = document.getElementById('use_location');
+      
+      if (useLocationCheckbox && useLocationCheckbox.checked) {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              document.getElementById('latitude').value = position.coords.latitude;
+              document.getElementById('longitude').value = position.coords.longitude;
+              document.getElementById('accuracy').value = position.coords.accuracy;
+            },
+            function(error) {
+              console.error('位置情報の取得に失敗しました:', error);
+              useLocationCheckbox.checked = false;
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0
+            }
+          );
+        }
+      }
+    });
+  </script>
+<% end %>

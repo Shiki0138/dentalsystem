@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #1DB446;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+    }
+    .appointment-info {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border: 1px solid #e0e0e0;
+    }
+    .info-row {
+      margin: 10px 0;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: bold;
+      color: #666;
+      display: inline-block;
+      width: 120px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: #1DB446;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>診療予約のお知らせ</h1>
+    </div>
+    
+    <div class="content">
+      <p><strong><%= @patient.name %></strong> 様</p>
+      
+      <p>いつもご利用いただきありがとうございます。</p>
+      <p>1週間後に診療予約がございますので、お知らせいたします。</p>
+      
+      <div class="appointment-info">
+        <h3>予約内容</h3>
+        
+        <div class="info-row">
+          <span class="label">予約日時：</span>
+          <strong><%= @appointment.scheduled_at.strftime('%Y年%m月%d日（%a）%H:%M') %></strong>
+        </div>
+        
+        <div class="info-row">
+          <span class="label">診療内容：</span>
+          <%= @appointment.treatment_type || '一般診療' %>
+        </div>
+        
+        <div class="info-row">
+          <span class="label">担当医：</span>
+          <%= @appointment.doctor_name || '担当医' %>
+        </div>
+        
+        <div class="info-row">
+          <span class="label">診療時間：</span>
+          約<%= @appointment.duration || 30 %>分
+        </div>
+      </div>
+      
+      <h3>持ち物</h3>
+      <ul>
+        <li>保険証</li>
+        <li>診察券</li>
+        <li>お薬手帳（お持ちの方）</li>
+        <li>紹介状（お持ちの方）</li>
+      </ul>
+      
+      <h3>ご注意事項</h3>
+      <ul>
+        <li>予約時間の5分前までにお越しください</li>
+        <li>体調不良の場合は無理をせず、ご連絡ください</li>
+        <li>予約の変更・キャンセルは前日までにお願いします</li>
+      </ul>
+      
+      <div style="text-align: center;">
+        <a href="<%= ENV['APP_URL'] %>/appointments/<%= @appointment.id %>" class="button">
+          予約内容を確認する
+        </a>
+      </div>
+      
+      <p>ご不明な点がございましたら、お気軽にお問い合わせください。</p>
+      <p>
+        <strong>TEL:</strong> <%= ENV['CLINIC_PHONE'] || '03-1234-5678' %><br>
+        <strong>受付時間:</strong> 平日 9:00-18:00 / 土曜 9:00-13:00
+      </p>
+    </div>
+    
+    <div class="footer">
+      <p>このメールは予約システムから自動送信されています。</p>
+      <p>© <%= Date.current.year %> <%= ENV['CLINIC_NAME'] || '歯科クリニック' %></p>
+    </div>
+  </div>
+</body>
+</html>

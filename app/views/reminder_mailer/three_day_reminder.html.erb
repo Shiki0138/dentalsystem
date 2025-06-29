@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #ff9800;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+    }
+    .appointment-info {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border: 1px solid #e0e0e0;
+    }
+    .highlight {
+      background-color: #fff3cd;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #ff9800;
+      margin: 20px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: #ff9800;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>まもなく診療予約です</h1>
+    </div>
+    
+    <div class="content">
+      <p><strong><%= @patient.name %></strong> 様</p>
+      
+      <div class="highlight">
+        <strong>3日後</strong>に診療予約がございます。<br>
+        お忘れなくお越しください。
+      </div>
+      
+      <div class="appointment-info">
+        <h3>予約内容</h3>
+        <p>
+          <strong>日時：<%= @appointment.scheduled_at.strftime('%Y年%m月%d日（%a）%H:%M') %></strong><br>
+          診療内容：<%= @appointment.treatment_type || '一般診療' %><br>
+          担当医：<%= @appointment.doctor_name || '担当医' %>
+        </p>
+      </div>
+      
+      <h3>必ずご持参ください</h3>
+      <ul>
+        <li><strong>保険証</strong>（月初めの受診時は必須）</li>
+        <li><strong>診察券</strong></li>
+        <li>お薬手帳（お持ちの方）</li>
+      </ul>
+      
+      <h3>来院前のお願い</h3>
+      <ul>
+        <li>歯磨きをしてからお越しください</li>
+        <li>予約時間の5分前までに受付をお済ませください</li>
+        <li>体調不良の場合は、無理をせずご連絡ください</li>
+      </ul>
+      
+      <div style="text-align: center;">
+        <a href="<%= ENV['APP_URL'] %>/appointments/<%= @appointment.id %>" class="button">
+          予約を確認・変更する
+        </a>
+      </div>
+      
+      <p>
+        <strong>予約の変更・キャンセルについて</strong><br>
+        前日までにご連絡いただければ、変更・キャンセルが可能です。<br>
+        TEL: <%= ENV['CLINIC_PHONE'] || '03-1234-5678' %>
+      </p>
+    </div>
+    
+    <div class="footer" style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
+      <p>© <%= Date.current.year %> <%= ENV['CLINIC_NAME'] || '歯科クリニック' %></p>
+    </div>
+  </div>
+</body>
+</html>

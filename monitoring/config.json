@@ -1,0 +1,14 @@
+{
+  "project": "dentalsystem",
+  "monitoring": {
+    "error_threshold": 3,
+    "worker_timeout": 1800,
+    "check_interval": 300,
+    "alert_channels": ["log", "console"]
+  },
+  "metrics": {
+    "cpu_threshold": 80,
+    "memory_threshold": 80,
+    "response_time_threshold": 3000
+  }
+}

@@ -1,0 +1,82 @@
+# Production Dockerfile for Dental System
+FROM ruby:3.3.0-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+  build-base \
+  postgresql-dev \
+  nodejs \
+  npm \
+  yarn \
+  git \
+  tzdata \
+  imagemagick \
+  imagemagick-dev
+
+# Set working directory
+WORKDIR /app
+
+# Copy Gemfile and install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle config --global frozen 1 && \
+    bundle config set --local without 'development test' && \
+    bundle install --jobs=4 --retry=3
+
+# Copy package files and install Node dependencies
+COPY package*.json yarn.lock* ./
+RUN if [ -f "yarn.lock" ]; then yarn install --frozen-lockfile --production; \
+    elif [ -f "package-lock.json" ]; then npm ci --only=production; \
+    elif [ -f "package.json" ]; then npm install --only=production; fi
+
+# Production stage
+FROM ruby:3.3.0-alpine AS production
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+  postgresql-client \
+  nodejs \
+  yarn \
+  tzdata \
+  imagemagick \
+  curl \
+  bash
+
+# Create app user
+RUN addgroup -g 1000 -S app && \
+    adduser -u 1000 -S app -G app
+
+# Set working directory
+WORKDIR /app
+
+# Copy gems from builder
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+# Copy application code
+COPY --chown=app:app . .
+
+# Set environment
+ENV RAILS_ENV=production \
+    RACK_ENV=production \
+    NODE_ENV=production \
+    RAILS_SERVE_STATIC_FILES=true \
+    RAILS_LOG_TO_STDOUT=true
+
+# Create directories and set permissions
+RUN mkdir -p log tmp/cache tmp/pids tmp/sockets public/system storage && \
+    chown -R app:app /app
+
+# Switch to app user
+USER app
+
+# Precompile assets
+RUN SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3000/up || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Start command
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]

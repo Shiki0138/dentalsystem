@@ -1,0 +1,361 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- ヘッダー -->
+    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">電話・窓口予約入力</h1>
+          <p class="mt-1 text-sm text-gray-500">
+            30秒以内での高速予約登録システム
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0 text-right">
+          <div class="text-lg font-semibold text-gray-900">
+            <%= l(Date.current, format: :long) %>
+          </div>
+          <div class="text-sm text-gray-500">
+            <%= Time.current.strftime("%H:%M") %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">今日の予約</p>
+            <p class="text-2xl font-semibold text-gray-900"><%= @stats[:today_total] %>件</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">来院済み</p>
+            <p class="text-2xl font-semibold text-gray-900"><%= @stats[:today_visited] %>件</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="p-2 bg-red-100 rounded-lg">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">キャンセル</p>
+            <p class="text-2xl font-semibold text-gray-900"><%= @stats[:today_cancelled] %>件</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-100 rounded-lg">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">要確認</p>
+            <p class="text-2xl font-semibold text-gray-900"><%= @stats[:pending_confirmations] %>件</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- 予約入力フォーム -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-medium text-gray-900">新規予約登録</h2>
+          <p class="text-sm text-gray-500">患者検索から予約完了まで30秒以内を目標</p>
+        </div>
+        
+        <div class="p-6">
+          <%= form_with model: @appointment, url: book_manual_path, remote: true, 
+              data: { 
+                controller: "manual-booking",
+                manual_booking_search_url_value: book_search_patients_path,
+                manual_booking_slots_url_value: book_available_slots_path
+              } do |f| %>
+            
+            <!-- 患者検索 -->
+            <div class="mb-6" data-controller="patient-search" 
+                 data-patient_search_url_value="<%= book_search_patients_path %>">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                患者検索
+              </label>
+              <div class="relative">
+                <%= text_field_tag :patient_search, "", 
+                    placeholder: "患者名、カナ、電話番号で検索",
+                    class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg py-3",
+                    data: { 
+                      patient_search_target: "input",
+                      action: "input->patient-search#search"
+                    },
+                    autocomplete: "off" %>
+                
+                <!-- 検索結果ドロップダウン -->
+                <div data-patient_search_target="results" 
+                     class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto">
+                </div>
+              </div>
+              
+              <!-- 選択された患者情報 -->
+              <div id="selected_patient_info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="font-medium text-blue-900" id="selected_patient_name"></h4>
+                    <p class="text-sm text-blue-700" id="selected_patient_details"></p>
+                  </div>
+                  <button type="button" onclick="clearSelectedPatient()" 
+                          class="text-blue-700 hover:text-blue-900">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <%= hidden_field_tag :selected_patient_id, "", id: "selected_patient_id" %>
+            </div>
+
+            <!-- 予約日選択 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  予約日
+                </label>
+                <%= f.date_field :appointment_date, 
+                    value: @default_date.strftime("%Y-%m-%d"),
+                    min: Date.current.strftime("%Y-%m-%d"),
+                    class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
+                    data: { action: "change->manual-booking#loadAvailableSlots" } %>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  診療時間
+                </label>
+                <%= f.select :treatment_duration, 
+                    options_for_select([
+                      ["30分", 30],
+                      ["45分", 45], 
+                      ["60分", 60],
+                      ["90分", 90],
+                      ["120分", 120]
+                    ], 30),
+                    {},
+                    { 
+                      class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
+                      data: { action: "change->manual-booking#loadAvailableSlots" }
+                    } %>
+              </div>
+            </div>
+
+            <!-- 時間枠選択 -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                時間枠選択
+              </label>
+              <div id="available_slots" class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <p class="col-span-full text-sm text-gray-500 text-center py-4">
+                  予約日を選択してください
+                </p>
+              </div>
+            </div>
+
+            <!-- 治療内容 -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                治療内容
+              </label>
+              <%= f.select :treatment_type,
+                  options_for_select([
+                    ["一般診療", "general"],
+                    ["検診・クリーニング", "checkup"],
+                    ["詰め物・被せ物", "restoration"],
+                    ["抜歯", "extraction"],
+                    ["根管治療", "endodontic"],
+                    ["インプラント", "implant"],
+                    ["矯正", "orthodontic"],
+                    ["その他", "other"]
+                  ]),
+                  { prompt: "治療内容を選択" },
+                  { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" } %>
+            </div>
+
+            <!-- メモ -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                メモ・備考
+              </label>
+              <%= f.text_area :notes, 
+                  rows: 3,
+                  placeholder: "症状や要望など",
+                  class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+            </div>
+
+            <%= hidden_field :appointment, :appointment_time %>
+            <%= hidden_field :appointment, :patient_id %>
+
+            <!-- 送信ボタン -->
+            <div class="flex space-x-3">
+              <%= f.submit "予約登録", 
+                  class: "flex-1 bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 font-medium text-lg",
+                  data: { disable_with: "登録中..." } %>
+              
+              <button type="button" onclick="resetForm()" 
+                      class="px-4 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                リセット
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- 今日の予約一覧 -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-medium text-gray-900">今日の予約</h2>
+          <p class="text-sm text-gray-500">
+            <%= Date.current.strftime("%Y年%m月%d日") %>の予約状況
+          </p>
+        </div>
+        
+        <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+          <% if @today_appointments.any? %>
+            <% @today_appointments.each do |appointment| %>
+              <div class="p-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="font-medium text-gray-900">
+                        <%= appointment.appointment_time.strftime("%H:%M") %>
+                      </span>
+                      <span class="text-sm text-gray-500">
+                        (<%= appointment.treatment_duration || 30 %>分)
+                      </span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900">
+                      <%= appointment.patient.name %>
+                    </p>
+                    <p class="text-sm text-gray-500">
+                      <%= appointment.treatment_type || "一般診療" %>
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <% case appointment.status %>
+                    <% when 'booked' %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        予約済み
+                      </span>
+                    <% when 'visited' %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        来院済み
+                      </span>
+                    <% when 'cancelled' %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        キャンセル
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="p-8 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">予約なし</h3>
+              <p class="mt-1 text-sm text-gray-500">今日の予約はありません。</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 成功・エラーメッセージ表示 -->
+<div id="flash_messages" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+// 患者選択機能
+function selectPatient(patient) {
+  document.getElementById('selected_patient_id').value = patient.id;
+  document.getElementById('appointment_patient_id').value = patient.id;
+  
+  // 選択された患者情報を表示
+  const infoDiv = document.getElementById('selected_patient_info');
+  const nameSpan = document.getElementById('selected_patient_name');
+  const detailsSpan = document.getElementById('selected_patient_details');
+  
+  nameSpan.textContent = patient.name + ' (' + patient.name_kana + ')';
+  detailsSpan.textContent = patient.patient_number + ' | ' + (patient.phone || '電話番号なし') + ' | 予約歴: ' + patient.appointments_count + '件';
+  
+  infoDiv.classList.remove('hidden');
+  
+  // 検索ボックスをクリア
+  document.querySelector('input[name="patient_search"]').value = patient.name;
+}
+
+function clearSelectedPatient() {
+  document.getElementById('selected_patient_id').value = '';
+  document.getElementById('appointment_patient_id').value = '';
+  document.getElementById('selected_patient_info').classList.add('hidden');
+  document.querySelector('input[name="patient_search"]').value = '';
+}
+
+function resetForm() {
+  document.querySelector('form').reset();
+  clearSelectedPatient();
+  document.getElementById('available_slots').innerHTML = '<p class="col-span-full text-sm text-gray-500 text-center py-4">予約日を選択してください</p>';
+}
+
+// フラッシュメッセージ表示
+function showFlashMessage(message, type = 'success') {
+  const flashDiv = document.getElementById('flash_messages');
+  const messageDiv = document.createElement('div');
+  
+  const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+  
+  messageDiv.className = `border-l-4 ${bgColor} p-4 mb-2 rounded shadow-lg`;
+  messageDiv.innerHTML = `
+    <div class="flex justify-between items-center">
+      <p>${message}</p>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  `;
+  
+  flashDiv.appendChild(messageDiv);
+  
+  // 5秒後に自動削除
+  setTimeout(() => {
+    if (messageDiv.parentNode) {
+      messageDiv.remove();
+    }
+  }, 5000);
+}
+</script>

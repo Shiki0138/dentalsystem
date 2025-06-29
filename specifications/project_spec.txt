@@ -1,0 +1,283 @@
+# 歯科クリニック予約・業務管理システム  開発指示書（for ClaudeCode）
+
+*Version 1.0 ― 2025‑06‑29*
+
+---
+
+## 0. 本書の目的
+
+本書は **「歯科クリニック予約・業務管理システム」（以下「本システム」）** の要件定義書 (v1.0, 2025‑06‑28) を 120 % の精度で具現化するために、ClaudeCode 開発者が遵守すべき実装上の詳細指針・開発ルール・運用フローを網羅的に示すものである。要件定義書を *WHY* とするなら、本書は *HOW* を示す。以後のすべての設計・実装・テスト・保守作業は本書・要件定義書・development\_rule・development\_log を常時参照しながら進めること。
+
+> **重要**
+> *開発開始時および作業再開時は必ず最新の* **development\_log.md** *と* **development\_rule.md** *を確認し、ログに進捗・課題・決定事項を追記すること。*
+
+---
+
+## 0.1 システム利用者のニーズと達成ゴール
+
+本システムは「**患者・院長・受付スタッフの三者がストレスなく診療を完了し、医院の経営を安定させる**」ことを最上位ゴールとする。そのために以下の一次ニーズ・二次ニーズを抽出し、機能および UI/UX に反映する。
+
+| ペルソナ                 | 一次ニーズ (真の動機)              | 二次ニーズ (顕在要望)                                | 本システムの施策・工夫                                                           |
+| -------------------- | ------------------------- | ------------------------------------------- | --------------------------------------------------------------------- |
+| **患者 (30〜50 代・共働き)** | *治療を早く・確実に終わらせたい*         | - 予約変更をスマホで完結したい<br>- 忘れないようにリマインドが欲しい      | ・LINE / メールから 3 タップで予約確定<br>・診療 7 日前 / 3 日前リマインド<br>・当日朝の「持ち物・注意点」再通知 |
+| **院長 (1 人クリニック)**    | *ダブルブッキングをゼロにし、売上を最大化したい* | - 紙の台帳から解放されたい<br>- スタッフの勤怠と給与を自動化したい       | ・予約メール自動集約 → 1 画面カレンダー<br>・重複検知と自動ブロック<br>・勤怠 → 給与までワンクリック確定          |
+| **受付スタッフ (パート 1 名)** | *ミスなく 1 人で回したい*           | - 電話中でも 30 秒で予約登録したい<br>- キャンセル状況をひと目で把握したい | ・電話 UI：患者検索→空き枠提示→確定をワンフロー<br>・ステータス別に色分け / バッジ表示                     |
+| **将来のスポット衛生士**       | *好きな時間に働きたい*              | - 空き枠を簡単に把握して応募したい                          | ・求人カレンダー連携 (Phase 2)                                                  |
+
+### 0.1.1 成功指標 (Outcome-based KPI)
+
+| 指標         | 現状値 (紙運用) | 目標値          | 達成時期        |
+| ---------- | --------- | ------------ | ----------- |
+| 予約重複率      | 2.8 %     | **0 %**      | 3 か月以内      |
+| 前日キャンセル率   | 12 %      | **5 %**      | 6 か月以内      |
+| 予約登録平均所要時間 | 2 分       | **30 秒**     | リリース時点      |
+| 給与計算作業時間   | 2 時間 / 月  | **10 分 / 月** | Phase 1 完了時 |
+
+### 0.1.2 体験設計の要諦
+
+1. **ワンライン入力** ― 受付は患者名を 1 行打つだけで候補・空き枠が即表示。
+2. **ファーストクラスモバイル** ― 診療チェア横の iPad でもストレスなし。
+3. **オフラインレジリエンス** ― 一時的な通信断でもローカル IndexedDB で参照可。
+4. **ノーコード運用** ― 設定変更やテンプレ文編集は UI から、コード修正不要。
+5. **コスト最小化** ― 単一 Rails モノリス + Lightsail で固定費 < ¥6,000 / 月。
+
+> これらニーズ・KPI が **機能実装より上位** に位置する。機能が要件を満たしていても、KPI が未達なら追加改善タスクを起票すること。
+
+---
+
+## 1. ドキュメント体系
+
+| 種別        | ファイル                                 | 役割                     | 更新主体           |
+| --------- | ------------------------------------ | ---------------------- | -------------- |
+| 要件定義書     | `requirements_spec_v1.0_20250628.md` | WHAT／WHY を確定           | PO & BA        |
+| 開発指示書（本書） | `dev_instruction_v1.0_20250629.md`   | HOW を指示                | SA & Tech‑Lead |
+| 開発ルール     | `development_rule.md`                | コーディング規約・Git 運用・レビュー基準 | Tech‑Lead      |
+| 開発ログ      | `development_log.md`                 | 日次の進捗・課題・決定事項・所要時間     | 全メンバー          |
+| API 仕様書   | `/docs/api/openapi.yaml`             | OpenAPI 3.0 定義         | BE チーム         |
+| テーブル定義書   | `/docs/db/schema.sql`                | DDL 全文                 | DBA            |
+| テスト計画書    | `/docs/test/test_plan.md`            | 全テストレベル戦略              | QA Lead        |
+| リリースノート   | `/release/CHANGELOG.md`              | バージョン履歴                | Release Mgr    |
+
+> **ファイル作成指示**
+>
+> * `development_log.md` と `development_rule.md` を **リポジトリ直下** に新規作成し、本書で参照する。
+> * それらが存在しない場合、直ちに作成してコミットすること。
+
+---
+
+## 2. 技術スタック & 基盤方針（シンプル版）
+
+| 層        | 採用技術                                                              | 理由 / 備考                                                                    |
+| -------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| フレームワーク  | **Ruby on Rails 7.2** (Ruby 3.3) + Hotwire (Turbo/Stimulus)       | フロントとバックを単一コードベースで実装、学習コストが低く保守も簡単。SPA 並の UX を実現しつつ SSR による SEO・高速初期表示も確保。 |
+| UI / CSS | Tailwind CSS 3 + Heroicons                                        | コンポーネント豊富、CSS 記述量を大幅削減。                                                    |
+| フロント補助   | Stimulus + Turbo Streams                                          | Ajax やリアルタイム更新を最小限の JS で実装。                                                |
+| ジョブキュー   | Sidekiq (Redis)                                                   | メール取得、リマインド送信、給与計算など非同期タスクを処理。                                             |
+| 認証       | Devise + devise‑two‑factor                                        | 2FA 対応、医療系 SaaS で実績豊富。                                                     |
+| DB       | PostgreSQL 16                                                     | Rails 公式サポート、高機能かつ低コストでスケール。                                               |
+| メール取得    | Rails **ActionMailbox** + IMAP Ingress                            | 予約メールを直接受信し ActiveRecord 化。専用ワーカー不要。                                       |
+| 外部 API   | LINE Messaging API (公式 gem)、Google Calendar API (google‑apis gem) | Ruby gem で簡潔に実装可。                                                          |
+| インフラ     | **AWS Lightsail** (2 vCPU / 4 GB) + Docker Compose                | 月額固定 ¥3,500 程度で 10 店舗まで余裕。スケールアップ時はサイズ変更のみ。                                |
+| CI/CD    | GitHub Actions → Capistrano (docker‑compose pull && up)           | シンプルかつ学習コストゼロに近い。                                                          |
+| 監視       | UptimeRobot (無料) + Grafana Cloud (無料枠)                            | SLA 99.9 % を満たす範囲で費用ゼロ。                                                    |
+| ログ       | Rails JSON ロガー → Loki Agent                                       | 無料枠で集中管理。                                                                  |
+
+> **月額ランニングコスト試算**
+>
+> * Lightsail : 約 ¥3,500
+> * Redis (ElastiCache basic) : 約 ¥1,500
+>   **合計 ≒ ¥5,000 / 月** で 10 店舗・同時接続 100 ユーザをカバー見込み。
+
+---
+
+## 3. リポジトリ構成（シンプル版）
+
+```text
+repo-root/
+├─ app/                 # Rails MVC
+│   ├─ models/
+│   ├─ controllers/
+│   ├─ views/
+│   └─ jobs/            # Sidekiq workers
+├─ config/
+│   ├─ routes.rb
+│   └─ database.yml
+├─ bin/                 # Capistrano / maintenance scripts
+├─ docker-compose.yml   # dev & prod 同一構成
+├─ development_rule.md
+├─ development_log.md
+└─ README.md
+```
+
+> **単一 Rails アプリ** で管理し、サービス分割はスケールが必要になった時点で検討する。Docker Compose により本番～ローカルを同一環境で再現。
+
+---
+
+## 4. モジュール別指針
+
+### 4.1 予約統合モジュール (Phase 1)
+
+| No     | 実装タスク                                                                                                                 | 重要ポイント                                                                     |
+| ------ | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| R‑1‑01 | **IMAP Fetcher Worker** を `apps/api-gateway/src/cron/fetch-mail.ts` に実装。`node-imap` を利用し IDLE 監視、新規メールを Redis キューに投入。 | OAuth2 トークンリフレッシュ実装必須。SSL 証明書ピンニング。                                        |
+|        | **Mail Parser Service** を `packages/lib-mail-parser` として汎用化。RegExp テンプレ + ML Fallback (fastText) を用意。                 | 新メール毎に自動ラベリング→失敗時は `parse_error` テーブルへ挿入しアラート。                             |
+| R‑1‑02 | Next.js **電話・窓口入力 UI** (`/book/manual`)。React‑Hook‑Form + Zod Validation を使用。                                         | 患者検索は `/api/v1/patient/search?q=` API。SWR キャッシュ。平均操作時間 30 秒以内 UX を KPI 計測。 |
+| R‑1‑03 | **Duplicate Checker** を DB レイヤ Trigger + Application Check の二重化。                                                      | `appointment` パーティション (日付) + GIN Index で 5 ms 以内。                          |
+| R‑1‑04 | Status ENUM は `booked / visited / cancelled / no_show / done / paid` を固定。                                             | 状態遷移は State Machine (xstate) で中央管理。                                        |
+
+### 4.2 リマインド配信モジュール
+
+* CronJob `remind-7d-3d` を `BullMQ` で AM09:00JST トリガ。
+* LINE 優先 → fallback Mail → fallback SMS (Twilio, オプション)。
+* 送信結果は `deliveries` テーブルへ (`status`, `opened_at`, `read_at`).
+* LINE 既読 Webhook は `/webhook/line` エンドポイントで統合処理。
+
+### 4.3 顧客管理モジュール
+
+* **重複患者マージ**: Levenshtein 80 % 以上 + 電話一致で候補表示、管理者承認で `merged_to` カラム更新。
+* **リコールリスト**: Materialized View `recall_candidates` を夜間更新、UI `/marketing/recall` で確認。
+
+### 4.4 勤怠・給与
+
+* モバイル打刻時に `expo-location` で GPS（±100 m）を取得、`clockings` テーブルへ。
+* 給与計算バッチは `apps/api-gateway/src/cron/payroll.ts`。残業計算は変形労働時間制未対応（拡張余地）。
+
+### 4.5 管理者ダッシュボード
+
+* Next.js RSC で KPI カードを `server` Components 化。
+* 稼働率ヒートマップは Recharts `HeatMapChart`。
+* レイテンシ目標: FCP 1 s、TTFB 200 ms。
+
+### 4.6 スポット衛生士マッチング (Phase 2)
+
+* 別ドメイン `hygienist-match` サービスを独立デプロイし、GraphQL Federation でポリグロット接続。
+* 契約・支払いは MVP として **システム内記録のみ**。Stripe Connect は将来案。
+
+---
+
+## 5. 開発プロセス & Git 運用
+
+1. **Branch Model**: GitFlow。`main` → production, `develop` → staging。Feature ブランチは `feat/XXX`, Hotfix は `hotfix/XXX`。
+2. **PR Review**: 2‑step Review (Peer & Tech‑Lead)。最低 1 approval + CI Pass 必須。
+3. **Issue Tracking**: GitHub Issues + Labels (`phase1`, `bug`, `enhancement`, `security`)。
+4. **コミット規約**: Conventional Commits (`feat:`, `fix:`, `refactor:`)。
+5. **CI**
+
+   ```yaml
+   name: CI
+   on: [push]
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - uses: pnpm/action-setup@v3
+         - run: pnpm install
+         - run: pnpm test -- --coverage
+         - run: pnpm lint
+         - run: pnpm build
+   ```
+6. **CD**: ArgoCD `auto-sync`; production sync は manual PR merge 時のみ。
+
+---
+
+## 6. 品質保証
+
+| テストレベル     | 実施責任         | ツール / 指標                                     |
+| ---------- | ------------ | -------------------------------------------- |
+| 単体（UT）     | 開発者          | Jest + React Testing Library / 80 % Line Cov |
+| 結合（IT）     | QA           | Cypress E2E / Critical Path 100 % Pass       |
+| 性能（PT）     | SRE          | k6 / 95p < 1 s, 100 VU                       |
+| セキュリティ（ST） | Security Eng | OWASP ZAP／Snyk / High Zero                   |
+| UAT        | 受付スタッフ       | 操作完了率 95 % 以上                                |
+
+失敗時は `development_log.md` に **原因・影響・対策** を必ず記録し、再現手順を添付すること。
+
+---
+
+## 7. 開発ルール (development\_rule) への追加指示（抜粋）
+
+* **可読性**: TypeScript strict オン, ESLint AirBnB + Prettier。
+* **アクセシビリティ**: eslint-plugin-jsx-a11y で AAA 警告 0。WCAG 2.1 AA を満たす。
+* **セキュリティ**: No `eval`, CSP header `default-src 'self'`.
+* **秘密情報**: `.env` は SOPS で暗号化、リポジトリに平文禁止。
+* **パフォーマンス**: N+1 クエリ検知(Prisma) を Jest watch で自動阻止。
+* **ドキュメント**: PR マージ時に `docs/` 更新を CI で強制チェック。
+
+---
+
+## 8. 開発ログ (development\_log) 運用フォーマット
+
+```
+### 2025-07-03
+- [担当] @alice
+- [作業開始] 09:30 JST
+- [作業内容]
+    - R‑1‑01 IMAP Fetcher 実装着手
+    - Dovecot OAuth2 認証検証
+- [課題]
+    - Gmail OAuth Consent 画面審査が未完了 → 7/05 予定
+- [ブロッカー] なし
+- [終了] 18:00 JST
+---
+```
+
+> **テンプレートは必須。** 例外なく日次で追記し、レビュー時に参照する。
+
+---
+
+## 9. リスクマネジメント
+
+| リスク             | シグナル                 | 対策                               | 担当      |
+| --------------- | -------------------- | -------------------------------- | ------- |
+| 外部予約サイト HTML 変更 | 予約メール解析失敗率 >2% / day | ML fallback, 自動セレクタ更新 Lambda     | BE Lead |
+| LINE API 料金改定   | 月額費用 > ¥30k          | Twilio SMS fallback + メール通知へ自動切替 | SRE     |
+| 法改正             | 改正情報通知               | Legal Watch → 月次レビュー             | PO      |
+
+---
+
+## 10. 受入基準の具体化
+
+* **機能テスト**: 機能要件 130 ケース (Phase 1) を Xray で管理。Pass 100 %。
+* **性能テスト**: k6 script `loadtest.js` を CI で実行し指標を Slack 通知。
+* **セキュリティ**: GitHub Dependabot + Snyk。ZAP baseline scan ステージング on PR。
+* **ユーザビリティ**: UX チームが SUS (≥ 80)。改善チケットは `ux-improve` ラベル。
+* **ドキュメント**: `docs/` の ADR (Architecture Decision Record) 最新化をチェックリスト化。
+
+---
+
+## 11. フェーズ別マイルストーン
+
+| フェーズ    | 開始         | 完了         | 成果物            | Go/NoGo 判定者        |
+| ------- | ---------- | ---------- | -------------- | ------------------ |
+| Phase 1 | 2025‑09‑01 | 2026‑01‑31 | 予約統合・勤怠・給与 MVP | PO + Tech‑Lead     |
+| Phase 2 | 2026‑02‑01 | 2026‑07‑31 | スポット衛生士基盤      | PO                 |
+| Phase 3 | 2026‑08‑01 | 2027‑01‑31 | 在庫管理・BI        | Steering Committee |
+
+各フェーズ完了時に **Post‑Mortem** を `development_log.md` にリンクすること。
+
+---
+
+## 12. 変更管理フロー (拡張)
+
+1. **変更要求書** (`/docs/change_request/CR‑YYYYMMDD‑NN.md`) を PR 形式で提出。
+2. BA が要件定義書を更新し MR。関係者でレビュー (GitHub Discussion)。
+3. 承認後、開発指示書を **Patch バージョン** 更新し、CHANGELOG へ追記。
+
+---
+
+## 13. 付録
+
+* **ER 図**: `/docs/db/er.vuerd.json` (Vuerd Studio)。
+* **Mermaid ソース**: `/docs/flow` 以下。
+* **ダミーデータ生成**: `packages/scripts/seed.ts` ― Faker.js で 1 万件。
+
+---
+
+### 最終宣言
+
+> 本書は ClaudeCode 開発者の **行動バイブル** である。疑義が生じた場合は、要件定義書を先に、次に本書を参照し、なお解決しない場合は Tech‑Lead か PO に即時エスカレーションすること。
+
+---
+
+EOF

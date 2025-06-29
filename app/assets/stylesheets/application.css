@@ -1,0 +1,76 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS (and SCSS, if configured) file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+
+/* Custom animations for dashboard */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Apply animations to dashboard elements */
+[data-turbo-frame="dashboard"] > div {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Mobile-optimized touch targets */
+@media (max-width: 640px) {
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Improve readability on small screens */
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+/* Loading states */
+.turbo-progress-bar {
+  background-color: #4F46E5;
+}
+
+/* Print styles for dashboard */
+@media print {
+  header, .no-print {
+    display: none !important;
+  }
+  
+  .bg-gray-50 {
+    background-color: white !important;
+  }
+  
+  .shadow, .shadow-sm, .shadow-lg {
+    box-shadow: none !important;
+  }
+}
