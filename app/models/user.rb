@@ -3,9 +3,7 @@ class User < ApplicationRecord
 
   # Devise modules
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :two_factor_authenticatable,
-         :otp_secret_encryption_key => Rails.application.secrets.secret_key_base
+         :recoverable, :rememberable, :validatable
 
   # Associations
   has_many :appointments, foreign_key: :staff_member_id, dependent: :nullify

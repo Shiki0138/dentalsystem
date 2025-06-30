@@ -15,7 +15,7 @@ export RAILS_MASTER_KEY="demo-master-key"
 export RAILS_LOG_TO_STDOUT=true
 
 # ポート確認
-PORT=${PORT:-3001}
+PORT=${PORT:-3456}
 
 echo "サーバーを起動しています..."
 echo "URL: http://localhost:$PORT"
