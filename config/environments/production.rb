@@ -17,10 +17,10 @@ Rails.application.configure do
 
   # Ensures that a master key has been made available in ENV["RAILS_MASTER_KEY"],
   # config/master.key, or an environment key such as config/credentials/production.key.
-  config.require_master_key = true
+  config.require_master_key = false
 
-  # Disable serving static files from `public/`, relying on NGINX/Apache for performance.
-  config.public_file_server.enabled = true
+  # Enable serving static files from `public/` for Railway deployment
+  config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
 
   # Static files serving with optimized headers
   config.public_file_server.headers = {
