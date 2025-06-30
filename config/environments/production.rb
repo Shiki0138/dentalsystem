@@ -18,6 +18,9 @@ Rails.application.configure do
   # Ensures that a master key has been made available in ENV["RAILS_MASTER_KEY"],
   # config/master.key, or an environment key such as config/credentials/production.key.
   config.require_master_key = false
+  
+  # Railway deployment configuration
+  config.force_ssl = false  # Railway handles SSL termination
 
   # Enable serving static files from `public/` for Railway deployment
   config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?

@@ -1,8 +1,14 @@
 class AddPerformanceIndexes < ActiveRecord::Migration[7.2]
   def up
+    # PostgreSQLのGINエクステンション有効化
+    begin
+      execute "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+    rescue => e
+      Rails.logger.warn "pg_trgm extension already exists or not available: #{e.message}"
+    end
+    
     # patientsテーブルのパフォーマンス最適化インデックス
-    add_index :patients, [:name, :phone], name: 'idx_patients_search', 
-              using: :gin, opclass: { name: :gin_trgm_ops, phone: :gin_trgm_ops }
+    add_index :patients, [:name, :phone], name: 'idx_patients_search'
     add_index :patients, :phone, name: 'idx_patients_phone'
     add_index :patients, :discarded_at, name: 'idx_patients_active', 
               where: 'discarded_at IS NULL'

@@ -1,8 +1,14 @@
+[phases.setup]
+nixPkgs = ['nodejs_18', 'yarn']
+
 [phases.build]
 cmds = [
-    "bundle install",
+    "bundle install --deployment --without development test",
     "bundle exec rails assets:precompile"
 ]
+
+[start]
+cmd = "bundle exec rails db:migrate && bundle exec rails server -p $PORT -e $RAILS_ENV"
 
 [variables]
 RAILS_ENV = "production"
