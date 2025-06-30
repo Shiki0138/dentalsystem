@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Critical Attendance & Payroll System', type: :system, js: true do
   describe 'Critical Error Detection and Resolution' do
-    let(:employee) { create(:employee, :full_time) }
-    let(:part_time_employee) { create(:employee, :part_time) }
+    let(:employee) { create(:employee) }
+    let(:part_time_employee) { create(:employee, employment_type: 'part_time') }
     
     before do
       # Simulate production environment

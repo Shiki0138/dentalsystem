@@ -1,8 +1,10 @@
 FactoryBot.define do
   factory :patient do
     name { Faker::Name.name }
+    sequence(:patient_number) { |n| "P#{n.to_s.rjust(8, '0')}" }
     email { Faker::Internet.email }
-    phone_number { "090#{Faker::Number.number(digits: 8)}" }
+    phone { "090#{Faker::Number.number(digits: 8)}" }
+    status { 'active' }
     birth_date { Faker::Date.birthday(min_age: 18, max_age: 80) }
     gender { ['male', 'female', 'other'].sample }
     address { Faker::Address.full_address }
@@ -25,7 +27,9 @@ FactoryBot.define do
     end
 
     trait :with_phone do
-      phone_number { "090#{Faker::Number.number(digits: 8)}" }
+      sequence(:patient_number) { |n| "P#{n.to_s.rjust(8, '0')}" }
+    phone { "090#{Faker::Number.number(digits: 8)}" }
+    status { 'active' }
     end
 
     trait :without_phone do

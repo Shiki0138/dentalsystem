@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'redis'
 
 RSpec.describe SecurityAlertJob, type: :job do
   let(:alert_data) do

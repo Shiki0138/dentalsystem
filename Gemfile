@@ -47,6 +47,7 @@ gem "faraday-retry"
 
 # JSON parsing
 gem "multi_json"
+gem "httparty"
 
 # LINE Messaging API
 gem "line-bot-api"
@@ -119,4 +120,6 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "webdrivers"
+  gem "shoulda-matchers", "~> 5.0"
+  gem "database_cleaner"
 end

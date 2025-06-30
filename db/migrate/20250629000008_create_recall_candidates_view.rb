@@ -7,7 +7,7 @@ class CreateRecallCandidatesView < ActiveRecord::Migration[7.2]
         p.patient_number,
         p.name,
         p.name_kana,
-        p.phone_number,
+        p.phone,
         p.email,
         p.line_user_id,
         p.birth_date,
@@ -33,12 +33,11 @@ class CreateRecallCandidatesView < ActiveRecord::Migration[7.2]
         p.updated_at as patient_updated_at
       FROM patients p
       LEFT JOIN appointments a ON p.id = a.patient_id 
-        AND a.status IN ('visited', 'completed', 'paid')
-        AND a.discarded_at IS NULL
+        
+        
       WHERE p.discarded_at IS NULL
-        AND p.status = 'active'
       GROUP BY 
-        p.id, p.patient_number, p.name, p.name_kana, p.phone_number, 
+        p.id, p.patient_number, p.name, p.name_kana, p.phone, 
         p.email, p.line_user_id, p.birth_date, p.preferred_contact_method,
         p.notes, p.created_at, p.updated_at
       HAVING MAX(a.appointment_date) IS NOT NULL

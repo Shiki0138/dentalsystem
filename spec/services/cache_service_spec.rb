@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'redis'
 
 RSpec.describe CacheService, type: :service do
   let(:service) { described_class.new }

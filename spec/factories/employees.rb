@@ -15,6 +15,12 @@ FactoryBot.define do
     active { true }
     settings { {} }
 
+    trait :full_time do
+      employment_type { 'full_time' }
+      base_salary { 300000 }
+      hourly_rate { nil }
+    end
+
     trait :part_time do
       employment_type { 'part_time' }
       base_salary { nil }

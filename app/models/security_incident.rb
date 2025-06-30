@@ -1,0 +1,2 @@
+class SecurityIncident < ApplicationRecord
+end

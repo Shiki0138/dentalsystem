@@ -65,7 +65,7 @@ RSpec.describe Patient, type: :model do
   
   describe 'callbacks' do
     it 'generates patient_number before create' do
-      patient = Patient.new(name: '田中太郎', name_kana: 'タナカタロウ')
+      patient = Patient.new(name: '田中太郎', name_kana: 'タナカタロウ', phone: '09012345678', email: 'test@example.com', birth_date: '2000-01-01')
       patient.save!
       
       expect(patient.patient_number).to match(/^P\d{8}$/)
