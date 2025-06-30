@@ -1,0 +1,10 @@
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+node_modules
+tmp
+log
+coverage
+.env*

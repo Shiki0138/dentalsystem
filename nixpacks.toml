@@ -1,0 +1,10 @@
+[phases.build]
+cmds = [
+    "bundle install",
+    "bundle exec rails assets:precompile"
+]
+
+[variables]
+RAILS_ENV = "production"
+RAILS_SERVE_STATIC_FILES = "true"
+RAILS_LOG_TO_STDOUT = "true"
