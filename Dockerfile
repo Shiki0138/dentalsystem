@@ -1,4 +1,4 @@
-FROM ruby:3.3.8-slim
+FROM ruby:3.3.0-slim
 
 # 必要なパッケージをインストール
 RUN apt-get update -qq && apt-get install -y \
@@ -14,8 +14,10 @@ RUN apt-get update -qq && apt-get install -y \
 WORKDIR /app
 
 # Gemfile関連をコピーして依存関係インストール
-COPY Gemfile Gemfile.lock ./
-RUN bundle config set --local deployment 'true' && \
+COPY Gemfile ./
+# Gemfile.lockが存在する場合のみコピー
+COPY Gemfile.lock* ./
+RUN bundle config set --local deployment 'false' && \
     bundle config set --local without 'development test' && \
     bundle install
 

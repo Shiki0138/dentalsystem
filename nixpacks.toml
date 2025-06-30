@@ -3,7 +3,8 @@ nixPkgs = ['nodejs_18', 'yarn']
 
 [phases.build]
 cmds = [
-    "bundle install --deployment --without development test",
+    "bundle config set --local deployment false",
+    "bundle install --without development test",
     "bundle exec rails assets:precompile"
 ]
 
