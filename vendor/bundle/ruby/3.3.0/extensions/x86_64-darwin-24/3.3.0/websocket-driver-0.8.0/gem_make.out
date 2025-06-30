@@ -1,0 +1,18 @@
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+/Users/MBP/.rbenv/versions/3.3.8/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-9buxbs sitelibdir\=./.gem.20250630-45700-9buxbs clean
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-9buxbs sitelibdir\=./.gem.20250630-45700-9buxbs
+compiling websocket_mask.c
+linking shared-object websocket_mask.bundle
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-9buxbs sitelibdir\=./.gem.20250630-45700-9buxbs install
+/usr/bin/install -c -m 0755 websocket_mask.bundle ./.gem.20250630-45700-9buxbs
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-9buxbs sitelibdir\=./.gem.20250630-45700-9buxbs clean

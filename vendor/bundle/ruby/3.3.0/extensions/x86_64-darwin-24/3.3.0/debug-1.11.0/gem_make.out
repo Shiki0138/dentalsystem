@@ -1,0 +1,19 @@
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+/Users/MBP/.rbenv/versions/3.3.8/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-3fk2mp sitelibdir\=./.gem.20250630-45700-3fk2mp clean
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-3fk2mp sitelibdir\=./.gem.20250630-45700-3fk2mp
+compiling debug.c
+compiling iseq_collector.c
+linking shared-object debug/debug.bundle
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-3fk2mp sitelibdir\=./.gem.20250630-45700-3fk2mp install
+/usr/bin/install -c -m 0755 debug.bundle ./.gem.20250630-45700-3fk2mp/debug
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-3fk2mp sitelibdir\=./.gem.20250630-45700-3fk2mp clean

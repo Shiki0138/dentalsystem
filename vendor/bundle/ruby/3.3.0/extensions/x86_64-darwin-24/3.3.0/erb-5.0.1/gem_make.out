@@ -1,0 +1,18 @@
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/erb-5.0.1/ext/erb/escape
+/Users/MBP/.rbenv/versions/3.3.8/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-j5xkx9 sitelibdir\=./.gem.20250630-45700-j5xkx9 clean
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-j5xkx9 sitelibdir\=./.gem.20250630-45700-j5xkx9
+compiling escape.c
+linking shared-object erb/escape.bundle
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-j5xkx9 sitelibdir\=./.gem.20250630-45700-j5xkx9 install
+/usr/bin/install -c -m 0755 escape.bundle ./.gem.20250630-45700-j5xkx9/erb
+
+current directory: /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/3.3.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250630-45700-j5xkx9 sitelibdir\=./.gem.20250630-45700-j5xkx9 clean

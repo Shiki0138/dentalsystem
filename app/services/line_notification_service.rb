@@ -48,6 +48,24 @@ class LineNotificationService
     end
   end
 
+  # 汎用メッセージ送信メソッド
+  def send_message(user_id, message)
+    begin
+      response = @client.push_message(user_id, message)
+      
+      if response.is_a?(Net::HTTPOK)
+        Rails.logger.info "LINE message sent successfully to #{user_id}"
+        true
+      else
+        Rails.logger.error "Failed to send LINE message to #{user_id}: #{response.code} - #{response.body}"
+        false
+      end
+    rescue => e
+      Rails.logger.error "LINE message send error to #{user_id}: #{e.message}"
+      false
+    end
+  end
+
   private
 
   def valid_delivery?(delivery)

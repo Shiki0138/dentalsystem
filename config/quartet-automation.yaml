@@ -1,0 +1,235 @@
+# ==================================================
+# Quartet Automation Configuration
+# ペイン間自動指示システム設定
+# ==================================================
+
+# 自動化設定
+automation:
+  enabled: true
+  auto_start: true
+  coordination_interval: 180  # 3分間隔
+  
+# ペイン自動処理設定
+panes:
+  president:
+    script: "scripts/pane-automation/president-auto.sh"
+    auto_functions:
+      - "auto_monitoring"
+      - "generate_periodic_report"
+      - "emergency_response"
+    triggers:
+      - event: "worker_shortage"
+        threshold: 3
+        action: "auto_directive"
+      - event: "error_spike"
+        threshold: 10
+        action: "auto_directive"
+      - event: "system_critical"
+        threshold: 5
+        action: "emergency_response"
+    monitoring_interval: 300  # 5分
+    
+  claude_code:
+    script: "scripts/pane-automation/claude-auto.sh"
+    leader_mode: true
+    auto_functions:
+      - "team_coordination_monitor"
+      - "auto_optimization"
+    response_patterns:
+      - trigger: "worker_shortage"
+        function: "auto_response_worker_shortage"
+      - trigger: "error_spike"
+        function: "auto_response_error_spike"
+      - trigger: "quality_check"
+        function: "auto_response_quality_check"
+      - trigger: "emergency"
+        function: "emergency_response_protocol"
+    coordination_interval: 120  # 2分
+    
+  gemini_cli:
+    script: "scripts/pane-automation/gemini-auto.sh"
+    auto_functions:
+      - "continuous_monitoring"
+    analysis_patterns:
+      - trigger: "analyze_worker_status"
+        function: "analyze_worker_status"
+      - trigger: "analyze_error_patterns"
+        function: "analyze_error_patterns"
+      - trigger: "analyze_system_quality"
+        function: "analyze_system_quality"
+      - trigger: "emergency_analysis"
+        function: "emergency_analysis"
+    monitoring_interval: 180  # 3分
+    
+  codex_cli:
+    script: "scripts/pane-automation/codex-auto.sh"
+    auto_functions:
+      - "auto_script_optimization"
+    generation_patterns:
+      - trigger: "generate_worker_recovery"
+        function: "generate_worker_recovery"
+      - trigger: "generate_error_fixes"
+        function: "generate_error_fixes"
+      - trigger: "generate_optimization_scripts"
+        function: "generate_optimization_scripts"
+      - trigger: "emergency_script_generation"
+        function: "emergency_script_generation"
+    optimization_interval: 1800  # 30分
+
+# 自動指示フロー定義
+instruction_flows:
+  error_response:
+    description: "エラー対応自動フロー"
+    steps:
+      - step: 1
+        pane: "president"
+        action: "detect_issue"
+        auto_trigger: true
+      - step: 2
+        pane: "president"
+        action: "issue_directive"
+        target: "claude_code"
+      - step: 3
+        pane: "claude_code"
+        action: "coordinate_team"
+        targets: ["gemini_cli", "codex_cli"]
+      - step: 4
+        pane: "gemini_cli"
+        action: "analyze_issue"
+        report_to: "claude_code"
+      - step: 5
+        pane: "codex_cli"
+        action: "generate_solution"
+        report_to: "claude_code"
+      - step: 6
+        pane: "claude_code"
+        action: "execute_solution"
+        report_to: "president"
+        
+  quality_improvement:
+    description: "品質向上自動フロー"
+    schedule: "0 */6 * * *"  # 6時間間隔
+    steps:
+      - step: 1
+        pane: "president"
+        action: "initiate_quality_check"
+      - step: 2
+        pane: "claude_code"
+        action: "coordinate_quality_analysis"
+      - step: 3
+        pane: "gemini_cli"
+        action: "analyze_system_quality"
+      - step: 4
+        pane: "codex_cli"
+        action: "generate_optimization_scripts"
+      - step: 5
+        pane: "claude_code"
+        action: "implement_optimizations"
+        
+  emergency_protocol:
+    description: "緊急事態対応プロトコル"
+    priority: "critical"
+    steps:
+      - step: 1
+        pane: "president"
+        action: "declare_emergency"
+        immediate: true
+      - step: 2
+        pane: "claude_code"
+        action: "emergency_response_protocol"
+        immediate: true
+      - step: 3
+        pane: "gemini_cli"
+        action: "emergency_analysis"
+        immediate: true
+      - step: 4
+        pane: "codex_cli"
+        action: "emergency_script_generation"
+        immediate: true
+      - step: 5
+        pane: "claude_code"
+        action: "execute_emergency_recovery"
+        immediate: true
+
+# 通信プロトコル
+communication:
+  method: "tmux_send_keys"
+  message_format: "[{timestamp}] [{source}→{target}] {message}"
+  log_file: "logs/quartet/automation-communication.log"
+  retry_attempts: 3
+  timeout: 30
+
+# トリガー条件
+triggers:
+  worker_shortage:
+    condition: "worker_count < 3"
+    check_interval: 60
+    auto_action: true
+    
+  error_spike:
+    condition: "error_count > 10 in 60min"
+    check_interval: 300
+    auto_action: true
+    
+  memory_critical:
+    condition: "memory_usage > 90%"
+    check_interval: 180
+    auto_action: true
+    
+  disk_critical:
+    condition: "disk_usage > 85%"
+    check_interval: 600
+    auto_action: true
+    
+  system_load_high:
+    condition: "load_average > 10.0"
+    check_interval: 120
+    auto_action: true
+
+# ログ設定
+logging:
+  enabled: true
+  level: "INFO"
+  files:
+    automation: "logs/quartet/automation.log"
+    communication: "logs/quartet/automation-communication.log"
+    errors: "logs/quartet/automation-errors.log"
+  rotation:
+    enabled: true
+    max_size: "50MB"
+    backup_count: 10
+
+# パフォーマンス設定
+performance:
+  max_concurrent_actions: 4
+  action_timeout: 300
+  retry_delay: 10
+  health_check_interval: 60
+
+# セキュリティ設定
+security:
+  script_validation: true
+  allowed_commands:
+    - "echo"
+    - "ps"
+    - "find"
+    - "grep"
+    - "tmux"
+    - "bash"
+  restricted_paths:
+    - "/etc"
+    - "/usr/bin"
+    - "/usr/sbin"
+
+# 通知設定
+notifications:
+  enabled: true
+  methods:
+    - "tmux_display"
+    - "log_file"
+  events:
+    - "automation_start"
+    - "automation_stop"
+    - "error_detected"
+    - "emergency_triggered"
+    - "recovery_completed"

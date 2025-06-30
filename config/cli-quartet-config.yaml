@@ -1,0 +1,129 @@
+# ==================================================
+# CLI Quartet Configuration - 4分割ペイン設定
+# ==================================================
+
+# プロジェクト設定
+project:
+  name: "dentalsystem"
+  session_prefix: "quartet"
+  auto_start: true
+
+# ペイン構成（4分割）
+panes:
+  president:
+    name: "PRESIDENT"
+    position: 0  # 左上
+    role: "統括責任者・指示管理"
+    ai_type: "claude_president"
+    auto_start_command: "echo '👑 PRESIDENT ペイン起動完了'"
+    capabilities:
+      - "project_oversight"
+      - "decision_making"
+      - "team_coordination"
+      - "quality_control"
+    
+  claudecode:
+    name: "CLAUDE_CODE"
+    position: 1  # 右上
+    role: "リーダー・メインシステム"
+    ai_type: "claude_code"
+    auto_start_command: "echo '🤖 Claude Code ペイン起動完了 - リーダーモード'"
+    capabilities:
+      - "file_operations"
+      - "system_analysis"
+      - "error_diagnosis"
+      - "team_leadership"
+      - "coordination"
+    
+  geminicli:
+    name: "GEMINI_CLI"
+    position: 2  # 左下
+    role: "推論エンジン・解析担当"
+    ai_type: "gemini_assistant"
+    auto_start_command: "echo '🧠 Gemini CLI ペイン起動完了 - 解析モード'"
+    capabilities:
+      - "pattern_analysis"
+      - "reasoning"
+      - "risk_assessment"
+      - "decision_support"
+    
+  codexcli:
+    name: "CODEX_CLI"
+    position: 3  # 右下
+    role: "コード生成・自動化担当"
+    ai_type: "codex_assistant"
+    auto_start_command: "echo '⚡ Codex CLI ペイン起動完了 - 生成モード'"
+    capabilities:
+      - "code_generation"
+      - "automation"
+      - "script_creation"
+      - "optimization"
+
+# 連携設定
+collaboration:
+  leader: "claudecode"
+  communication_method: "tmux_send"
+  error_response_flow:
+    - step: 1
+      actor: "president"
+      action: "issue_directive"
+      target: "claudecode"
+    - step: 2
+      actor: "claudecode"
+      action: "coordinate_analysis"
+      targets: ["geminicli", "codexcli"]
+    - step: 3
+      actor: "geminicli"
+      action: "provide_analysis"
+      target: "claudecode"
+    - step: 4
+      actor: "codexcli"
+      action: "generate_solution"
+      target: "claudecode"
+    - step: 5
+      actor: "claudecode"
+      action: "execute_recovery"
+      report_to: "president"
+
+# 通信プロトコル
+communication:
+  prefix: "[QUARTET]"
+  log_file: "logs/quartet-communication.log"
+  message_format: "[{timestamp}] [{from}→{to}] {message}"
+  
+# 自動起動設定
+auto_startup:
+  enabled: true
+  session_name: "${project.name}_quartet"
+  window_name: "CLI_Quartet"
+  layout: "tiled"  # 4分割レイアウト
+  
+# エラー対応設定
+error_response:
+  enabled: true
+  auto_trigger: true
+  severity_levels:
+    critical:
+      auto_execute: true
+      notification: true
+    high:
+      auto_execute: false
+      confirmation_required: true
+    medium:
+      manual_review: true
+    low:
+      log_only: true
+
+# パフォーマンス設定
+performance:
+  max_concurrent_tasks: 3
+  timeout_seconds: 300
+  retry_attempts: 3
+  
+# ログ設定
+logging:
+  enabled: true
+  level: "INFO"
+  rotation: true
+  max_size: "100MB"
+  backup_count: 5
