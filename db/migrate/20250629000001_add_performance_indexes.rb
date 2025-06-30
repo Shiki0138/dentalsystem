@@ -2,28 +2,25 @@ class AddPerformanceIndexes < ActiveRecord::Migration[7.2]
   def up
     # patientsテーブルのパフォーマンス最適化インデックス
     add_index :patients, [:name, :phone], name: 'idx_patients_search', 
-              using: :gin, opclass: { name: :gin_trgm_ops }
+              using: :gin, opclass: { name: :gin_trgm_ops, phone: :gin_trgm_ops }
     add_index :patients, :phone, name: 'idx_patients_phone'
     add_index :patients, :discarded_at, name: 'idx_patients_active', 
               where: 'discarded_at IS NULL'
     add_index :patients, [:created_at, :id], name: 'idx_patients_timeline'
     
     # appointmentsテーブルのパフォーマンス最適化インデックス
-    add_index :appointments, [:patient_id, :status, :appointment_at], 
+    add_index :appointments, [:patient_id, :status, :appointment_date], 
               name: 'idx_appointments_patient_status_time'
-    add_index :appointments, [:appointment_at, :status], 
+    add_index :appointments, [:appointment_date, :status], 
               name: 'idx_appointments_schedule'
-    add_index :appointments, [:status, :appointment_at], 
+    add_index :appointments, [:status, :appointment_date], 
               name: 'idx_appointments_status_time'
-    add_index :appointments, :appointment_at, 
-              name: 'idx_appointments_date_range',
-              where: 'appointment_at >= CURRENT_DATE - INTERVAL \'30 days\''
+    add_index :appointments, :appointment_date, 
+              name: 'idx_appointments_date_range'
     
     # deliveriesテーブルのパフォーマンス最適化インデックス
     add_index :deliveries, [:appointment_id, :status, :delivery_type], 
               name: 'idx_deliveries_appointment_status_type'
-    add_index :deliveries, [:scheduled_at, :status], 
-              name: 'idx_deliveries_schedule'
     add_index :deliveries, :sent_at, name: 'idx_deliveries_sent'
     
     # usersテーブルのパフォーマンス最適化インデックス
