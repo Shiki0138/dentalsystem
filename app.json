@@ -1,0 +1,28 @@
+{
+  "name": "dental-system",
+  "description": "歯科クリニック管理システム",
+  "repository": "https://github.com/Shiki0138/dentalsystem",
+  "keywords": ["rails", "postgresql", "dental", "clinic"],
+  "success_url": "/",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "hobby"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:hobby-dev"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/ruby"
+    }
+  ],
+  "environments": {
+    "production": {
+      "RAILS_ENV": "production",
+      "RAILS_SERVE_STATIC_FILES": "true",
+      "RAILS_LOG_TO_STDOUT": "true"
+    }
+  }
+}
