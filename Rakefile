@@ -3,4 +3,8 @@
 
 require_relative "config/application"
 
+# Load environment variables from .env file
+require 'dotenv-rails'
+Dotenv::Railtie.load
+
 Rails.application.load_tasks

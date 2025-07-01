@@ -19,6 +19,11 @@ test:
 
 production:
   <<: *default
-  database: dental_system_production
-  username: <%= ENV.fetch("DATABASE_USERNAME") %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") %>
+  # RailwayではDATABASE_URLが自動設定されるため、個別設定は不要
+  <% if ENV['DATABASE_URL'].present? %>
+    url: <%= ENV['DATABASE_URL'] %>
+  <% else %>
+    database: dental_system_production
+    username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD") { "postgres" } %>
+  <% end %>

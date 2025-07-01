@@ -24,7 +24,9 @@ RUN bundle config set --local deployment 'false' && \
 # アプリケーションコードをコピー
 COPY . .
 
-# アセットプリコンパイル
+# アセットプリコンパイル（ダミーのDATABASE_URLを使用）
+ENV RAILS_ENV=production
+ENV DATABASE_URL=postgresql://dummy:dummy@localhost/dummy
 RUN bundle exec rails assets:precompile
 
 # ポート公開
