@@ -6,17 +6,16 @@ RUN apt-get update -qq && \
         build-essential libpq-dev nodejs npm curl && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+    WORKDIR /app
 
-# lockfile は必ず含める
-COPY Gemfile Gemfile.lock ./
-
-# Bundler を最新へ（EXDEV fallback 実装済み）
-RUN gem install bundler:2.4.22 && \
-    bundle config set deployment true && \
-    bundle config set path /usr/local/bundle && \
-    bundle install --jobs 4 --retry 3
-
+    COPY Gemfile Gemfile.lock ./
+    
+    # Bundler バージョンを lockfile に合わせる
+    RUN gem install bundler:2.5.9 && \
+        bundle _2.5.9_ config set deployment true && \
+        bundle _2.5.9_ config set without 'development test' && \
+        bundle _2.5.9_ install --jobs 4 --retry 3
+        
 COPY . .
 
 ENV RAILS_ENV=production
