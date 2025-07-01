@@ -1,0 +1,55 @@
+#!/bin/bash
+
+echo "🚀 歯科クリニックシステム - デプロイ選択肢"
+echo "================================================="
+
+echo ""
+echo "📋 利用可能なデプロイ方法:"
+echo ""
+
+echo "1. 🥇 Railway (推奨・設定済み)"
+echo "   💰 コスト: $5/月"
+echo "   ✅ Rails完全対応"
+echo "   ✅ PostgreSQL統合"
+echo "   ✅ 設定完了済み"
+echo "   🔗 https://railway.app"
+echo ""
+
+echo "2. 🐳 Docker (ローカル・任意のサーバー)"
+echo "   💰 コスト: サーバー代のみ"
+echo "   ✅ 完全制御"
+echo "   ✅ 本格運用対応"
+echo "   📋 コマンド: docker build -t dental-system . && docker run -p 3000:3000 dental-system"
+echo ""
+
+echo "3. 📦 Heroku"
+echo "   💰 コスト: $7/月"
+echo "   ✅ Rails伝統的サポート"
+echo "   ✅ PostgreSQL統合"
+echo "   📋 要設定"
+echo ""
+
+echo "4. 🔧 Render"
+echo "   💰 コスト: $7/月"
+echo "   ✅ Docker対応"
+echo "   ✅ PostgreSQL統合"
+echo "   📋 要設定"
+echo ""
+
+echo "5. ⚠️  Vercel (非推奨)"
+echo "   💰 コスト: $20+/月"
+echo "   ❌ Rails制限あり"
+echo "   ❌ PostgreSQL困難"
+echo "   📋 フロントエンド特化プラットフォーム"
+echo ""
+
+echo "🎯 推奨アクション:"
+echo "1. Railway Dashboard でデプロイ状況確認"
+echo "2. 問題があればDockerでローカルテスト"
+echo "3. 必要に応じてHeroku/Renderに移行検討"
+echo ""
+
+echo "📞 サポートドキュメント:"
+echo "- Railway: RAILWAY_DEPLOY_NOW.md"
+echo "- Vercel: VERCEL_DEPLOYMENT_NOTICE.md"
+echo "- Docker: Dockerfile"

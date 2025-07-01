@@ -1,0 +1,21 @@
+{
+  "name": "dental-system",
+  "version": "1.0.0",
+  "description": "歯科クリニック管理システム",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Rails app - use Docker deployment'",
+    "start": "echo 'Rails app - use Docker deployment'",
+    "dev": "echo 'Rails app - use Docker deployment'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shiki0138/dentalsystem.git"
+  },
+  "keywords": ["rails", "ruby", "postgresql", "dental", "clinic"],
+  "author": "Dental System Team",
+  "license": "MIT"
+}
