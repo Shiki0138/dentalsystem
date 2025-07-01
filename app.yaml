@@ -1,0 +1,55 @@
+# Google App Engine 設定ファイル
+runtime: ruby32
+env: standard
+
+# 自動スケーリング設定
+automatic_scaling:
+  min_instances: 0
+  max_instances: 5
+  target_cpu_utilization: 0.6
+  target_throughput_utilization: 0.8
+
+# リソース制限
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+# 環境変数
+env_variables:
+  RAILS_ENV: production
+  RAILS_SERVE_STATIC_FILES: true
+  RAILS_LOG_TO_STDOUT: true
+  SECRET_KEY_BASE: "will_be_set_via_gcloud_command"
+  
+# Cloud SQL接続設定
+beta_settings:
+  cloud_sql_instances: dental-system-prod:asia-northeast1:dental-db
+
+# エントリーポイント
+entrypoint: bundle exec puma -C config/puma.rb
+
+# ヘルスチェック
+readiness_check:
+  path: "/health"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 4
+  success_threshold: 2
+
+# セッション設定
+vpc_access_connector:
+  name: projects/dental-system-prod/locations/asia-northeast1/connectors/default
+
+# ファイルサイズ制限
+automatic_scaling:
+  max_pending_latency: 1s
+  max_idle_instances: 2
