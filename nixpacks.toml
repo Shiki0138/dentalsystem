@@ -1,16 +1,7 @@
-[phases.setup]
-nixPkgs = ['nodejs_18', 'yarn']
-
 [phases.build]
 cmds = [
-    "bundle config set --local deployment false",
     "bundle install --without development test"
 ]
 
 [start]
-cmd = "bundle exec rails db:migrate && bundle exec rails server -p $PORT -e $RAILS_ENV"
-
-[variables]
-RAILS_ENV = "production"
-RAILS_SERVE_STATIC_FILES = "true"
-RAILS_LOG_TO_STDOUT = "true"
+cmd = "bundle exec rails db:migrate && bundle exec rails server -p $PORT"

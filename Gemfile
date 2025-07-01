@@ -24,43 +24,12 @@ gem "sassc-rails"
 # Use image processing for Active Storage variant
 gem "image_processing", "~> 1.2"
 
-# Authentication
+# Authentication (simplified)
 gem "devise"
-gem "devise-two-factor"
-gem "rqrcode"
-
-# Security
-gem "rack-attack"
 gem "bcrypt"
-
-# Background jobs
-gem "sidekiq"
-gem "sidekiq-cron"
-
-# Email processing
-gem "mail"
-gem "actionmailbox"
-
-# HTTP clients
-gem "faraday"
-gem "faraday-retry"
 
 # JSON parsing
 gem "multi_json"
-gem "httparty"
-
-# LINE Messaging API
-gem "line-bot-api"
-
-# Google APIs
-gem "google-apis-calendar_v3"
-gem "google-apis-gmail_v1"
-
-# State machine
-gem "aasm"
-
-# Soft delete
-gem "discard"
 
 # Pagination
 gem "kaminari"
@@ -90,36 +59,9 @@ gem "stimulus-rails"
 gem "bootsnap", require: false
 
 group :development, :test do
-  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
-
-  # Testing framework
-  gem "rspec-rails"
-  gem "factory_bot_rails"
-  gem "faker"
-  
-  # Code quality
-  gem "rubocop", require: false
-  gem "rubocop-rails", require: false
-  gem "rubocop-rspec", require: false
 end
 
 group :development do
-  # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-
-  # Deployment
-  gem "capistrano"
-  gem "capistrano-rails"
-  gem "capistrano-bundler"
-  gem "capistrano3-puma"
-end
-
-group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
-  gem "shoulda-matchers", "~> 5.0"
-  gem "database_cleaner"
 end

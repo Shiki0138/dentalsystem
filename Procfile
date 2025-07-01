@@ -1,2 +1,1 @@
-web: bundle exec rails server -p $PORT -e production -b 0.0.0.0
-worker: bundle exec sidekiq -e production
+web: bundle exec rails db:migrate && bundle exec rails server -p $PORT
