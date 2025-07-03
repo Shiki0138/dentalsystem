@@ -6,8 +6,9 @@ ruby "2.6.10"
 # Rails 6.1 for Ruby 2.6 compatibility
 gem "rails", "~> 6.1.7"
 
-# Database - SQLite for development speed
-gem "sqlite3", "~> 1.4"
+# Database
+gem "sqlite3", "~> 1.4", group: [:development, :test]
+gem "pg", "~> 1.1", group: :production
 
 # Server
 gem "puma", "~> 5.6"
@@ -24,6 +25,10 @@ gem "dotenv-rails"
 
 # CORS for API
 gem "rack-cors"
+
+# Background jobs
+gem "sidekiq"
+gem "redis", "~> 4.0"
 
 # Utilities
 gem "bootsnap", require: false
