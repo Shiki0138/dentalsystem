@@ -1,5 +1,8 @@
 class Api::AiController < ApplicationController
+  require_relative '../../../config/demo_mode'
+  
   before_action :authenticate_user!
+  before_action :demo_mode_safety_check
   skip_before_action :verify_authenticity_token
 
   # POST /api/ai/suggest_appointment_time
@@ -7,7 +10,7 @@ class Api::AiController < ApplicationController
     patient_id = params[:patient_id]
     treatment_type = params[:treatment_type]
 
-    # 実際のAI最適化ロジック（デモモードでは使用されない）
+    # 実際のAI最適化ロジック
     optimal_times = calculate_optimal_times(patient_id, treatment_type)
 
     render json: {
@@ -55,6 +58,41 @@ class Api::AiController < ApplicationController
   end
 
   private
+  
+  def demo_mode_safety_check
+    return unless DemoMode.enabled?
+    
+    # デモモードでは安全なモック応答を返す
+    case action_name
+    when 'suggest_appointment_time'
+      render json: DemoMode::MockResponses.ai_optimization_result
+    when 'predict_conflicts'
+      render json: {
+        success: true,
+        conflict_probability: 0.15,
+        risk_level: 'low',
+        suggested_alternatives: [
+          { time: (Time.current + 1.hour).iso8601, risk: 0.05, reason: 'デモ最適化時間' },
+          { time: (Time.current + 2.hours).iso8601, risk: 0.08, reason: 'デモ代替時間' }
+        ],
+        ai_insight: 'デモモード: 競合リスク分析結果',
+        demo_mode: true
+      }
+    when 'optimize_recurring'
+      render json: {
+        success: true,
+        optimized_schedule: [
+          { date: (Date.current + 7.days).iso8601, confidence: 0.95, reason: 'デモ最適スケジュール' },
+          { date: (Date.current + 14.days).iso8601, confidence: 0.92, reason: 'デモ最適スケジュール' }
+        ],
+        pattern_efficiency: 98.5,
+        ai_insight: 'デモモード: 繰り返し予約最適化結果',
+        demo_mode: true
+      }
+    end
+    
+    return false # アクションの実行を停止
+  end
 
   def calculate_optimal_times(patient_id, treatment_type)
     # 患者の履歴を取得

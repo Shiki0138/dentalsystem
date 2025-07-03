@@ -18,6 +18,7 @@
 class Patient < ApplicationRecord
   include Discard::Model
   include Cacheable
+  require Rails.root.join('config', 'demo_mode')
 
   has_many :appointments, dependent: :destroy
 
@@ -38,6 +39,11 @@ class Patient < ApplicationRecord
   scope :active, -> { where(status: 'active') }
   scope :due_for_recall, -> { where('next_recall_date <= ?', Date.current) }
   scope :birthday_this_month, -> { where('EXTRACT(month FROM birth_date) = ?', Date.current.month) }
+  
+  # デモモード関連スコープ
+  scope :demo_data, -> { where("name LIKE ?", "#{DemoMode.demo_prefix}%") }
+  scope :production_data, -> { where("name NOT LIKE ?", "#{DemoMode.demo_prefix}%") }
+  scope :safe_for_demo, -> { DemoMode.enabled? ? demo_data : all }
 
   # 患者検索（名前・電話番号・メールアドレス） - パフォーマンス最適化版
   def self.search(query)
@@ -94,6 +100,26 @@ class Patient < ApplicationRecord
       "#{name} (#{name_kana})"
     else
       name
+    end
+  end
+  
+  # デモデータかどうか判定
+  def demo_data?
+    return false unless DemoMode.enabled?
+    name&.start_with?(DemoMode.demo_prefix)
+  end
+  
+  # デモモードでの安全な操作チェック
+  def safe_for_demo_operation?(operation)
+    return true unless DemoMode.enabled?
+    
+    case operation
+    when :delete, :destroy
+      demo_data? # デモデータのみ削除可能
+    when :update, :edit
+      demo_data? # デモデータのみ編集可能
+    else
+      true # その他の操作は許可
     end
   end
 

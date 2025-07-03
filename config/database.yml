@@ -16,3 +16,11 @@ test:
 production:
   <<: *default
   url: <%= ENV['DATABASE_URL'] %>
+  # Render.com specific optimizations
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  connect_timeout: 2
+  checkout_timeout: 5
+  reaping_frequency: 10
+  variables:
+    statement_timeout: '30s'

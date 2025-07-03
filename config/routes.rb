@@ -38,16 +38,24 @@ Rails.application.routes.draw do
   # デモデータリセット
   post '/beta/reset', to: 'beta#reset_demo_data', as: :reset_demo_data
   
-  # デモモード専用ルート
-  namespace :demo do
-    get :dashboard, to: 'demo#dashboard'
+  # デモモード専用ルート（歯科業界革命体験）
+  scope '/demo' do
+    get '/', to: 'demo#start', as: :demo_start
+    get '/dashboard', to: 'demo#dashboard', as: :demo_dashboard
+    post '/seed_data', to: 'demo#seed_data', as: :demo_seed_data
+    post '/reset_data', to: 'demo#reset_data', as: :demo_reset_data
+    get '/status', to: 'demo#status', as: :demo_status
+    get '/ai_demo', to: 'demo#ai_demo', as: :demo_ai
+    get '/notification_demo', to: 'demo#notification_demo', as: :demo_notification
+    post '/end_session', to: 'demo#end_session', as: :demo_end_session
+    
+    # 既存のデモルート（下位互換）
     get :realtime_data, to: 'demo#realtime_data'
     get :ai_predictions, to: 'demo#ai_predictions'
     get :system_performance, to: 'demo#system_performance'
     post :update_settings, to: 'demo#update_settings'
     get :toggle_mode, to: 'demo#toggle_mode'
     get :statistics, to: 'demo#statistics'
-    post :reset_demo_data
     get :performance_test
     get :load_test
     get :feature_showcase

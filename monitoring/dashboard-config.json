@@ -1,0 +1,246 @@
+{
+  "dashboard": {
+    "title": "🦷⚡ 歯科業界革命システム監視ダッシュボード",
+    "uid": "dental-revolution-dashboard",
+    "version": 1,
+    "timezone": "Asia/Tokyo",
+    "refresh": "5s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "title": "🟢 システム稼働率",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 8 },
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg_over_time(up{job='dental-system'}[5m]) * 100",
+            "legendFormat": "稼働率"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 95, "color": "yellow" },
+                { "value": 99, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "⚡ レスポンスタイム",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, http_request_duration_seconds_bucket{job='dental-system'})",
+            "legendFormat": "95パーセンタイル"
+          },
+          {
+            "expr": "histogram_quantile(0.50, http_request_duration_seconds_bucket{job='dental-system'})",
+            "legendFormat": "中央値"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "min": 0,
+            "max": 500
+          }
+        ],
+        "alert": {
+          "name": "高レスポンスタイム",
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [200],
+                "type": "gt"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ]
+        }
+      },
+      {
+        "title": "📊 スループット",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job='dental-system'}[1m]) * 60",
+            "legendFormat": "リクエスト/分"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "rpm",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "🚨 エラー率",
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 8 },
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job='dental-system',status=~'5..'}[5m]) / rate(http_requests_total{job='dental-system'}[5m]) * 100",
+            "legendFormat": "エラー率"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 0.1, "color": "yellow" },
+                { "value": 1, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "👥 アクティブユーザー数",
+        "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "active_users_count{job='dental-system'}",
+            "legendFormat": "アクティブユーザー"
+          },
+          {
+            "expr": "concurrent_connections{job='dental-system'}",
+            "legendFormat": "同時接続数"
+          }
+        ]
+      },
+      {
+        "title": "💾 データベースパフォーマンス",
+        "gridPos": { "x": 8, "y": 8, "w": 8, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(pg_stat_database_blks_hit{job='postgresql'} / (pg_stat_database_blks_hit{job='postgresql'} + pg_stat_database_blks_read{job='postgresql'})) * 100",
+            "legendFormat": "キャッシュヒット率"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_commit{job='postgresql'}[1m])",
+            "legendFormat": "コミット/秒"
+          }
+        ]
+      },
+      {
+        "title": "🔧 リソース使用状況",
+        "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "100 - (avg(irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
+            "legendFormat": "CPU使用率"
+          },
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "メモリ使用率"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "title": "🦷 歯科業界革命メトリクス",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "type": "table",
+        "targets": [
+          {
+            "expr": "dental_revolution_metrics{job='dental-system'}",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "efficiency_improvement": "業務効率改善率",
+                "patient_satisfaction": "患者満足度",
+                "appointment_accuracy": "予約精度",
+                "cost_reduction": "コスト削減率"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "title": "🏆 品質スコアトレンド",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "quality_score{job='dental-system'}",
+            "legendFormat": "総合品質スコア"
+          },
+          {
+            "expr": "performance_score{job='dental-system'}",
+            "legendFormat": "パフォーマンススコア"
+          },
+          {
+            "expr": "security_score{job='dental-system'}",
+            "legendFormat": "セキュリティスコア"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": false,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "デプロイ",
+          "type": "tags",
+          "tags": ["deployment"]
+        },
+        {
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": false,
+          "iconColor": "rgba(255, 96, 96, 1)",
+          "name": "インシデント",
+          "type": "tags",
+          "tags": ["incident"]
+        }
+      ]
+    }
+  }
+}
