@@ -1,25 +1,27 @@
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="md:grid md:grid-cols-3 md:gap-6">
-    <div class="md:col-span-1">
-      <div class="px-4 sm:px-0">
-        <h3 class="text-lg font-medium leading-6 text-gray-900">新規患者登録</h3>
-        <p class="mt-1 text-sm text-gray-600">
-          患者の基本情報を入力してください。<br>
-          氏名とフリガナは必須項目です。
-        </p>
-        <div class="mt-6">
-          <p class="text-sm text-gray-500">
-            <strong>重複チェック機能</strong><br>
-            登録時に類似する患者情報を自動的に検出し、重複登録を防ぎます。
-          </p>
-        </div>
+<div class="patients-container min-h-screen bg-gray-50">
+  <!-- ヘッダー部分 -->
+  <div class="patients-header bg-white shadow-sm border-b border-gray-200 p-6">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">新規患者登録</h1>
+        <p class="text-sm text-gray-600 mt-1">新しい患者の基本情報を登録します</p>
+      </div>
+      <div>
+        <%= link_to patients_path, 
+            class: "inline-flex items-center px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          患者一覧に戻る
+        <% end %>
       </div>
     </div>
-    
-    <div class="mt-5 md:col-span-2 md:mt-0">
-      <div class="shadow sm:overflow-hidden sm:rounded-md">
-        <%= render 'form', patient: @patient %>
-      </div>
+  </div>
+
+  <!-- フォーム部分 -->
+  <div class="max-w-4xl mx-auto p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <%= render 'form', patient: @patient %>
     </div>
   </div>
 </div>

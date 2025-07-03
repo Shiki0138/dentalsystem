@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API接続テスト - 歯科クリニック予約管理システム</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .status-badge { font-size: 0.8em; padding: 4px 8px; border-radius: 4px; }
+    .status-success { background: #28a745; color: white; }
+    .status-error { background: #dc3545; color: white; }
+    .status-pending { background: #ffc107; color: black; }
+    .log-entry { font-family: monospace; font-size: 0.9em; margin: 2px 0; }
+    .log-success { color: #28a745; }
+    .log-error { color: #dc3545; }
+    .log-info { color: #17a2b8; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1>🔧 API接続テスト</h1>
+    <p>バックエンド・フロントエンド間の通信を確認します</p>
+
+    <!-- 接続状態 -->
+    <div class="test-section">
+      <h3>接続状態</h3>
+      <div class="row">
+        <div class="col-md-4">
+          <p>API接続: <span id="api-status" class="status-badge status-pending">未確認</span></p>
+        </div>
+        <div class="col-md-4">
+          <p>認証状態: <span id="auth-status" class="status-badge status-pending">未認証</span></p>
+        </div>
+        <div class="col-md-4">
+          <p>WebSocket: <span id="ws-status" class="status-badge status-pending">未接続</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- テストコントロール -->
+    <div class="test-section">
+      <h3>テスト実行</h3>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <button class="btn btn-primary w-100" onclick="testAPIConnection()">
+            1. API接続テスト
+          </button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-info w-100" onclick="testCORS()">
+            2. CORS設定テスト
+          </button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-success w-100" onclick="testAuthentication()">
+            3. 認証テスト
+          </button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-warning w-100" onclick="testWebSocket()">
+            4. WebSocketテスト
+          </button>
+        </div>
+      </div>
+      <div class="mt-2">
+        <button class="btn btn-dark w-100" onclick="runAllTests()">
+          🚀 全テスト実行
+        </button>
+      </div>
+    </div>
+
+    <!-- 認証フォーム -->
+    <div class="test-section">
+      <h3>認証テスト</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <input type="email" id="email" class="form-control mb-2" placeholder="メールアドレス" value="admin@dental.clinic">
+          <input type="password" id="password" class="form-control mb-2" placeholder="パスワード" value="password123">
+          <button class="btn btn-primary" onclick="performLogin()">ログイン</button>
+          <button class="btn btn-secondary" onclick="performLogout()">ログアウト</button>
+        </div>
+        <div class="col-md-6">
+          <h5>トークン情報</h5>
+          <div id="token-info" class="text-muted">未取得</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- データ取得テスト -->
+    <div class="test-section">
+      <h3>データ取得テスト</h3>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <button class="btn btn-info w-100" onclick="fetchAppointments()">予約一覧</button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-info w-100" onclick="fetchPatients()">患者一覧</button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-info w-100" onclick="fetchDashboard()">ダッシュボード</button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-info w-100" onclick="fetchAIPredictions()">AI予測</button>
+        </div>
+      </div>
+      <div class="mt-3">
+        <h5>取得データ</h5>
+        <pre id="data-result" class="bg-light p-3" style="max-height: 300px; overflow-y: auto;">データ未取得</pre>
+      </div>
+    </div>
+
+    <!-- テストログ -->
+    <div class="test-section">
+      <h3>テストログ</h3>
+      <div id="test-log" style="max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+        <div class="log-entry log-info">テストログを表示します...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api_client.js"></script>
+  <script>
+    let api = null;
+    
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('test-log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStatus(elementId, status, text) {
+      const element = document.getElementById(elementId);
+      element.className = `status-badge status-${status}`;
+      element.textContent = text;
+    }
+
+    async function testAPIConnection() {
+      log('API接続テスト開始...');
+      try {
+        const response = await fetch('http://localhost:3001/health');
+        const data = await response.json();
+        
+        if (data.status === 'OK') {
+          updateStatus('api-status', 'success', '接続成功');
+          log('API接続成功: ' + JSON.stringify(data), 'success');
+        } else {
+          throw new Error('ヘルスチェック失敗');
+        }
+      } catch (error) {
+        updateStatus('api-status', 'error', '接続失敗');
+        log('API接続エラー: ' + error.message, 'error');
+      }
+    }
+
+    async function testCORS() {
+      log('CORS設定テスト開始...');
+      try {
+        const response = await fetch('http://localhost:3001/api/v1/test', {
+          method: 'OPTIONS',
+          headers: {
+            'Origin': window.location.origin,
+            'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'Content-Type, Authorization'
+          }
+        });
+        
+        const corsHeaders = {
+          'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+          'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+          'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+          'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+        };
+        
+        log('CORS設定: ' + JSON.stringify(corsHeaders, null, 2), 'success');
+      } catch (error) {
+        log('CORSテストエラー: ' + error.message, 'error');
+      }
+    }
+
+    async function testAuthentication() {
+      log('認証システムテスト開始...');
+      if (!api) {
+        api = new DentalClinicAPI('http://localhost:3001');
+      }
+      
+      try {
+        const verified = await api.verifyToken();
+        if (verified) {
+          updateStatus('auth-status', 'success', '認証済み');
+          log('トークン検証成功: ' + JSON.stringify(verified), 'success');
+        } else {
+          updateStatus('auth-status', 'error', '未認証');
+          log('トークン検証失敗', 'error');
+        }
+      } catch (error) {
+        updateStatus('auth-status', 'error', '認証エラー');
+        log('認証テストエラー: ' + error.message, 'error');
+      }
+    }
+
+    async function testWebSocket() {
+      log('WebSocket接続テスト開始...');
+      
+      if (!api || !api.token) {
+        log('認証が必要です。先にログインしてください。', 'error');
+        return;
+      }
+      
+      try {
+        api.connectWebSocket();
+        
+        // 接続状態を監視
+        setTimeout(() => {
+          if (api.cable && api.cable.readyState === WebSocket.OPEN) {
+            updateStatus('ws-status', 'success', '接続済み');
+            log('WebSocket接続成功', 'success');
+          } else {
+            updateStatus('ws-status', 'error', '接続失敗');
+            log('WebSocket接続失敗', 'error');
+          }
+        }, 2000);
+      } catch (error) {
+        updateStatus('ws-status', 'error', '接続エラー');
+        log('WebSocketエラー: ' + error.message, 'error');
+      }
+    }
+
+    async function performLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      log(`ログイン試行: ${email}`);
+      
+      if (!api) {
+        api = new DentalClinicAPI('http://localhost:3001');
+      }
+      
+      try {
+        const result = await api.login(email, password);
+        updateStatus('auth-status', 'success', '認証済み');
+        document.getElementById('token-info').textContent = `Token: ${result.token.substring(0, 20)}...`;
+        log('ログイン成功: ' + JSON.stringify(result.user), 'success');
+        
+        // WebSocket自動接続
+        setTimeout(() => testWebSocket(), 1000);
+      } catch (error) {
+        updateStatus('auth-status', 'error', 'ログイン失敗');
+        log('ログインエラー: ' + error.message, 'error');
+      }
+    }
+
+    async function performLogout() {
+      if (!api) return;
+      
+      log('ログアウト実行...');
+      await api.logout();
+      updateStatus('auth-status', 'pending', '未認証');
+      updateStatus('ws-status', 'pending', '未接続');
+      document.getElementById('token-info').textContent = '未取得';
+      log('ログアウト完了', 'success');
+    }
+
+    async function fetchAppointments() {
+      if (!api || !api.token) {
+        log('認証が必要です', 'error');
+        return;
+      }
+      
+      try {
+        const appointments = await api.getAppointments();
+        document.getElementById('data-result').textContent = JSON.stringify(appointments, null, 2);
+        log(`予約データ取得成功: ${appointments.length}件`, 'success');
+      } catch (error) {
+        log('予約データ取得エラー: ' + error.message, 'error');
+      }
+    }
+
+    async function fetchPatients() {
+      if (!api || !api.token) {
+        log('認証が必要です', 'error');
+        return;
+      }
+      
+      try {
+        const patients = await api.getPatients();
+        document.getElementById('data-result').textContent = JSON.stringify(patients, null, 2);
+        log(`患者データ取得成功: ${patients.length}件`, 'success');
+      } catch (error) {
+        log('患者データ取得エラー: ' + error.message, 'error');
+      }
+    }
+
+    async function fetchDashboard() {
+      if (!api || !api.token) {
+        log('認証が必要です', 'error');
+        return;
+      }
+      
+      try {
+        const stats = await api.getDashboardStats();
+        document.getElementById('data-result').textContent = JSON.stringify(stats, null, 2);
+        log('ダッシュボードデータ取得成功', 'success');
+      } catch (error) {
+        log('ダッシュボードデータ取得エラー: ' + error.message, 'error');
+      }
+    }
+
+    async function fetchAIPredictions() {
+      if (!api || !api.token) {
+        log('認証が必要です', 'error');
+        return;
+      }
+      
+      try {
+        const predictions = await api.getAIPredictions('appointments');
+        document.getElementById('data-result').textContent = JSON.stringify(predictions, null, 2);
+        log('AI予測データ取得成功', 'success');
+      } catch (error) {
+        log('AI予測データ取得エラー: ' + error.message, 'error');
+      }
+    }
+
+    async function runAllTests() {
+      log('===== 全テスト実行開始 =====', 'info');
+      
+      await testAPIConnection();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await testCORS();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await performLogin();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      await fetchAppointments();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      log('===== 全テスト完了 =====', 'info');
+    }
+
+    // WebSocketイベントリスナー
+    window.addEventListener('notification:received', (event) => {
+      log('通知受信: ' + JSON.stringify(event.detail), 'info');
+    });
+
+    window.addEventListener('appointment:updated', (event) => {
+      log('予約更新: ' + JSON.stringify(event.detail), 'info');
+    });
+
+    // 初期テスト実行
+    window.addEventListener('load', () => {
+      testAPIConnection();
+    });
+  </script>
+</body>
+</html>

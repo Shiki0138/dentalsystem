@@ -1,61 +1,31 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.3.0"
+ruby "2.6.10"
 
-# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.2.0"
+# Rails 6.1 for Ruby 2.6 compatibility
+gem "rails", "~> 6.1.7"
 
-# Use PostgreSQL as the database for Active Record
-gem "pg", "~> 1.5"
+# Database - SQLite for development speed
+gem "sqlite3", "~> 1.4"
 
-# Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 6.0"
+# Server
+gem "puma", "~> 5.6"
 
-# Use Redis adapter to run Action Cable in production
-gem "redis", "~> 5.0"
-
-# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
-
-# Use Sass to process CSS
-gem "sassc-rails"
-
-# Use image processing for Active Storage variant
-gem "image_processing", "~> 1.2"
-
-# Authentication (simplified)
+# Authentication
 gem "devise"
-gem "bcrypt"
 
-# JSON parsing
-gem "multi_json"
+# Styling - Beautiful UI (CDN-based, no bundling needed)
+gem "bootstrap", require: false
+gem "jquery-rails", require: false
 
-# Pagination
-gem "kaminari"
-
-# Environment variables
+# Environment
 gem "dotenv-rails"
 
-# Build JSON APIs
-gem "jbuilder"
+# CORS for API
+gem "rack-cors"
 
-# Asset pipeline
-gem "sprockets-rails"
-
-# Import maps
-gem "importmap-rails"
-
-# QR code generation (moved to authentication section above)
-
-# CSS framework
-gem "tailwindcss-rails"
-
-# JavaScript bundling
-gem "turbo-rails"
-gem "stimulus-rails"
-
-# Reduces boot times through caching; required in config/boot.rb
+# Utilities
 gem "bootsnap", require: false
 
 group :development, :test do
@@ -64,4 +34,6 @@ end
 
 group :development do
   gem "web-console"
+  gem "listen"
+  gem "spring"
 end

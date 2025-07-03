@@ -20,13 +20,14 @@ class Patient < ApplicationRecord
   include Cacheable
 
   has_many :appointments, dependent: :destroy
-  has_many :deliveries, dependent: :destroy
-  has_many :medical_records, dependent: :destroy
 
   validates :name, presence: true, length: { maximum: 100 }
   validates :phone, presence: true, format: { with: /\A[\d\-\+\(\)]+\z/ }, uniqueness: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
-  validates :birth_date, presence: true
+
+  # ステータス管理
+  enum status: { active: 'active', inactive: 'inactive', suspended: 'suspended' }
+  enum gender: { male: 'male', female: 'female', other: 'other' }
 
   # Callbacks
   before_validation :normalize_phone
@@ -34,6 +35,9 @@ class Patient < ApplicationRecord
 
   scope :search_by_name, ->(query) { where("name ILIKE ? OR name_kana ILIKE ?", "%#{query}%", "%#{query}%") }
   scope :search_by_phone, ->(phone) { where("phone LIKE ?", "%#{phone.gsub(/[^\d]/, '')}%") }
+  scope :active, -> { where(status: 'active') }
+  scope :due_for_recall, -> { where('next_recall_date <= ?', Date.current) }
+  scope :birthday_this_month, -> { where('EXTRACT(month FROM birth_date) = ?', Date.current.month) }
 
   # 患者検索（名前・電話番号・メールアドレス） - パフォーマンス最適化版
   def self.search(query)
@@ -71,15 +75,7 @@ class Patient < ApplicationRecord
                .last&.appointment_date
   end
 
-  # リコール対象かどうか
-  def recall_candidate?
-    return false if last_visit.nil?
-    
-    # 6ヶ月以上経過している場合
-    last_visit < 6.months.ago
-  end
-
-  # 重複患者候補を検出
+  # 重複患者候補を検出（簡素化版）
   def self.find_duplicates
     patients_with_same_phone = Patient.group(:phone).having('COUNT(*) > 1').pluck(:phone)
     
@@ -110,19 +106,16 @@ class Patient < ApplicationRecord
     age
   end
 
-  # 患者マージ機能
+  # 患者マージ機能（簡素化版）
   def merge_with!(other_patient)
     return false if other_patient == self
 
     transaction do
-      # Move associations to this patient
+      # Move appointments to this patient
       other_patient.appointments.update_all(patient_id: id)
-      other_patient.deliveries.update_all(patient_id: id) if respond_to?(:deliveries)
-      other_patient.medical_records.update_all(patient_id: id) if other_patient.respond_to?(:medical_records)
-
-      # Mark other patient as merged
-      other_patient.update!(merged_to_id: id) if other_patient.respond_to?(:merged_to_id)
-      other_patient.discard!
+      
+      # Mark other patient as inactive
+      other_patient.update!(status: 'inactive')
     end
 
     true

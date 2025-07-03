@@ -1,0 +1,58 @@
+# Rails specific
+*.log
+*.sqlite3
+/tmp
+/log
+.byebug_history
+/public/packs
+/public/packs-test
+/node_modules
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+/storage
+
+# Git
+.git/
+.gitignore
+
+# Development
+.env*
+!.env.example
+config/master.key
+config/credentials/*.key
+/coverage
+/spec
+/test
+docker-compose*.yml
+Dockerfile*
+
+# Docs and configs
+*.md
+README*
+docs/
+.rubocop.yml
+.eslintrc*
+
+# Railway specific
+railway.toml
+nixpacks.toml
+Procfile
+
+# CI/CD
+.github/
+.circleci/
+.gitlab-ci.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Backup
+backup_*/

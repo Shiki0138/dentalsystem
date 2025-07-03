@@ -1,0 +1,38 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        歯科クリニック管理システム
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        ベータ版アクセス
+      </p>
+    </div>
+    
+    <%= form_with url: beta_login_path, local: true, class: "mt-8 space-y-6" do |f| %>
+      <div class="rounded-md shadow-sm -space-y-px">
+        <div>
+          <label for="access_code" class="sr-only">アクセスコード</label>
+          <%= text_field_tag :access_code, nil, 
+              class: "appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+              placeholder: "アクセスコードを入力" %>
+        </div>
+      </div>
+
+      <% if flash[:alert] %>
+        <div class="text-red-600 text-sm">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.submit "アクセス", class: "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      </div>
+      
+      <div class="text-center text-sm text-gray-600">
+        <p>ベータテスト参加者の方はアクセスコードを入力してください</p>
+        <p class="mt-2">デモ用コード: <code class="bg-gray-100 px-2 py-1 rounded">dental2024beta</code></p>
+      </div>
+    <% end %>
+  </div>
+</div>

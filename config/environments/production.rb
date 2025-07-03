@@ -186,6 +186,69 @@ Rails.application.configure do
 
   # Custom headers for performance monitoring
   config.middleware.insert_after ActionDispatch::Static, Rack::ResponseTime
+
+  # 継続改善システム設定
+  config.continuous_improvement = {
+    enabled: true,
+    monitoring_interval: 60.seconds,
+    quality_target: 96.5,
+    performance_target: {
+      response_time: 500, # ms
+      throughput: 1000,   # req/min
+      error_rate: 0.1     # %
+    },
+    auto_scaling: {
+      enabled: true,
+      cpu_threshold: 70,
+      memory_threshold: 80
+    },
+    alerts: {
+      slack_webhook: ENV['SLACK_WEBHOOK_URL'],
+      email_recipients: ENV['ALERT_EMAIL_RECIPIENTS']&.split(',') || []
+    }
+  }
+
+  # 品質保証設定
+  config.quality_assurance = {
+    real_time_monitoring: true,
+    performance_tracking: true,
+    error_tracking: true,
+    user_feedback_collection: true,
+    automated_testing: true
+  }
+
+  # AI品質保証設定（worker2連携）
+  config.ai_quality_assurance = {
+    accuracy_target: 99.9,
+    monitoring_enabled: true,
+    drift_detection: true,
+    auto_retraining: false # 本番では手動承認制
+  }
+
+  # デモモード設定
+  config.demo_mode = {
+    enabled: ENV['DEMO_MODE'] == 'true',
+    data_masking: true,
+    limited_functionality: true,
+    watermark: true
+  }
+
+  # 監視・ログ設定
+  config.monitoring = {
+    metrics_enabled: true,
+    tracing_enabled: true,
+    profiling_enabled: false, # 本番では無効
+    health_check_endpoint: '/health',
+    metrics_endpoint: '/metrics'
+  }
+
+  # バックアップ設定
+  config.backup = {
+    enabled: true,
+    schedule: '0 2 * * *', # 毎日2時
+    retention_days: 30,
+    encryption_enabled: true
+  }
 end
 
 # Custom middleware for response time tracking
@@ -202,6 +265,11 @@ class Rack::ResponseTime
     response_time = ((end_time - start_time) * 1000).round(2)
     headers['X-Response-Time'] = "#{response_time}ms"
     
+    # 継続改善システムにメトリクス送信
+    if defined?(EnhancedMonitoringService)
+      EnhancedMonitoringService.instance.record_response_time(response_time)
+    end
+    
     # Log slow requests
     if response_time > 1000 # 1 second
       Rails.logger.warn "Slow request: #{env['REQUEST_METHOD']} #{env['PATH_INFO']} took #{response_time}ms"
@@ -209,4 +277,68 @@ class Rack::ResponseTime
     
     [status, headers, response]
   end
+end
+
+# 継続改善システム初期化
+Rails.application.config.after_initialize do
+  if Rails.env.production?
+    begin
+      # 品質保証サービス起動
+      ContinuousQualityMonitoringService.instance.start_monitoring
+      
+      # パフォーマンス最適化サービス起動
+      AdvancedPerformanceOptimizationService.instance.start_optimization
+      
+      # 自動メンテナンスサービス起動
+      AutoMaintenanceService.instance.schedule_maintenance
+      
+      # 監視サービス起動
+      EnhancedMonitoringService.instance.start_monitoring
+      
+      # フィードバック収集サービス起動
+      UserFeedbackCollectionService.instance.initialize_feedback_collection
+      
+      # AI品質保証サービス起動（worker2連携）
+      if defined?(AIQualityAssuranceService)
+        AIQualityAssuranceService.instance.monitor_ai_accuracy
+      end
+      
+      # 品質永続保証サービス起動
+      if defined?(QualityPerpetualAssuranceService)
+        QualityPerpetualAssuranceService.instance.ensure_perpetual_quality
+      end
+      
+      Rails.logger.info "継続改善システム本番環境で正常に起動しました"
+    rescue => e
+      Rails.logger.error "継続改善システム起動エラー: #{e.message}"
+    end
+  end
+end
+# ===== Google App Engine 安全設定 =====
+Rails.application.configure do
+  # SSL設定（GAEが自動処理）
+  config.force_ssl = false
+  
+  # 静的ファイル配信
+  config.public_file_server.enabled = true
+  config.public_file_server.headers = {
+    'Cache-Control' => 'public, max-age=3600'
+  }
+  
+  # ログ設定
+  config.log_level = :info
+  config.log_tags = [ :request_id ]
+  
+  # アセット設定
+  config.assets.compile = false
+  config.assets.digest = true
+  
+  # エラーレポート設定
+  if defined?(Google::Cloud::ErrorReporting)
+    config.google_cloud.project_id = ENV['GOOGLE_CLOUD_PROJECT']
+    config.google_cloud.keyfile = ENV['GOOGLE_APPLICATION_CREDENTIALS']
+  end
+  
+  # Active Storageの安全設定
+  config.active_storage.variant_processor = :mini_magick if defined?(ActiveStorage)
 end

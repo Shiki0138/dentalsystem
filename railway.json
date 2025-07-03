@@ -1,0 +1,25 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "bundle install --without development test && bundle exec rake assets:precompile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "startCommand": "bundle exec puma -C config/puma.rb",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "RAILS_ENV": "production",
+        "RAILS_SERVE_STATIC_FILES": "true",
+        "RAILS_LOG_TO_STDOUT": "true",
+        "DEMO_MODE_ENABLED": "true",
+        "DEMO_UPDATE_INTERVAL": "2000",
+        "DEMO_PERFORMANCE_MODE": "optimized"
+      }
+    }
+  }
+}

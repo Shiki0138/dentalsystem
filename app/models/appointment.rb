@@ -17,13 +17,10 @@ class Appointment < ApplicationRecord
   include Cacheable
 
   belongs_to :patient
-  belongs_to :staff_member, optional: true
-  has_many :reminders, dependent: :destroy
+  belongs_to :user, optional: true
 
   validates :appointment_date, presence: true
   validates :status, presence: true
-  validates :treatment_type, presence: true
-  validates :duration_minutes, presence: true, numericality: { greater_than: 0 }
 
   scope :today, -> { where(appointment_date: Date.current.beginning_of_day..Date.current.end_of_day) }
   scope :upcoming, -> { where('appointment_date > ?', Time.current) }
@@ -59,8 +56,6 @@ class Appointment < ApplicationRecord
       transitions from: [:booked, :visited], to: :cancelled
       after do
         update_column(:cancelled_at, Time.current)
-        # Cancel related reminders
-        reminders.pending.update_all(status: 'cancelled')
       end
     end
 
@@ -108,46 +103,6 @@ class Appointment < ApplicationRecord
   def can_be_cancelled?
     return false unless booked? || visited?
     appointment_date > 1.hour.from_now
-  end
-
-  def schedule_reminders
-    return unless booked? && appointment_date.future?
-
-    # 既存のリマインダーをキャンセル
-    reminders.pending.update_all(status: 'cancelled')
-
-    # 7日前リマインダー
-    schedule_reminder(7.days.before(appointment_date), 'seven_day')
-    
-    # 3日前リマインダー
-    schedule_reminder(3.days.before(appointment_date), 'three_day')
-    
-    # 1日前リマインダー
-    schedule_reminder(1.day.before(appointment_date), 'one_day')
-  end
-
-  def schedule_reminder(scheduled_at, reminder_type)
-    return if scheduled_at <= Time.current
-
-    reminders.create!(
-      reminder_type: reminder_type,
-      scheduled_at: scheduled_at,
-      status: 'pending',
-      delivery_method: preferred_delivery_method
-    )
-  end
-
-  def preferred_delivery_method
-    # 患者の設定に基づいてデフォルトの配信方法を決定
-    if patient.line_user_id.present?
-      'line'
-    elsif patient.email.present?
-      'email'
-    elsif patient.phone_number.present?
-      'sms'
-    else
-      'email' # デフォルト
-    end
   end
 
   private

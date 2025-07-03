@@ -15,7 +15,21 @@
     "type": "git",
     "url": "https://github.com/Shiki0138/dentalsystem.git"
   },
-  "keywords": ["rails", "ruby", "postgresql", "dental", "clinic"],
+  "keywords": [
+    "rails",
+    "ruby",
+    "postgresql",
+    "dental",
+    "clinic"
+  ],
   "author": "Dental System Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@fullcalendar/bootstrap5": "^6.1.18",
+    "@fullcalendar/core": "^6.1.18",
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/list": "^6.1.18",
+    "@fullcalendar/timegrid": "^6.1.18"
+  }
 }

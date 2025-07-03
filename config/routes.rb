@@ -1,107 +1,74 @@
 Rails.application.routes.draw do
-  namespace :api do
-    namespace :v1 do
-      get "health", to: "health#show"
+  # ヘルスチェック
+  get "/health", to: proc { [200, {"Content-Type" => "text/plain"}, ["OK"]] }
+  get "/_ah/health", to: proc { [200, {"Content-Type" => "text/plain"}, ["healthy"]] }
+  
+  # ベータアクセス
+  get '/beta', to: 'beta_login#new', as: :beta_login
+  post '/beta/login', to: 'beta_login#create'
+  delete '/beta/logout', to: 'beta_login#logout', as: :beta_logout
+  
+  # メインアプリケーション
+  root 'dashboard#index'
+  
+  # 患者管理
+  resources :patients do
+    resources :appointments
+    resources :treatments
+    collection do
+      get :search
     end
   end
-  devise_for :users
-  root "dashboard#index"
-
-  # ActionMailbox routes
-  mount ActionMailbox::Engine => "/rails/action_mailbox"
-
-  # Dashboard
-  get "dashboard", to: "dashboard#index"
   
-  # Manual booking interface
-  namespace :book do
-    get :manual, to: "manual#index"
-    post :manual, to: "manual#create"
-    get :search_patients, to: "manual#search_patients"
-    get :available_slots, to: "manual#available_slots"
-  end
-
-  # Appointments
+  # 予約管理
   resources :appointments do
     member do
-      patch :visit
-      patch :cancel
       patch :confirm
+      patch :cancel
     end
-    
     collection do
-      get :today
-      get :upcoming
-      get :search
+      get :calendar
+      get :search_patients
     end
   end
-
-  # Patients
-  resources :patients do
-    member do
-      get :history
-      post :merge_with
-    end
-    
-    collection do
-      get :search
-      get :duplicates
-    end
+  
+  # フィードバック
+  post '/beta/feedback', to: 'beta_feedback#create', as: :beta_feedback
+  
+  # デモデータリセット
+  post '/beta/reset', to: 'beta#reset_demo_data', as: :reset_demo_data
+  
+  # デモモード専用ルート
+  namespace :demo do
+    get :dashboard, to: 'demo#dashboard'
+    get :realtime_data, to: 'demo#realtime_data'
+    get :ai_predictions, to: 'demo#ai_predictions'
+    get :system_performance, to: 'demo#system_performance'
+    post :update_settings, to: 'demo#update_settings'
+    get :toggle_mode, to: 'demo#toggle_mode'
+    get :statistics, to: 'demo#statistics'
+    post :reset_demo_data
+    get :performance_test
+    get :load_test
+    get :feature_showcase
   end
-
+  
+  # ダッシュボードルート（デモモード対応）
+  get '/dashboard', to: 'dashboard#index'
+  get '/dashboard/realtime', to: 'dashboard#realtime_enhanced'
+  get '/dashboard/demo', to: 'demo#dashboard'
+  
   # API routes
   namespace :api do
-    namespace :v1 do
-      resources :appointments, only: [:index, :show, :create, :update]
-      resources :patients, only: [:index, :show, :create, :update] do
-        collection do
-          get :search
-        end
-      end
-      resources :reminders, only: [:index, :create]
-    end
-  end
-  
-  # Background jobs monitoring (Sidekiq Web UI)
-  require "sidekiq/web"
-  mount Sidekiq::Web => "/sidekiq"
-  
-  # Employee management
-  resources :employees do
-    resources :clockings, except: [:show]
-    member do
-      get :timesheet
-    end
-  end
-  
-  # Payroll management
-  resources :payrolls, only: [:index, :show, :create]
-  
-  # Admin routes
-  namespace :admin do
-    resources :users
-    resources :settings, only: [:index, :update]
-    resources :reports, only: [:index, :show]
+    # AI統合エンドポイント
+    post '/ai/predict', to: 'ai#predict'
+    get '/ai/patient_analytics', to: 'ai#patient_analytics'
+    post '/ai/realtime_optimization', to: 'ai#realtime_optimization'
+    get '/ai/integrated_dashboard', to: 'ai#integrated_dashboard'
     
-    resources :payrolls do
-      member do
-        patch :approve
-        patch :mark_as_paid
-      end
-      collection do
-        post :calculate_all
-        get :export
-      end
-    end
-    
-    resources :employees do
-      resources :clockings
-    end
-  end
-  
-  # Webhooks
-  namespace :webhooks do
-    post 'line', to: 'line#callback'
-    post 'gmail', to: 'gmail#callback'
+    # AI予約最適化エンドポイント
+    post 'ai/suggest_appointment_time', to: 'ai#suggest_appointment_time'
+    post 'ai/predict_conflicts', to: 'ai#predict_conflicts'
+    post 'ai/optimize_recurring', to: 'ai#optimize_recurring'
   end
 end

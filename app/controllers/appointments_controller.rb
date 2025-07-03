@@ -30,6 +30,19 @@ class AppointmentsController < ApplicationController
     end
   end
 
+  # GET /appointments/calendar
+  def calendar
+    @appointments = Appointment.includes(:patient)
+                              .joins(:patient)
+                              .where(appointment_date: calendar_date_range)
+                              .order(:appointment_date)
+
+    respond_to do |format|
+      format.html
+      format.json { render json: calendar_events_json }
+    end
+  end
+
   # GET /appointments/1
   def show
   end
@@ -83,24 +96,38 @@ class AppointmentsController < ApplicationController
     end
   end
 
-  # POST /appointments/1/cancel
+  # PATCH /appointments/1/cancel
   def cancel
-    if @appointment.cancel
-      redirect_to @appointment, notice: '予約がキャンセルされました。'
+    if @appointment.update(status: 'cancelled')
+      respond_to do |format|
+        format.html { redirect_to @appointment, notice: '予約がキャンセルされました。' }
+        format.json { head :ok }
+      end
     else
-      redirect_to @appointment, alert: 'キャンセル処理に失敗しました。'
+      respond_to do |format|
+        format.html { redirect_to @appointment, alert: 'キャンセル処理に失敗しました。' }
+        format.json { head :unprocessable_entity }
+      end
     end
   end
 
   # GET /appointments/search_patients
   def search_patients
     query = params[:q]
-    patients = Patient.search(query).limit(10)
+    
+    if query.present?
+      patients = Patient.where(
+        "name ILIKE :query OR phone LIKE :query OR email ILIKE :query",
+        query: "%#{query}%"
+      ).limit(10)
+    else
+      patients = Patient.limit(10)
+    end
     
     render json: patients.map { |p| 
       { 
         id: p.id, 
-        name: p.display_name,
+        name: p.name,
         phone: p.phone,
         email: p.email
       } 
@@ -199,5 +226,56 @@ class AppointmentsController < ApplicationController
 
       ※このメッセージは#{days_before}日前の自動配信です。
     CONTENT
+  end
+
+  # カレンダー用の日付範囲
+  def calendar_date_range
+    start_date = params[:start].present? ? Date.parse(params[:start]) : Date.current.beginning_of_month
+    end_date = params[:end].present? ? Date.parse(params[:end]) : Date.current.end_of_month
+    start_date..end_date
+  end
+
+  # カレンダーイベント用JSON
+  def calendar_events_json
+    @appointments.map do |appointment|
+      duration = appointment.duration_minutes || 60
+      {
+        id: appointment.id,
+        title: "#{appointment.patient.name} - #{appointment.treatment_type || '診療'}",
+        start: appointment.appointment_date.iso8601,
+        end: (appointment.appointment_date + duration.minutes).iso8601,
+        url: appointment_path(appointment),
+        backgroundColor: appointment_status_color(appointment.status),
+        borderColor: appointment_status_color(appointment.status),
+        textColor: '#ffffff',
+        extendedProps: {
+          patientId: appointment.patient.id,
+          patientName: appointment.patient.name,
+          patientPhone: appointment.patient.phone,
+          treatmentType: appointment.treatment_type,
+          status: appointment.status,
+          notes: appointment.notes,
+          duration: duration
+        }
+      }
+    end
+  end
+
+  # ステータス別カラー
+  def appointment_status_color(status)
+    case status
+    when 'scheduled'
+      '#3B82F6'  # Blue
+    when 'confirmed'
+      '#10B981'  # Green
+    when 'completed'
+      '#6B7280'  # Gray
+    when 'cancelled'
+      '#EF4444'  # Red
+    when 'no_show'
+      '#F59E0B'  # Amber
+    else
+      '#6366F1'  # Indigo
+    end
   end
 end

@@ -7,6 +7,19 @@ ja:
       no_show: "無断欠席"
       done: "完了"
       paid: "精算済"
+    
+    treatment_type:
+      consultation: "初診・相談"
+      cleaning: "歯科清掃"
+      filling: "詰め物・虫歯治療"
+      crown: "被せ物"
+      root_canal: "根管治療"
+      extraction: "抜歯"
+      orthodontics: "歯科矯正"
+      whitening: "ホワイトニング"
+      checkup: "定期検診"
+      general: "一般診療"
+      other: "その他"
   
   time:
     formats:

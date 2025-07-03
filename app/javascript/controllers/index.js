@@ -9,3 +9,6 @@ application.register("dashboard", DashboardController)
 
 import ChartController from "./chart_controller"
 application.register("chart", ChartController)
+
+import CalendarController from "./calendar_controller"
+application.register("calendar", CalendarController)

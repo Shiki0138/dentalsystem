@@ -1,182 +1,454 @@
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
-        患者情報
-      </h3>
-      <p class="mt-1 max-w-2xl text-sm text-gray-500">
-        患者番号: <%= @patient.patient_number %>
-      </p>
-    </div>
-    
-    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
-      <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">氏名</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.name %></dd>
-        </div>
-        
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">カナ</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.name_kana %></dd>
-        </div>
-        
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">電話番号</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.phone || "未登録" %></dd>
-        </div>
-        
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">メールアドレス</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.email || "未登録" %></dd>
-        </div>
-        
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">LINE ID</dt>
-          <dd class="mt-1 text-sm text-gray-900">
-            <% if @patient.line_user_id.present? %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                連携済み
+<div class="patient-detail-container min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+  <!-- ヘッダー部分 -->
+  <div class="patient-header bg-white shadow-lg border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+          <!-- 患者アバター -->
+          <div class="relative">
+            <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+              <span class="text-3xl font-bold text-white">
+                <%= @patient.name.first %>
               </span>
-            <% else %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                未連携
+            </div>
+            <div class="absolute -bottom-2 -right-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border-2 border-white">
+                アクティブ
               </span>
-            <% end %>
-          </dd>
+            </div>
+          </div>
+          
+          <!-- 基本情報 -->
+          <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-900"><%= @patient.name %></h1>
+            <p class="text-lg text-gray-600 mt-1"><%= @patient.name_kana %></p>
+            <div class="flex items-center space-x-4 mt-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                患者番号: <%= @patient.patient_number %>
+              </span>
+              <% if @patient.birth_date %>
+                <span class="text-sm text-gray-500">
+                  <%= Date.current.year - @patient.birth_date.year %>歳
+                </span>
+              <% end %>
+            </div>
+          </div>
         </div>
         
-        <div class="sm:col-span-1">
-          <dt class="text-sm font-medium text-gray-500">生年月日</dt>
-          <dd class="mt-1 text-sm text-gray-900">
-            <%= @patient.birth_date ? l(@patient.birth_date) : "未登録" %>
-          </dd>
+        <!-- アクションボタン -->
+        <div class="flex items-center space-x-3">
+          <%= link_to edit_patient_path(@patient), 
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all duration-200 hover:shadow-lg" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            編集
+          <% end %>
+          
+          <%= link_to new_patient_appointment_path(@patient), 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 shadow-md transition-all duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            予約追加
+          <% end %>
+          
+          <%= link_to patients_path, 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 shadow-md transition-all duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            一覧に戻る
+          <% end %>
         </div>
-        
-        <div class="sm:col-span-2">
-          <dt class="text-sm font-medium text-gray-500">住所</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.address || "未登録" %></dd>
-        </div>
-        
-        <div class="sm:col-span-2">
-          <dt class="text-sm font-medium text-gray-500">保険情報</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @patient.insurance_info || "未登録" %></dd>
-        </div>
-      </dl>
-    </div>
-    
-    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-      <%= link_to "編集", edit_patient_path(@patient), 
-          class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
-      <%= link_to "重複チェック", patient_path(@patient, check_duplicates: true), 
-          class: "ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-      <%= link_to "一覧に戻る", patients_path, 
-          class: "ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+      </div>
     </div>
   </div>
 
-  <!-- 重複候補表示 -->
-  <% if @duplicates.present? %>
-    <div class="mt-8 bg-yellow-50 border-l-4 border-yellow-400 p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
+  <!-- AI統合インサイト -->
+  <%= render 'ai_insights', patient: @patient %>
+
+  <!-- メインコンテンツ -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- 左カラム - 基本情報 -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- 基本情報カード -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+              </svg>
+              基本情報
+            </h2>
+          </div>
+          
+          <div class="p-6">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="patient-info-field">
+                <dt class="info-label">氏名</dt>
+                <dd class="info-value font-semibold text-gray-900"><%= @patient.name %></dd>
+              </div>
+              
+              <div class="patient-info-field">
+                <dt class="info-label">カナ</dt>
+                <dd class="info-value"><%= @patient.name_kana %></dd>
+              </div>
+              
+              <div class="patient-info-field">
+                <dt class="info-label">電話番号</dt>
+                <dd class="info-value">
+                  <% if @patient.phone.present? %>
+                    <a href="tel:<%= @patient.phone %>" class="text-blue-600 hover:text-blue-800 transition-colors">
+                      <%= @patient.phone %>
+                    </a>
+                  <% else %>
+                    <span class="text-gray-400">未登録</span>
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div class="patient-info-field">
+                <dt class="info-label">メールアドレス</dt>
+                <dd class="info-value">
+                  <% if @patient.email.present? %>
+                    <a href="mailto:<%= @patient.email %>" class="text-blue-600 hover:text-blue-800 transition-colors">
+                      <%= @patient.email %>
+                    </a>
+                  <% else %>
+                    <span class="text-gray-400">未登録</span>
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div class="patient-info-field">
+                <dt class="info-label">生年月日</dt>
+                <dd class="info-value">
+                  <% if @patient.birth_date %>
+                    <%= l(@patient.birth_date) %>
+                    <span class="text-sm text-gray-500 ml-2">
+                      (<%= Date.current.year - @patient.birth_date.year %>歳)
+                    </span>
+                  <% else %>
+                    <span class="text-gray-400">未登録</span>
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div class="patient-info-field">
+                <dt class="info-label">LINE連携</dt>
+                <dd class="info-value">
+                  <% if @patient.line_user_id.present? %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                      連携済み
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      未連携
+                    </span>
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div class="sm:col-span-2 patient-info-field">
+                <dt class="info-label">住所</dt>
+                <dd class="info-value">
+                  <%= @patient.address.present? ? @patient.address : content_tag(:span, "未登録", class: "text-gray-400") %>
+                </dd>
+              </div>
+              
+              <div class="sm:col-span-2 patient-info-field">
+                <dt class="info-label">保険情報</dt>
+                <dd class="info-value">
+                  <%= @patient.insurance_info.present? ? @patient.insurance_info : content_tag(:span, "未登録", class: "text-gray-400") %>
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-yellow-800">
-            重複の可能性がある患者が見つかりました
-          </h3>
-          <div class="mt-2 text-sm text-yellow-700">
-            <ul class="list-disc pl-5 space-y-1">
-              <% @duplicates.each do |duplicate| %>
-                <li>
-                  <%= link_to duplicate.name, patient_path(duplicate), 
-                      class: "font-medium underline" %>
-                  (<%= duplicate.patient_number %>) - 
-                  電話: <%= duplicate.phone %>, 
-                  最終来院: <%= duplicate.appointments.maximum(:appointment_date) || "なし" %>
-                  <%= link_to "この患者にマージ", merge_patients_path(patient_id: @patient.id, target_id: duplicate.id), 
-                      method: :post,
-                      data: { confirm: "本当にマージしますか？この操作は取り消せません。" },
-                      class: "ml-2 text-yellow-600 hover:text-yellow-500" %>
-                </li>
+
+        <!-- 予約履歴セクション -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+              </svg>
+              予約履歴
+              <span class="ml-auto text-sm font-normal">
+                <%= @appointments.count %>件
+              </span>
+            </h2>
+          </div>
+          
+          <div class="divide-y divide-gray-100">
+            <% if @appointments.any? %>
+              <% @appointments.each do |appointment| %>
+                <div class="p-6 hover:bg-gray-50 transition-colors duration-200">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-3 mb-3">
+                        <div class="appointment-date-badge">
+                          <div class="text-lg font-bold text-blue-600">
+                            <%= appointment.appointment_date.strftime('%d') %>
+                          </div>
+                          <div class="text-xs text-gray-500 uppercase">
+                            <%= appointment.appointment_date.strftime('%b') %>
+                          </div>
+                        </div>
+                        
+                        <div class="flex-1">
+                          <h3 class="text-sm font-medium text-gray-900">
+                            <%= l(appointment.appointment_date, format: :long) %>
+                          </h3>
+                          <p class="text-sm text-gray-500">
+                            <%= appointment.treatment_type || "一般診療" %>
+                          </p>
+                        </div>
+                        
+                        <div class="appointment-status">
+                          <% case appointment.status %>
+                          <% when 'scheduled' %>
+                            <span class="status-badge status-scheduled">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                              </svg>
+                              予約済み
+                            </span>
+                          <% when 'confirmed' %>
+                            <span class="status-badge status-confirmed">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                              </svg>
+                              確認済み
+                            </span>
+                          <% when 'completed' %>
+                            <span class="status-badge status-completed">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                              </svg>
+                              完了
+                            </span>
+                          <% when 'cancelled' %>
+                            <span class="status-badge status-cancelled">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                              </svg>
+                              キャンセル
+                            </span>
+                          <% when 'no_show' %>
+                            <span class="status-badge status-no-show">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                              </svg>
+                              無断欠席
+                            </span>
+                          <% end %>
+                        </div>
+                      </div>
+                      
+                      <% if appointment.notes.present? %>
+                        <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                          <p class="text-sm text-gray-600">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <%= appointment.notes %>
+                          </p>
+                        </div>
+                      <% end %>
+                    </div>
+                    
+                    <div class="ml-4 flex items-center space-x-2">
+                      <%= link_to appointment_path(appointment), 
+                          class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        詳細
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
               <% end %>
-            </ul>
+            <% else %>
+              <div class="p-12 text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 class="text-lg font-medium text-gray-400 mb-2">予約履歴がありません</h3>
+                <p class="text-sm text-gray-500 mb-6">この患者の予約履歴はまだありません</p>
+                <%= link_to new_patient_appointment_path(@patient), 
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200" do %>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  予約を追加
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右カラム - サマリー・アクション -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-8 space-y-6">
+          <!-- 統計サマリー -->
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">統計サマリー</h3>
+            
+            <div class="space-y-4">
+              <div class="stat-item">
+                <div class="stat-value text-blue-600">
+                  <%= @appointments.count %>
+                </div>
+                <div class="stat-label">総予約数</div>
+              </div>
+              
+              <div class="stat-item">
+                <div class="stat-value text-green-600">
+                  <%= @appointments.where(status: ['completed', 'confirmed']).count %>
+                </div>
+                <div class="stat-label">完了予約</div>
+              </div>
+              
+              <div class="stat-item">
+                <div class="stat-value text-red-600">
+                  <%= @appointments.where(status: 'cancelled').count %>
+                </div>
+                <div class="stat-label">キャンセル</div>
+              </div>
+              
+              <% if @appointments.any? %>
+                <div class="stat-item">
+                  <div class="stat-value text-purple-600">
+                    <%= l(@appointments.maximum(:appointment_date), format: :short) if @appointments.maximum(:appointment_date) %>
+                  </div>
+                  <div class="stat-label">最終来院</div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- クイックアクション -->
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">クイックアクション</h3>
+            
+            <div class="space-y-3">
+              <%= link_to patient_path(@patient, check_duplicates: true), 
+                  class: "quick-action-btn bg-yellow-50 text-yellow-700 hover:bg-yellow-100" do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                重複チェック
+              <% end %>
+              
+              <button type="button" class="quick-action-btn bg-blue-50 text-blue-700 hover:bg-blue-100 w-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                メール送信
+              </button>
+              
+              <button type="button" class="quick-action-btn bg-green-50 text-green-700 hover:bg-green-100 w-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 011 1v2a1 1 0 01-1 1h-1v9a2 2 0 01-2 2H7a2 2 0 01-2-2V8H4a1 1 0 01-1-1V5a1 1 0 011-1h3z" />
+                </svg>
+                データ出力
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  <% end %>
-
-  <!-- 予約履歴 -->
-  <div class="mt-8">
-    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-      予約履歴
-    </h3>
-    
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul class="divide-y divide-gray-200">
-        <% @appointments.each do |appointment| %>
-          <li>
-            <div class="px-4 py-4 sm:px-6">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <p class="text-sm font-medium text-indigo-600 truncate">
-                    <%= l(appointment.appointment_date, format: :long) %>
-                  </p>
-                  <div class="ml-2 flex-shrink-0 flex">
-                    <% case appointment.status %>
-                    <% when 'booked' %>
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        予約済み
-                      </p>
-                    <% when 'visited' %>
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        来院済み
-                      </p>
-                    <% when 'cancelled' %>
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                        キャンセル
-                      </p>
-                    <% when 'no_show' %>
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        無断キャンセル
-                      </p>
-                    <% end %>
-                  </div>
-                </div>
-                <div class="ml-2 flex-shrink-0">
-                  <%= link_to "詳細", appointment_path(appointment), 
-                      class: "text-sm text-gray-500 hover:text-gray-700" %>
-                </div>
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500">
-                    治療内容: <%= appointment.treatment_type || "未定" %>
-                  </p>
-                </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                  <% if appointment.delivery.present? %>
-                    リマインダー: 
-                    <span class="ml-1">
-                      <%= appointment.delivery.status == 'sent' ? '送信済み' : '未送信' %>
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-    
-    <% if @appointments.total_pages > 1 %>
-      <div class="mt-4">
-        <%= paginate @appointments %>
-      </div>
-    <% end %>
   </div>
+
+  <!-- 重複警告（条件付き表示） -->
+  <% if @duplicates.present? %>
+    <div class="fixed bottom-4 right-4 max-w-sm bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded-lg shadow-lg">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-yellow-800">
+            重複の可能性: <%= @duplicates.count %>件
+          </p>
+          <p class="text-xs text-yellow-700 mt-1">
+            確認が必要です
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
+
+<style>
+  .patient-info-field {
+    @apply space-y-2;
+  }
+  
+  .info-label {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+  }
+  
+  .info-value {
+    @apply text-sm text-gray-900;
+  }
+  
+  .appointment-date-badge {
+    @apply w-12 h-12 bg-blue-50 rounded-lg flex flex-col items-center justify-center border border-blue-200;
+  }
+  
+  .appointment-status {
+    @apply flex items-center;
+  }
+  
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .status-scheduled {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .status-confirmed {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .status-completed {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  .status-cancelled {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .status-no-show {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .stat-item {
+    @apply text-center p-3 border border-gray-100 rounded-lg;
+  }
+  
+  .stat-value {
+    @apply text-2xl font-bold;
+  }
+  
+  .stat-label {
+    @apply text-xs text-gray-500 mt-1;
+  }
+  
+  .quick-action-btn {
+    @apply flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-colors duration-200;
+  }
+</style>

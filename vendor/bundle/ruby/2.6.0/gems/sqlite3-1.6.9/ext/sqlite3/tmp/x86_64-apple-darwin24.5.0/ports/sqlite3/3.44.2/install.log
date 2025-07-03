@@ -1,0 +1,15 @@
+ ././install-sh -c -d '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib'
+ /bin/sh ./libtool   --mode=install /usr/bin/install -c   libsqlite3.la '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib'
+libtool: install: /usr/bin/install -c .libs/libsqlite3.lai /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/libsqlite3.la
+libtool: install: /usr/bin/install -c .libs/libsqlite3.a /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/libsqlite3.a
+libtool: install: chmod 644 /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/libsqlite3.a
+libtool: install: ranlib /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/libsqlite3.a
+ ././install-sh -c -d '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/bin'
+  /bin/sh ./libtool   --mode=install /usr/bin/install -c sqlite3 '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/bin'
+libtool: install: /usr/bin/install -c sqlite3 /Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/bin/sqlite3
+ ././install-sh -c -d '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/include'
+ /usr/bin/install -c -m 644 sqlite3.h sqlite3ext.h '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/include'
+ ././install-sh -c -d '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/share/man/man1'
+ /usr/bin/install -c -m 644 sqlite3.1 '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/share/man/man1'
+ ././install-sh -c -d '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/pkgconfig'
+ /usr/bin/install -c -m 644 sqlite3.pc '/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2/lib/pkgconfig'

@@ -1,0 +1,1 @@
+["--host=x86_64-apple-darwin24.5.0", "--enable-static", "--disable-shared", "--enable-shared=no", "--enable-static=yes", "--enable-fts5", "CC=xcrun clang", "CFLAGS=-fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1", "--prefix=/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2"]

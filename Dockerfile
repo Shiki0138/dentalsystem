@@ -1,33 +1,43 @@
-# 最新 3.3 系 & セキュリティＰatch
-FROM ruby:3.3.8-slim
+###################################
+# 1) Build stage
+###################################
+FROM ruby:3.2.0-slim AS builder
 
+ENV LANG=C.UTF-8 \
+    TZ=Etc/UTC \
+    BUNDLER_VERSION=2.4.22
+
+# build-time packages
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
-        build-essential libpq-dev nodejs npm curl && \
+      build-essential libpq-dev git curl nodejs npm && \
     rm -rf /var/lib/apt/lists/*
 
-    WORKDIR /app
+WORKDIR /app
+COPY Gemfile Gemfile.lock* ./
 
-    COPY Gemfile Gemfile.lock ./
-    
-    # Bundler バージョンを lockfile に合わせる
-    RUN gem install bundler:2.5.9 && \
-        bundle _2.5.9_ config set deployment true && \
-        bundle _2.5.9_ config set without 'development test' && \
-        bundle _2.5.9_ install --jobs 4 --retry 3
-        
+# Gemfile.lock を arm64/amd64 両対応に書き換える
+RUN bundle _${BUNDLER_VERSION}_ lock --add-platform aarch64-linux --add-platform x86_64-linux \
+ && bundle _${BUNDLER_VERSION}_ config set --local deployment true \
+ && bundle _${BUNDLER_VERSION}_ config set --local without 'development test' \
+ && bundle _${BUNDLER_VERSION}_ install --jobs 4 --retry 3
+
 COPY . .
 
-ENV RAILS_ENV=production
-RUN SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
+###################################
+# 2) Runtime stage
+###################################
+FROM ruby:3.2.0-slim
 
-# 非 root
-RUN adduser --system --group rails && \
-    chown -R rails:rails /app
-USER rails
+ENV LANG=C.UTF-8 TZ=Etc/UTC
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends libpq5 nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+COPY --from=builder /app /app
 
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD curl -f http://localhost:3000/up || exit 1
-
 CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]

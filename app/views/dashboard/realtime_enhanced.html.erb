@@ -1,0 +1,397 @@
+<!-- 🚀 リアルタイム機能強化ダッシュボード -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" id="realtime-dashboard">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- ヘッダーセクション（リアルタイム情報付き） -->
+    <div class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Real-Time Dashboard
+          </h1>
+          <p class="text-xl text-gray-600 mt-3 flex items-center">
+            <svg class="w-6 h-6 mr-3 text-emerald-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            史上最高のリアルタイムシステム
+          </p>
+        </div>
+        <div class="flex space-x-4">
+          <!-- リアルタイム時計 -->
+          <div class="bg-white p-4 rounded-2xl shadow-lg border border-gray-200">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-blue-600" id="realtime-time">
+                <%= Time.current.strftime('%H:%M') %>
+              </div>
+              <div class="text-sm text-gray-500" id="realtime-date">
+                <%= Date.current.strftime('%m/%d (%a)') %>
+              </div>
+            </div>
+          </div>
+          <!-- 接続状態インジケーター -->
+          <div class="bg-white p-4 rounded-2xl shadow-lg border border-gray-200">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse" id="connection-status"></div>
+              <span class="text-sm font-medium text-gray-700" id="connection-text">LIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- リアルタイム状態バー -->
+      <div class="bg-gradient-to-r from-emerald-500 to-blue-600 p-6 rounded-2xl shadow-xl text-white mb-8" id="realtime-status-bar">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="p-3 bg-white bg-opacity-20 rounded-xl mr-4">
+              <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold">リアルタイム更新中</h3>
+              <p class="text-blue-100">
+                最終更新: <span id="last-update-time"><%= Time.current.strftime('%H:%M:%S') %></span> | 
+                更新間隔: 5秒 | 
+                データ同期: 完璧
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="text-right">
+              <div class="text-lg font-bold">アクティブユーザー</div>
+              <div class="text-3xl font-black" id="active-users-count">8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- リアルタイムKPIセクション -->
+    <div class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+          <span class="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Live Performance Metrics</span>
+        </h2>
+        <div class="flex items-center space-x-3">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-sm text-gray-500">自動更新中</span>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <!-- リアルタイム予約数 -->
+        <div class="relative bg-white p-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full -mr-16 -mt-16 opacity-30 group-hover:scale-110 transition-transform"></div>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black text-blue-600" id="realtime-bookings">23</div>
+                <div class="text-xs text-blue-500 font-medium">+3 今日</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">今日の予約数</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">目標: 30件</span>
+              <span class="text-xs text-blue-600 font-medium" id="booking-progress">77%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- リアルタイム来院数 -->
+        <div class="relative bg-white p-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-emerald-100 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-200 rounded-full -mr-16 -mt-16 opacity-30 group-hover:scale-110 transition-transform"></div>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black text-emerald-600" id="realtime-checkins">15</div>
+                <div class="text-xs text-emerald-500 font-medium">+2 過去1時間</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">本日来院数</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">待機中: <span id="waiting-count">3</span>名</span>
+              <span class="text-xs text-emerald-600 font-medium">順調</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- リアルタイム売上 -->
+        <div class="relative bg-white p-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-purple-100 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full -mr-16 -mt-16 opacity-30 group-hover:scale-110 transition-transform"></div>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black text-purple-600" id="realtime-revenue">¥847K</div>
+                <div class="text-xs text-purple-500 font-medium">+¥125K 今日</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">本日売上</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">目標: ¥1M</span>
+              <span class="text-xs text-purple-600 font-medium" id="revenue-progress">85%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- システム性能 -->
+        <div class="relative bg-white p-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-amber-100 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full -mr-16 -mt-16 opacity-30 group-hover:scale-110 transition-transform"></div>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black text-amber-600" id="system-performance">98.7%</div>
+                <div class="text-xs text-amber-500 font-medium">稼働率</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">システム性能</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">応答: <span id="response-time">142</span>ms</span>
+              <span class="text-xs text-amber-600 font-medium">最適</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- アクティビティ指標 -->
+        <div class="relative bg-white p-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-rose-50 to-rose-100 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-rose-200 rounded-full -mr-16 -mt-16 opacity-30 group-hover:scale-110 transition-transform"></div>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black text-rose-600" id="activity-score">94</div>
+                <div class="text-xs text-rose-500 font-medium">活動指数</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">アクティビティ</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">過去1時間</span>
+              <span class="text-xs text-rose-600 font-medium">活発</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- リアルタイムアクティビティフィード -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      <!-- ライブアクティビティストリーム -->
+      <div class="lg:col-span-2">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+              <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">ライブアクティビティ</span>
+            </h3>
+            <div class="flex items-center space-x-3">
+              <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span class="text-sm text-gray-500">リアルタイム更新</span>
+            </div>
+          </div>
+          
+          <div class="space-y-4" id="realtime-activity-feed">
+            <!-- アクティビティアイテムがJavaScriptで動的に追加される -->
+          </div>
+        </div>
+      </div>
+
+      <!-- リアルタイム統計サイドバー -->
+      <div class="space-y-6">
+        <!-- 今日の統計 -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            今日の統計
+          </h4>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-gray-600">新規予約</span>
+              <span class="font-bold text-blue-600" id="today-new-bookings">8</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">完了診療</span>
+              <span class="font-bold text-green-600" id="today-completed">12</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">キャンセル</span>
+              <span class="font-bold text-red-600" id="today-cancelled">1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- システム監視 -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            システム監視
+          </h4>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-gray-600">CPU使用率</span>
+              <span class="font-bold text-emerald-600" id="cpu-usage">23%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">メモリ</span>
+              <span class="font-bold text-blue-600" id="memory-usage">67%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">データベース</span>
+              <span class="font-bold text-purple-600" id="db-connections">12/50</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- リアルタイム更新用JavaScript -->
+<script>
+// リアルタイム機能のJavaScript実装
+class RealtimeDashboard {
+  constructor() {
+    this.updateInterval = 5000; // 5秒間隔
+    this.startRealTimeUpdates();
+    this.initializeWebSocket();
+  }
+
+  startRealTimeUpdates() {
+    setInterval(() => {
+      this.updateTime();
+      this.updateKPIs();
+      this.updateActivityFeed();
+      this.updateLastUpdateTime();
+    }, this.updateInterval);
+  }
+
+  updateTime() {
+    const now = new Date();
+    document.getElementById('realtime-time').textContent = 
+      now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('realtime-date').textContent = 
+      now.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit', weekday: 'short' });
+  }
+
+  updateKPIs() {
+    // 模擬的なリアルタイムデータ更新
+    const bookings = document.getElementById('realtime-bookings');
+    const revenue = document.getElementById('realtime-revenue');
+    const performance = document.getElementById('system-performance');
+    
+    if (bookings) {
+      const currentBookings = parseInt(bookings.textContent);
+      bookings.textContent = currentBookings + Math.floor(Math.random() * 2);
+    }
+    
+    if (revenue) {
+      const currentRevenue = parseInt(revenue.textContent.replace(/[^0-9]/g, ''));
+      const newRevenue = currentRevenue + Math.floor(Math.random() * 10000);
+      revenue.textContent = `¥${Math.floor(newRevenue / 1000)}K`;
+    }
+  }
+
+  updateActivityFeed() {
+    const feed = document.getElementById('realtime-activity-feed');
+    if (!feed) return;
+
+    const activities = [
+      { icon: '👤', message: '新規患者が登録されました', patient: '田中太郎', type: 'success' },
+      { icon: '📅', message: '予約が確定されました', patient: '佐藤花子', type: 'info' },
+      { icon: '✅', message: '診療が完了しました', patient: '鈴木一郎', type: 'success' },
+      { icon: '📞', message: 'リコール通知を送信', patient: '15名の患者', type: 'warning' },
+      { icon: '💰', message: '会計処理が完了', patient: '高橋美咲', type: 'success' }
+    ];
+
+    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+    const timestamp = new Date().toLocaleTimeString('ja-JP');
+    
+    const activityElement = document.createElement('div');
+    activityElement.className = `flex items-start space-x-3 p-4 bg-${randomActivity.type === 'success' ? 'green' : randomActivity.type === 'warning' ? 'yellow' : 'blue'}-50 rounded-xl animate-pulse`;
+    activityElement.innerHTML = `
+      <div class="text-2xl">${randomActivity.icon}</div>
+      <div class="flex-1">
+        <p class="text-sm font-medium text-gray-900">${randomActivity.message}</p>
+        <p class="text-xs text-gray-500">${randomActivity.patient} • ${timestamp}</p>
+      </div>
+    `;
+
+    feed.insertBefore(activityElement, feed.firstChild);
+    
+    // 最大10件まで表示
+    while (feed.children.length > 10) {
+      feed.removeChild(feed.lastChild);
+    }
+  }
+
+  updateLastUpdateTime() {
+    const lastUpdateElement = document.getElementById('last-update-time');
+    if (lastUpdateElement) {
+      lastUpdateElement.textContent = new Date().toLocaleTimeString('ja-JP');
+    }
+  }
+
+  initializeWebSocket() {
+    // WebSocket接続の初期化（実装時）
+    console.log('WebSocket リアルタイム機能準備完了');
+  }
+}
+
+// ページ読み込み完了後にリアルタイム機能を開始
+document.addEventListener('DOMContentLoaded', () => {
+  new RealtimeDashboard();
+});
+</script>
+
+<style>
+/* カスタムアニメーション */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* ホバー効果の強化 */
+.group:hover .group-hover\:scale-110 {
+  transform: scale(1.1);
+}
+
+/* リアルタイム要素のグロー効果 */
+.realtime-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+</style>

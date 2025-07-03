@@ -1,0 +1,412 @@
+/* レスポンシブデザイン統合CSS */
+
+/* 基本設定 */
+* {
+  box-sizing: border-box;
+}
+
+/* モバイルファースト設計 */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* グリッドシステム */
+.grid {
+  display: grid;
+  gap: 1rem;
+  
+  /* モバイル（デフォルト）: 1カラム */
+  grid-template-columns: 1fr;
+  
+  /* タブレット: 2カラム */
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  /* デスクトップ: 3カラム */
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* カード要素 */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* タブレット以上 */
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+/* ナビゲーション */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  
+  .navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1f2937;
+  }
+  
+  .navbar-menu {
+    display: none;
+    
+    @media (min-width: 768px) {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+  
+  .navbar-toggle {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+/* モバイルメニュー */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  
+  &.active {
+    display: block;
+  }
+  
+  .menu-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    padding: 2rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+/* テーブル */
+.table-responsive {
+  overflow-x: auto;
+  
+  table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+    
+    /* モバイルでは重要な列のみ表示 */
+    @media (max-width: 767px) {
+      .hide-mobile {
+        display: none;
+      }
+    }
+  }
+}
+
+/* フォーム */
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  input, select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    &:invalid {
+      border-color: #ef4444;
+    }
+  }
+  
+  .error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+}
+
+/* ボタン */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* プライマリボタン */
+  &.btn-primary {
+    background: #3b82f6;
+    color: white;
+    
+    &:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+  }
+  
+  /* セカンダリボタン */
+  &.btn-secondary {
+    background: #6b7280;
+    color: white;
+    
+    &:hover {
+      background: #4b5563;
+    }
+  }
+  
+  /* 成功ボタン */
+  &.btn-success {
+    background: #10b981;
+    color: white;
+    
+    &:hover {
+      background: #059669;
+    }
+  }
+  
+  /* 危険ボタン */
+  &.btn-danger {
+    background: #ef4444;
+    color: white;
+    
+    &:hover {
+      background: #dc2626;
+    }
+  }
+  
+  /* 小さいボタン */
+  &.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* 大きいボタン */
+  &.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+  
+  /* 全幅ボタン */
+  &.btn-block {
+    width: 100%;
+  }
+  
+  /* 無効化 */
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+/* アラート */
+.alert {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  
+  &.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  
+  &.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+  
+  &.alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+  
+  &.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+  }
+}
+
+/* ローディング */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid #3b82f6;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ダッシュボード統計カード */
+.stats-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  .stat-title {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f2937;
+  }
+  
+  .stat-change {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    
+    &.positive {
+      color: #10b981;
+    }
+    
+    &.negative {
+      color: #ef4444;
+    }
+  }
+}
+
+/* パフォーマンス最適化 */
+.lazy-load {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  &.loaded {
+    opacity: 1;
+  }
+}
+
+/* アクセシビリティ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* フォーカス表示 */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* プリント用スタイル */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}

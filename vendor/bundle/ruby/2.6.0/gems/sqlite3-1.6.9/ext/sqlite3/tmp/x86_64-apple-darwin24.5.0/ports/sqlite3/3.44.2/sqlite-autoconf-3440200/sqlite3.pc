@@ -1,0 +1,13 @@
+# Package Information for pkg-config
+
+prefix=/Users/MBP/Desktop/system/dentalsystem/vendor/bundle/ruby/2.6.0/gems/sqlite3-1.6.9/ports/x86_64-apple-darwin24.5.0/sqlite3/3.44.2
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: SQLite
+Description: SQL database engine
+Version: 3.44.2
+Libs: -L${libdir} -lsqlite3
+Libs.private: -lz 
+Cflags: -I${includedir}

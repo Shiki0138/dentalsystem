@@ -1,44 +1,148 @@
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="md:grid md:grid-cols-3 md:gap-6">
-    <div class="md:col-span-1">
-      <div class="px-4 sm:px-0">
-        <h3 class="text-lg font-medium leading-6 text-gray-900">患者情報編集</h3>
-        <p class="mt-1 text-sm text-gray-600">
-          患者番号: <%= @patient.patient_number %>
-        </p>
-        <div class="mt-6">
-          <p class="text-sm text-gray-500">
-            <strong>登録日</strong><br>
-            <%= l(@patient.created_at, format: :long) %>
-          </p>
-          <p class="mt-2 text-sm text-gray-500">
-            <strong>最終更新日</strong><br>
-            <%= l(@patient.updated_at, format: :long) %>
-          </p>
-          <% if @patient.appointments.any? %>
-            <p class="mt-2 text-sm text-gray-500">
-              <strong>予約件数</strong><br>
-              <%= @patient.appointments.count %>件
+<div class="patient-edit-container min-h-screen bg-gradient-to-b from-gray-50 to-white">
+  <!-- ヘッダー部分 -->
+  <div class="patient-edit-header bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-blue-100 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">患者情報編集</h1>
+            <p class="text-sm text-gray-600">
+              患者番号: <span class="font-mono text-blue-600"><%= @patient.patient_number %></span>
             </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <%= link_to patient_path(@patient), 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            詳細表示
+          <% end %>
+          
+          <%= link_to patients_path, 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            一覧に戻る
           <% end %>
         </div>
       </div>
     </div>
-    
-    <div class="mt-5 md:col-span-2 md:mt-0">
-      <div class="shadow sm:overflow-hidden sm:rounded-md">
-        <%= render 'form', patient: @patient %>
+  </div>
+
+  <!-- メイン編集エリア -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- サイドバー - 患者情報概要 -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-md p-6 sticky top-8">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mx-auto flex items-center justify-center mb-4">
+              <span class="text-2xl font-bold text-white">
+                <%= @patient.name.first %>
+              </span>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900"><%= @patient.name %></h3>
+            <p class="text-sm text-gray-500"><%= @patient.name_kana %></p>
+          </div>
+          
+          <div class="space-y-4 border-t border-gray-200 pt-6">
+            <div class="patient-info-item">
+              <span class="info-label">登録日</span>
+              <span class="info-value"><%= l(@patient.created_at, format: :short) %></span>
+            </div>
+            
+            <div class="patient-info-item">
+              <span class="info-label">最終更新</span>
+              <span class="info-value"><%= l(@patient.updated_at, format: :short) %></span>
+            </div>
+            
+            <% if @patient.appointments.any? %>
+              <div class="patient-info-item">
+                <span class="info-label">予約実績</span>
+                <span class="info-value text-blue-600 font-semibold">
+                  <%= @patient.appointments.count %>件
+                </span>
+              </div>
+            <% end %>
+            
+            <div class="patient-info-item">
+              <span class="info-label">ステータス</span>
+              <span class="info-value">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  アクティブ
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div class="mt-6 flex justify-end">
-        <%= link_to "この患者を削除", patient_path(@patient), 
-            method: :delete,
-            data: { 
-              confirm: "本当に削除しますか？この操作は取り消せません。",
-              disable_with: "削除中..."
-            },
-            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200" %>
+      <!-- メイン編集フォーム -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-xl shadow-md">
+          <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">基本情報の変更</h2>
+            <p class="text-sm text-gray-600 mt-1">患者の基本情報を更新できます</p>
+          </div>
+          
+          <%= render 'form', patient: @patient %>
+        </div>
+        
+        <!-- 危険操作エリア -->
+        <div class="mt-8 bg-red-50 rounded-xl border border-red-200 p-6">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-medium text-red-800">危険操作</h3>
+              <p class="text-sm text-red-700 mt-1">
+                この操作は取り消すことができません。患者のすべての予約履歴も削除されます。
+              </p>
+              <div class="mt-4">
+                <%= link_to patient_path(@patient), 
+                    method: :delete,
+                    data: { 
+                      confirm: "【重要】この患者とすべての関連データを削除します。\n\n患者名: #{@patient.name}\n患者番号: #{@patient.patient_number}\n予約件数: #{@patient.appointments.count}件\n\nこの操作は取り消せません。本当に削除しますか？",
+                      disable_with: "削除中..."
+                    },
+                    class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-red-100 hover:bg-red-200 transition-colors duration-200" do %>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  患者データを削除
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .patient-info-item {
+    @apply flex justify-between items-start py-2;
+  }
+  
+  .info-label {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+  }
+  
+  .info-value {
+    @apply text-sm text-gray-900 font-medium text-right;
+  }
+</style>

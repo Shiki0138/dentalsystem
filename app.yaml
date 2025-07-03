@@ -1,35 +1,36 @@
-# Google App Engine 設定ファイル
 runtime: ruby32
 env: standard
 
-# 自動スケーリング設定
+# インスタンス設定（コスト最小化）
 automatic_scaling:
   min_instances: 0
-  max_instances: 5
-  target_cpu_utilization: 0.6
-  target_throughput_utilization: 0.8
+  max_instances: 2
+  target_cpu_utilization: 0.65
+  target_throughput_utilization: 0.65
+  max_concurrent_requests: 10
+  max_pending_latency: 30s
 
-# リソース制限
+# リソース設定
 resources:
   cpu: 1
-  memory_gb: 1
+  memory_gb: 0.5
   disk_size_gb: 10
 
 # 環境変数
 env_variables:
-  RAILS_ENV: production
-  RAILS_SERVE_STATIC_FILES: true
-  RAILS_LOG_TO_STDOUT: true
-  SECRET_KEY_BASE: "will_be_set_via_gcloud_command"
+  RAILS_ENV: "production"
+  RACK_ENV: "production"
+  RAILS_SERVE_STATIC_FILES: "true"
+  RAILS_LOG_TO_STDOUT: "true"
+  SECRET_KEY_BASE: "fce138673a40325e4068879b9da46053c87b4be6f8e7d7bfce1d2f88e81b5263985c7368e44d6fca24934bba51baa32af64eccd2d7e3cf1230ad86f654f11002"
+  RAILS_MASTER_KEY: "fce138673a40325e4068879b9da46053c87b4be6f8e7d7bfce1d2f88e81b5263985c7368e44d6fca24934bba51baa32af64eccd2d7e3cf1230ad86f654f11002"
+  WEB_CONCURRENCY: "1"
+  RAILS_MAX_THREADS: "5"
   
-# Cloud SQL接続設定
-beta_settings:
-  cloud_sql_instances: dental-system-prod:asia-northeast1:dental-db
-
 # エントリーポイント
-entrypoint: bundle exec puma -C config/puma.rb
+entrypoint: bundle exec rails server -p $PORT -e production
 
-# ヘルスチェック
+# ヘルスチェック（重要）
 readiness_check:
   path: "/health"
   check_interval_sec: 5
@@ -42,14 +43,5 @@ liveness_check:
   path: "/health"
   check_interval_sec: 30
   timeout_sec: 4
-  failure_threshold: 4
+  failure_threshold: 2
   success_threshold: 2
-
-# セッション設定
-vpc_access_connector:
-  name: projects/dental-system-prod/locations/asia-northeast1/connectors/default
-
-# ファイルサイズ制限
-automatic_scaling:
-  max_pending_latency: 1s
-  max_idle_instances: 2

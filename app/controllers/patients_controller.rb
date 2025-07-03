@@ -68,19 +68,31 @@ class PatientsController < ApplicationController
   
   # GET /patients/search
   def search
-    @patients = Patient.search(params[:q])
-                      .limit(10)
+    query = params[:q] || params[:search]
     
-    render json: @patients.map { |p| 
-      {
-        id: p.id,
-        name: p.name,
-        name_kana: p.name_kana,
-        phone: p.phone,
-        email: p.email,
-        patient_number: p.patient_number
+    if query.present?
+      @patients = Patient.where(
+        "name ILIKE :query OR name_kana ILIKE :query OR phone LIKE :query OR email ILIKE :query",
+        query: "%#{query}%"
+      ).limit(10)
+    else
+      @patients = Patient.limit(10)
+    end
+    
+    respond_to do |format|
+      format.json {
+        render json: @patients.map { |p| 
+          {
+            id: p.id,
+            name: p.name,
+            name_kana: p.name_kana,
+            phone: p.phone,
+            email: p.email,
+            patient_number: p.patient_number
+          }
+        }
       }
-    }
+    end
   end
   
   # GET /patients/duplicates
