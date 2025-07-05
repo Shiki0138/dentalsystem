@@ -61,3 +61,5 @@ http://localhost:3000/sw.js -> /sw.js
 http://localhost:3000/sw.js -> /sw.js
 ::1 - - [05/Jul/2025:11:03:45 JST] "GET /sw.js HTTP/1.1" 200 3115
 http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:11:09:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
