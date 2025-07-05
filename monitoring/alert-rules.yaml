@@ -1,0 +1,294 @@
+# 🚨 歯科業界革命システム アラートルール定義
+# 史上最強の品質維持のための包括的アラート設定
+
+groups:
+  - name: dental_revolution_critical
+    interval: 30s
+    rules:
+      # システム死活監視
+      - alert: SystemDown
+        expr: up{job="dental-system"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: ops
+          revolution_impact: high
+        annotations:
+          summary: "🔴 システムダウン検知"
+          description: "歯科業界革命システムが {{ $value }}分間応答していません。"
+          runbook_url: "https://wiki.dental-revolution.com/runbooks/system-down"
+          
+      # 高レスポンスタイム
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, http_request_duration_seconds_bucket{job="dental-system"}) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: dev
+          revolution_impact: medium
+        annotations:
+          summary: "⚠️ レスポンスタイム劣化"
+          description: "95パーセンタイルが {{ $value | humanizeDuration }}に達しています（目標: 200ms以下）"
+          
+      # エラー率上昇
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="dental-system",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="dental-system"}[5m]))
+          ) * 100 > 1
+        for: 5m
+        labels:
+          severity: critical
+          team: dev
+          revolution_impact: high
+        annotations:
+          summary: "🔴 エラー率が閾値を超過"
+          description: "エラー率が {{ $value | humanize }}%に達しています（閾値: 1%）"
+          
+  - name: dental_revolution_performance
+    interval: 1m
+    rules:
+      # CPU使用率
+      - alert: HighCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: ops
+          resource: cpu
+        annotations:
+          summary: "⚠️ CPU使用率が高い"
+          description: "CPU使用率が {{ $value | humanize }}%に達しています"
+          
+      # メモリ使用率
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          team: ops
+          resource: memory
+        annotations:
+          summary: "⚠️ メモリ使用率が高い"
+          description: "メモリ使用率が {{ $value | humanize }}%に達しています"
+          
+      # ディスク使用率
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 80
+        for: 30m
+        labels:
+          severity: warning
+          team: ops
+          resource: disk
+        annotations:
+          summary: "⚠️ ディスク使用率が高い"
+          description: "ディスク使用率が {{ $value | humanize }}%に達しています"
+          
+  - name: dental_revolution_database
+    interval: 1m
+    rules:
+      # データベース接続プール枯渇
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_stat_database_numbackends{job="postgresql"} / pg_settings_max_connections{job="postgresql"} > 0.8
+        for: 5m
+        labels:
+          severity: critical
+          team: dev
+          component: database
+        annotations:
+          summary: "🔴 データベース接続プールが枯渇寸前"
+          description: "接続プール使用率が {{ $value | humanize }}%に達しています"
+          
+      # スロークエリ
+      - alert: SlowQueries
+        expr: rate(pg_stat_statements_mean_time_seconds{job="postgresql"}[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+          team: dev
+          component: database
+        annotations:
+          summary: "⚠️ スロークエリ検出"
+          description: "平均クエリ実行時間が {{ $value | humanizeDuration }}です"
+          
+      # デッドロック
+      - alert: DatabaseDeadlocks
+        expr: increase(pg_stat_database_deadlocks{job="postgresql"}[5m]) > 0
+        labels:
+          severity: critical
+          team: dev
+          component: database
+        annotations:
+          summary: "🔴 データベースデッドロック発生"
+          description: "過去5分間に {{ $value }}件のデッドロックが発生しました"
+          
+  - name: dental_revolution_quality
+    interval: 5m
+    rules:
+      # 品質スコア低下
+      - alert: QualityScoreDegradation
+        expr: quality_score{job="dental-system"} < 95
+        for: 30m
+        labels:
+          severity: warning
+          team: quality
+          revolution_impact: high
+        annotations:
+          summary: "⚠️ 品質スコアが低下"
+          description: "品質スコアが {{ $value }}点に低下しています（目標: 95点以上）"
+          
+      # 患者満足度低下
+      - alert: PatientSatisfactionDrop
+        expr: patient_satisfaction_score{job="dental-system"} < 90
+        for: 1h
+        labels:
+          severity: warning
+          team: product
+          revolution_impact: medium
+        annotations:
+          summary: "⚠️ 患者満足度が低下"
+          description: "患者満足度が {{ $value }}%に低下しています"
+          
+      # 予約精度低下
+      - alert: AppointmentAccuracyDrop
+        expr: appointment_accuracy{job="dental-system"} < 99
+        for: 30m
+        labels:
+          severity: critical
+          team: dev
+          revolution_impact: high
+        annotations:
+          summary: "🔴 予約精度が低下"
+          description: "予約精度が {{ $value }}%に低下しています（重複予約の可能性）"
+          
+  - name: dental_revolution_security
+    interval: 1m
+    rules:
+      # 不正アクセス試行
+      - alert: SuspiciousActivity
+        expr: rate(failed_login_attempts{job="dental-system"}[5m]) > 10
+        labels:
+          severity: critical
+          team: security
+          type: intrusion_attempt
+        annotations:
+          summary: "🔴 不正アクセス試行を検出"
+          description: "過去5分間に {{ $value }}回/秒の失敗したログイン試行"
+          
+      # SQLインジェクション検出
+      - alert: PotentialSQLInjection
+        expr: rate(sql_injection_attempts{job="dental-system"}[5m]) > 0
+        labels:
+          severity: critical
+          team: security
+          type: sql_injection
+        annotations:
+          summary: "🔴 SQLインジェクション攻撃の可能性"
+          description: "SQLインジェクションパターンを検出しました"
+          
+      # XSS攻撃検出
+      - alert: PotentialXSSAttack
+        expr: rate(xss_attempts{job="dental-system"}[5m]) > 0
+        labels:
+          severity: critical
+          team: security
+          type: xss
+        annotations:
+          summary: "🔴 XSS攻撃の可能性"
+          description: "XSSパターンを検出しました"
+          
+  - name: dental_revolution_business
+    interval: 5m
+    rules:
+      # 予約キャンセル率上昇
+      - alert: HighCancellationRate
+        expr: |
+          (
+            sum(increase(appointment_cancellations{job="dental-system"}[1h]))
+            /
+            sum(increase(appointment_bookings{job="dental-system"}[1h]))
+          ) * 100 > 10
+        for: 1h
+        labels:
+          severity: warning
+          team: product
+          business_impact: high
+        annotations:
+          summary: "⚠️ 予約キャンセル率が上昇"
+          description: "キャンセル率が {{ $value | humanize }}%に達しています"
+          
+      # 業務効率低下
+      - alert: EfficiencyDegradation
+        expr: efficiency_improvement_rate{job="dental-system"} < 200
+        for: 2h
+        labels:
+          severity: warning
+          team: product
+          revolution_impact: medium
+        annotations:
+          summary: "⚠️ 業務効率改善率が低下"
+          description: "効率改善率が {{ $value }}%に低下しています（目標: 300%以上）"
+
+# アラート通知設定
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+            
+# グローバル設定
+global:
+  # 評価間隔
+  evaluation_interval: 30s
+  
+  # 外部ラベル
+  external_labels:
+    monitor: 'dental-revolution'
+    environment: 'production'
+    
+# 通知ルーティング
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'dental-revolution-team'
+  
+  routes:
+    # Critical アラートは即座に通知
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      continue: true
+      
+    # セキュリティアラートは専用チャンネル
+    - match:
+        team: security
+      receiver: 'security-team'
+      
+    # ビジネスインパクトが高いものは経営層にも通知
+    - match:
+        business_impact: high
+      receiver: 'management-team'
+
+# 通知先設定
+receivers:
+  - name: 'dental-revolution-team'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#dental-revolution-alerts'
+        title: '歯科業界革命システムアラート'
+        
+  - name: 'critical-alerts'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@dental-revolution.com'
+        
+  - name: 'management-team'
+    email_configs:
+      - to: 'management@dental-revolution.com'

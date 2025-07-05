@@ -1,0 +1,20 @@
+{
+  "appointments": [
+    {
+      "id": 1,
+      "patient_id": 1,
+      "patient_name": "田中太郎",
+      "patient_number": "P2025001",
+      "appointment_date": "2025-07-05 09:00",
+      "duration": 60,
+      "treatment_type": "定期検診",
+      "status": "予約済",
+      "priority": "通常",
+      "channel": "電話",
+      "dentist_id": 1,
+      "hygienist_id": 3,
+      "notes": "定期検診・クリーニング希望"
+    }
+  ],
+  "next_id": 2
+}

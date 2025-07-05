@@ -1,0 +1,93 @@
+<%# Turbo Stream用イベント部分テンプレート %>
+<%# リアルタイム更新・楽観的UI更新対応 %>
+
+<div id="appointment_<%= appointment.id %>" 
+     class="calendar-event" 
+     data-appointment-id="<%= appointment.id %>"
+     data-patient-id="<%= appointment.patient_id %>"
+     data-status="<%= appointment.status %>"
+     data-priority="<%= appointment.priority || 'normal' %>">
+  
+  <!-- カレンダーイベント表示内容 -->
+  <div class="event-content">
+    <div class="event-time">
+      <%= appointment.appointment_date&.strftime('%H:%M') %>
+    </div>
+    
+    <div class="event-title">
+      <%= appointment.patient.name %>
+    </div>
+    
+    <div class="event-treatment">
+      <%= appointment.treatment_type || '一般診療' %>
+    </div>
+    
+    <div class="event-status">
+      <span class="status-badge status-<%= appointment.status %>">
+        <%= t("appointment.status.#{appointment.status}") %>
+      </span>
+    </div>
+  </div>
+  
+  <!-- イベントメタデータ（JavaScript用） -->
+  <script type="application/json" class="event-data">
+    {
+      "id": "<%= appointment.id %>",
+      "title": "<%= j appointment.patient.name %>",
+      "start": "<%= appointment.appointment_date&.iso8601 %>",
+      "end": "<%= (appointment.appointment_date + appointment.duration.minutes)&.iso8601 if appointment.appointment_date && appointment.duration %>",
+      "backgroundColor": "<%= appointment_background_color(appointment) %>",
+      "borderColor": "<%= appointment_border_color(appointment) %>",
+      "textColor": "<%= appointment_text_color(appointment) %>",
+      "classNames": ["appointment-event", "status-<%= appointment.status %>", "priority-<%= appointment.priority || 'normal' %>"],
+      "extendedProps": {
+        "patientId": "<%= appointment.patient_id %>",
+        "patientName": "<%= j appointment.patient.name %>",
+        "patientPhone": "<%= j appointment.patient.phone %>",
+        "treatmentType": "<%= j appointment.treatment_type %>",
+        "status": "<%= appointment.status %>",
+        "priority": "<%= appointment.priority || 'normal' %>",
+        "notes": "<%= j appointment.notes %>",
+        "duration": <%= appointment.duration || 60 %>,
+        "reminderEnabled": <%= appointment.reminder_enabled? %>,
+        "createdAt": "<%= appointment.created_at&.iso8601 %>",
+        "updatedAt": "<%= appointment.updated_at&.iso8601 %>"
+      }
+    }
+  </script>
+</div>
+
+<%# ヘルパーメソッドの定義（app/helpers/appointments_helper.rbに配置推奨） %>
+<%
+  def appointment_background_color(appointment)
+    case appointment.status
+    when 'booked'
+      '#3B82F6'  # blue-500
+    when 'visited'
+      '#10B981'  # green-500
+    when 'completed'
+      '#6B7280'  # gray-500
+    when 'cancelled'
+      '#EF4444'  # red-500
+    when 'no_show'
+      '#F59E0B'  # amber-500
+    else
+      '#6366F1'  # indigo-500
+    end
+  end
+
+  def appointment_border_color(appointment)
+    case appointment.priority
+    when 'urgent'
+      '#DC2626'  # red-600
+    when 'high'
+      '#F59E0B'  # amber-500
+    else
+      appointment_background_color(appointment)
+    end
+  end
+
+  def appointment_text_color(appointment)
+    '#FFFFFF'  # 白文字
+  end
+%>

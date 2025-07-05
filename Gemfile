@@ -7,8 +7,7 @@ ruby "2.6.10"
 gem "rails", "~> 6.1.7"
 
 # Database
-gem "sqlite3", "~> 1.4", group: [:development, :test]
-gem "pg", "~> 1.1", group: :production
+gem "sqlite3", "~> 1.4"
 
 # Server
 gem "puma", "~> 5.6"
@@ -26,12 +25,12 @@ gem "dotenv-rails"
 # CORS for API
 gem "rack-cors"
 
-# Background jobs
-gem "sidekiq"
-gem "redis", "~> 4.0"
+# Background jobs (removed for compatibility)
+# gem "sidekiq"
+# gem "redis", "~> 4.0"
 
-# Utilities
-gem "bootsnap", require: false
+# Utilities (removed for compatibility)
+# gem "bootsnap", require: false
 
 group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]

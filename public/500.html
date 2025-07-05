@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>500 - サーバーエラー | 歯科クリニック予約管理システム</title>
+  <meta name="description" content="一時的なサーバーエラーが発生しました。歯科クリニック予約管理システムが復旧するまでお待ちください。">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'dental-blue': '#3b82f6',
+            'dental-green': '#10b981',
+            'dental-purple': '#8b5cf6',
+            'dental-red': '#ef4444'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.8s ease-in-out',
+            'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+            'pulse-gentle': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 3s linear infinite'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounceGentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #ef4444 0%, #f97316 25%, #8b5cf6 75%, #3b82f6 100%);
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .maintenance-pattern {
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.1) 10px,
+        transparent 10px,
+        transparent 20px
+      );
+    }
+  </style>
+</head>
+
+<body class="h-full gradient-bg maintenance-pattern flex items-center justify-center px-4">
+  <div class="max-w-lg w-full animate-fade-in">
+    <!-- Error Card -->
+    <div class="glass-effect rounded-2xl shadow-2xl p-8 text-center">
+      <!-- Warning Icon with Animation -->
+      <div class="flex justify-center mb-6">
+        <div class="relative">
+          <div class="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-bounce-gentle">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+          </div>
+          <!-- Spinning Ring -->
+          <div class="absolute inset-0 w-24 h-24 border-4 border-transparent border-t-red-300 rounded-full animate-spin-slow"></div>
+        </div>
+      </div>
+      
+      <!-- Error Title -->
+      <h1 class="text-6xl font-bold text-gray-800 mb-4">500</h1>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">サーバーエラー</h2>
+      
+      <!-- Error Message -->
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center mb-2">
+          <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="text-sm font-medium text-red-800">一時的なサーバーエラー</h3>
+        </div>
+        <p class="text-red-700 text-sm leading-relaxed">
+          申し訳ございません。<br>
+          サーバーで予期しないエラーが発生しました。<br>
+          しばらく時間をおいてから再度お試しください。
+        </p>
+      </div>
+      
+      <!-- Status Information -->
+      <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center mb-2">
+          <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="text-sm font-medium text-orange-800">現在の状況</h3>
+        </div>
+        <ul class="space-y-2 text-sm text-orange-700">
+          <li class="flex items-center">
+            <div class="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
+            システム復旧作業中
+          </li>
+          <li class="flex items-center">
+            <div class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+            データは安全に保護されています
+          </li>
+          <li class="flex items-center">
+            <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+            復旧は数分以内に完了予定
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <button onclick="window.location.reload()" 
+                class="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium py-3 px-6 rounded-lg hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          ページを再読み込み
+        </button>
+        
+        <button onclick="window.location.href='/'" 
+                class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+          </svg>
+          ダッシュボードに戻る
+        </button>
+        
+        <button onclick="history.back()" 
+                class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          前のページに戻る
+        </button>
+      </div>
+      
+      <!-- Technical Info -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <details class="text-left">
+          <summary class="text-sm text-gray-600 cursor-pointer hover:text-gray-800 mb-2">
+            技術的な詳細 <span class="text-xs">(クリックで表示)</span>
+          </summary>
+          <div class="text-xs text-gray-500 bg-gray-50 rounded p-3 mt-2">
+            <p class="mb-1"><strong>エラーID:</strong> <code class="bg-gray-200 px-1 rounded">ERR-<span id="error-id"></span></code></p>
+            <p class="mb-1"><strong>発生時刻:</strong> <span id="error-time"></span></p>
+            <p><strong>リクエストID:</strong> <code class="bg-gray-200 px-1 rounded" id="request-id"></code></p>
+          </div>
+        </details>
+      </div>
+      
+      <!-- Contact Info -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <p class="text-xs text-gray-500 text-center">
+          エラーが継続する場合は、上記の情報と共にシステム管理者にお問い合わせください。<br>
+          <span class="font-medium">歯科クリニック予約管理システム - 緊急時サポート</span>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Status Indicator -->
+    <div class="mt-6 text-center">
+      <div class="inline-flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+        <div class="w-3 h-3 bg-red-400 rounded-full mr-2 animate-pulse"></div>
+        <span class="text-white text-sm font-medium">システム復旧中...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background Animation -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-white bg-opacity-10 rounded-full animate-pulse-gentle"></div>
+    <div class="absolute top-3/4 right-1/4 w-24 h-24 bg-white bg-opacity-10 rounded-full animate-pulse-gentle" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-3/4 w-16 h-16 bg-white bg-opacity-10 rounded-full animate-pulse-gentle" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-1/4 left-1/2 w-20 h-20 bg-white bg-opacity-10 rounded-full animate-pulse-gentle" style="animation-delay: 3s;"></div>
+  </div>
+
+  <!-- Auto-refresh Script -->
+  <script>
+    // Generate random error tracking info
+    document.getElementById('error-id').textContent = Math.random().toString(36).substr(2, 8).toUpperCase();
+    document.getElementById('error-time').textContent = new Date().toLocaleString('ja-JP');
+    document.getElementById('request-id').textContent = 'REQ-' + Math.random().toString(36).substr(2, 12).toUpperCase();
+    
+    // Auto-refresh after 30 seconds
+    setTimeout(() => {
+      if (confirm('30秒が経過しました。ページを自動で再読み込みしますか？')) {
+        window.location.reload();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>

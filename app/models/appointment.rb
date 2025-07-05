@@ -1,160 +1,140 @@
-# == Schema Information
-#
-# Table name: appointments
-#
-#  id                :bigint           not null, primary key
-#  patient_id        :bigint           not null
-#  appointment_date  :datetime         not null
-#  status           :string           not null, default: "booked"
-#  notes            :text
-#  treatment_type   :string
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
-#
+# 歯科医院予約管理システム - Appointmentモデル
+# 予約情報の管理・バリデーション
+
 class Appointment < ApplicationRecord
-  include AASM
-  include Discard::Model
-  include Cacheable
-
   belongs_to :patient
-  belongs_to :user, optional: true
-
+  
+  # ステータス定義
+  enum status: {
+    booked: 'booked',           # 予約済み
+    visited: 'visited',         # 確認済み（来院済み）
+    completed: 'completed',     # 診療完了
+    cancelled: 'cancelled',     # キャンセル
+    no_show: 'no_show'         # 無断キャンセル
+  }
+  
+  # 優先度定義
+  enum priority: {
+    low: 'low',                 # 低
+    normal: 'normal',           # 通常
+    high: 'high',               # 高
+    urgent: 'urgent'            # 緊急
+  }, _default: 'normal'
+  
+  # バリデーション
+  validates :patient_id, presence: true
   validates :appointment_date, presence: true
+  validates :duration, presence: true, numericality: { greater_than: 0 }
   validates :status, presence: true
-
-  scope :today, -> { where(appointment_date: Date.current.beginning_of_day..Date.current.end_of_day) }
-  scope :upcoming, -> { where('appointment_date > ?', Time.current) }
-  scope :by_status, ->(status) { where(status: status) }
-  scope :by_date_range, ->(start_date, end_date) { where(appointment_date: start_date..end_date) }
-
+  validates :treatment_type, presence: true
+  
+  # 未来の日時のみ許可（編集時は過去も可）
+  validate :appointment_date_cannot_be_in_past, on: :create
+  
   # 重複予約チェック
-  validate :check_duplicate_appointment
-  validate :check_business_hours
-  validate :check_appointment_in_future, on: :create
-
-  # Cache invalidation callbacks
-  after_save :invalidate_related_cache
-  after_destroy :invalidate_related_cache
-
-  # AASM状態機械
-  aasm column: :status do
-    state :booked, initial: true
-    state :visited
-    state :cancelled
-    state :no_show
-    state :done
-    state :paid
-
-    event :visit do
-      transitions from: :booked, to: :visited
-      after do
-        update_column(:visited_at, Time.current)
-      end
-    end
-
-    event :cancel do
-      transitions from: [:booked, :visited], to: :cancelled
-      after do
-        update_column(:cancelled_at, Time.current)
-      end
-    end
-
-    event :mark_no_show do
-      transitions from: :booked, to: :no_show
-      after do
-        update_column(:no_show_at, Time.current)
-      end
-    end
-
-    event :complete do
-      transitions from: :visited, to: :done
-      after do
-        update_column(:completed_at, Time.current)
-      end
-    end
-
-    event :pay do
-      transitions from: :done, to: :paid
-      after do
-        update_column(:paid_at, Time.current)
-      end
-    end
-  end
-
-  # 時間枠チェック
-  def time_slot_available?
-    return true unless appointment_date && duration_minutes
-
-    end_time = appointment_date + duration_minutes.minutes
-    
-    overlapping_appointments = Appointment.kept
-                                         .where.not(id: id)
-                                         .where.not(status: ['cancelled', 'no_show'])
-                                         .where(
-                                           "(appointment_date < ? AND appointment_date + INTERVAL duration_minutes MINUTE > ?) OR 
-                                            (appointment_date < ? AND appointment_date + INTERVAL duration_minutes MINUTE > ?)",
-                                           end_time, appointment_date,
-                                           appointment_date, end_time
-                                         )
-    
-    overlapping_appointments.empty?
-  end
-
-  def can_be_cancelled?
-    return false unless booked? || visited?
-    appointment_date > 1.hour.from_now
-  end
-
+  validate :no_overlapping_appointments
+  
+  # スコープ
+  scope :upcoming, -> { where('appointment_date > ?', Time.current) }
+  scope :past, -> { where('appointment_date < ?', Time.current) }
+  scope :today, -> { where(appointment_date: Date.current.beginning_of_day..Date.current.end_of_day) }
+  scope :this_week, -> { where(appointment_date: Date.current.beginning_of_week..Date.current.end_of_week) }
+  scope :this_month, -> { where(appointment_date: Date.current.beginning_of_month..Date.current.end_of_month) }
+  
+  # 時間範囲での検索
+  scope :in_date_range, ->(start_date, end_date) { 
+    where(appointment_date: start_date..end_date) 
+  }
+  
+  # カレンダー表示用スコープ
+  scope :for_calendar, ->(start_date, end_date) {
+    includes(:patient).in_date_range(start_date, end_date).order(:appointment_date)
+  }
+  
+  # デフォルト値設定
+  before_create :set_defaults
+  
   private
-
-  def check_duplicate_appointment
-    return unless patient_id && appointment_date
-
-    # 同じ患者の同じ日の予約をチェック
-    same_day_appointments = Appointment.kept
-                                      .where(patient_id: patient_id)
-                                      .where(appointment_date: appointment_date.beginning_of_day..appointment_date.end_of_day)
-                                      .where.not(id: id)
-                                      .where.not(status: ['cancelled', 'no_show'])
+  
+  def appointment_date_cannot_be_in_past
+    if appointment_date.present? && appointment_date < Time.current
+      errors.add(:appointment_date, '予約日時は現在時刻より後に設定してください')
+    end
+  end
+  
+  def no_overlapping_appointments
+    return unless appointment_date && duration && patient_id
     
-    if same_day_appointments.exists?
-      errors.add(:appointment_date, "この患者は既に同じ日に予約があります")
-    end
-
-    # 時間枠重複チェック
-    unless time_slot_available?
-      errors.add(:appointment_date, "この時間帯は既に予約が入っています")
-    end
-  end
-
-  def check_business_hours
-    return unless appointment_date
-
-    hour = appointment_date.hour
-    wday = appointment_date.wday
-
-    # 日曜日は休診
-    if wday == 0
-      errors.add(:appointment_date, "日曜日は休診日です")
-    end
-
-    # 営業時間外チェック（平日9-18時、土曜9-17時）
-    if wday.between?(1, 5) && !hour.between?(9, 17)
-      errors.add(:appointment_date, "営業時間外です（平日9:00-18:00）")
-    elsif wday == 6 && !hour.between?(9, 16)
-      errors.add(:appointment_date, "営業時間外です（土曜9:00-17:00）")
+    start_time = appointment_date
+    end_time = start_time + duration.minutes
+    
+    overlapping = Appointment.where(patient_id: patient_id)
+                             .where.not(id: id) # 自分自身を除外
+                             .where('appointment_date < ? AND (appointment_date + INTERVAL ? MINUTE) > ?', 
+                                    end_time, duration, start_time)
+    
+    if overlapping.exists?
+      errors.add(:appointment_date, '指定の時間帯に重複する予約があります')
     end
   end
-
-  def check_appointment_in_future
-    return unless appointment_date
-
-    if appointment_date <= Time.current
-      errors.add(:appointment_date, "予約は未来の日時を指定してください")
+  
+  def set_defaults
+    self.duration ||= 60
+    self.status ||= 'booked'
+    self.priority ||= 'normal'
+    self.reminder_enabled = true if reminder_enabled.nil?
+  end
+  
+  # インスタンスメソッド
+  def end_time
+    appointment_date + duration.minutes if appointment_date && duration
+  end
+  
+  def formatted_time
+    appointment_date&.strftime('%Y年%m月%d日 %H:%M')
+  end
+  
+  def formatted_time_range
+    return nil unless appointment_date && duration
+    start_str = appointment_date.strftime('%H:%M')
+    end_str = end_time.strftime('%H:%M')
+    "#{start_str} - #{end_str}"
+  end
+  
+  def is_past?
+    appointment_date < Time.current
+  end
+  
+  def is_today?
+    appointment_date.to_date == Date.current
+  end
+  
+  def is_upcoming?
+    appointment_date > Time.current
+  end
+  
+  def can_be_cancelled?
+    ['booked', 'visited'].include?(status) && is_upcoming?
+  end
+  
+  def status_color
+    case status
+    when 'booked' then 'blue'
+    when 'visited' then 'green'
+    when 'completed' then 'gray'
+    when 'cancelled' then 'red'
+    when 'no_show' then 'amber'
+    else 'indigo'
     end
   end
-
-  def invalidate_related_cache
-    CacheService.invalidate_appointment_cache(self)
+  
+  def priority_color
+    case priority
+    when 'urgent' then 'red'
+    when 'high' then 'amber'
+    when 'normal' then 'blue'
+    when 'low' then 'gray'
+    else 'blue'
+    end
   end
 end

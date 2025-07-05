@@ -1,0 +1,414 @@
+<%# 予約統計・レポート機能 - Mobile First Design %>
+<div class="min-h-screen bg-gray-50">
+  <%# ヘッダー %>
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900">予約統計・レポート</h1>
+            <p class="text-sm text-gray-500 hidden sm:block">KPI達成状況とデータ分析</p>
+          </div>
+        </div>
+        
+        <%# 期間選択 %>
+        <div class="flex items-center space-x-2">
+          <select class="text-sm border border-gray-300 rounded-md px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option>今日</option>
+            <option>今週</option>
+            <option selected>今月</option>
+            <option>過去3ヶ月</option>
+            <option>過去6ヶ月</option>
+            <option>過去1年</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 sm:px-6 lg:px-8 py-6">
+    <%# 目標KPI達成状況 %>
+    <div class="mb-8">
+      <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        目標KPI達成状況
+      </h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <%# 予約重複率 0% 目標 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">予約重複率</h3>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-sm font-medium text-green-600">目標達成</span>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <%# 現在値 %>
+            <div class="text-center">
+              <div class="text-4xl font-bold text-green-600">0.0<span class="text-xl">%</span></div>
+              <div class="text-sm text-gray-500">現在の重複率</div>
+            </div>
+            
+            <%# 目標との比較 %>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-600">目標: 0%</span>
+                <span class="text-sm font-medium text-green-600">達成</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <%# 推移グラフ（簡易版） %>
+            <div class="space-y-2">
+              <h4 class="text-sm font-medium text-gray-700">過去6ヶ月の推移</h4>
+              <div class="grid grid-cols-6 gap-1 h-20">
+                <% [2.8, 1.5, 0.8, 0.3, 0.1, 0.0].each_with_index do |rate, index| %>
+                  <div class="flex flex-col justify-end">
+                    <div class="bg-gradient-to-t from-red-400 to-green-400 rounded-t" 
+                         style="height: <%= 100 - (rate * 35) %>%"></div>
+                    <div class="text-xs text-center text-gray-500 mt-1">
+                      <%= Date.current.beginning_of_month.advance(months: index - 5).strftime("%m月") %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <%# 改善効果 %>
+            <div class="border-t pt-4">
+              <div class="text-sm text-gray-600 mb-2">改善効果</div>
+              <ul class="space-y-1 text-sm">
+                <li class="flex items-center text-green-600">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  スタッフのストレス軽減
+                </li>
+                <li class="flex items-center text-green-600">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  患者満足度向上
+                </li>
+                <li class="flex items-center text-green-600">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  売上機会損失防止
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <%# 前日キャンセル率 5% 目標 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">前日キャンセル率</h3>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-sm font-medium text-green-600">目標内</span>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <%# 現在値 %>
+            <div class="text-center">
+              <div class="text-4xl font-bold text-orange-600">4.2<span class="text-xl">%</span></div>
+              <div class="text-sm text-gray-500">現在のキャンセル率</div>
+            </div>
+            
+            <%# 目標との比較 %>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-600">目標: 5%以下</span>
+                <span class="text-sm font-medium text-green-600">達成中</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-orange-400 h-2 rounded-full" style="width: 84%"></div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">目標まで0.8%の余裕</div>
+            </div>
+            
+            <%# 推移グラフ（簡易版） %>
+            <div class="space-y-2">
+              <h4 class="text-sm font-medium text-gray-700">過去6ヶ月の推移</h4>
+              <div class="grid grid-cols-6 gap-1 h-20">
+                <% [12.0, 8.5, 6.8, 5.2, 4.8, 4.2].each_with_index do |rate, index| %>
+                  <div class="flex flex-col justify-end">
+                    <div class="bg-gradient-to-t from-red-400 to-orange-400 rounded-t" 
+                         style="height: <%= (rate / 12.0) * 100 %>%"></div>
+                    <div class="text-xs text-center text-gray-500 mt-1">
+                      <%= Date.current.beginning_of_month.advance(months: index - 5).strftime("%m月") %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <%# 改善施策 %>
+            <div class="border-t pt-4">
+              <div class="text-sm text-gray-600 mb-2">改善施策</div>
+              <ul class="space-y-1 text-sm">
+                <li class="flex items-center text-blue-600">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  7日前・3日前リマインド強化
+                </li>
+                <li class="flex items-center text-blue-600">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  変更可能期限の明確化
+                </li>
+                <li class="flex items-center text-blue-600">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  待機患者リストの活用
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 詳細統計 %>
+    <div class="mb-8">
+      <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <svg class="h-5 w-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        詳細統計データ
+      </h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <%# 予約関連統計 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            予約統計
+          </h3>
+          
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">総予約数</span>
+              <span class="text-lg font-bold text-gray-900">542<span class="text-sm text-gray-500">件</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">新規予約</span>
+              <span class="text-lg font-bold text-blue-600">89<span class="text-sm text-gray-500">件</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">リピート予約</span>
+              <span class="text-lg font-bold text-green-600">453<span class="text-sm text-gray-500">件</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">平均予約間隔</span>
+              <span class="text-lg font-bold text-purple-600">3.2<span class="text-sm text-gray-500">ヶ月</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">予約変更率</span>
+              <span class="text-lg font-bold text-orange-600">7.8<span class="text-sm text-gray-500">%</span></span>
+            </div>
+          </div>
+        </div>
+
+        <%# 患者関連統計 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            患者統計
+          </h3>
+          
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">登録患者数</span>
+              <span class="text-lg font-bold text-gray-900">1,247<span class="text-sm text-gray-500">名</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">新規患者（今月）</span>
+              <span class="text-lg font-bold text-blue-600">34<span class="text-sm text-gray-500">名</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">アクティブ患者</span>
+              <span class="text-lg font-bold text-green-600">892<span class="text-sm text-gray-500">名</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">平均来院頻度</span>
+              <span class="text-lg font-bold text-purple-600">3.8<span class="text-sm text-gray-500">回/年</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">患者満足度</span>
+              <span class="text-lg font-bold text-yellow-600">4.8<span class="text-sm text-gray-500">/5.0</span></span>
+            </div>
+          </div>
+        </div>
+
+        <%# 効率性統計 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            効率性統計
+          </h3>
+          
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">平均予約登録時間</span>
+              <span class="text-lg font-bold text-green-600">28<span class="text-sm text-gray-500">秒</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">平均待ち時間</span>
+              <span class="text-lg font-bold text-blue-600">8.3<span class="text-sm text-gray-500">分</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">稼働率</span>
+              <span class="text-lg font-bold text-orange-600">87.5<span class="text-sm text-gray-500">%</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">無断キャンセル率</span>
+              <span class="text-lg font-bold text-red-600">1.2<span class="text-sm text-gray-500">%</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">スタッフ生産性</span>
+              <span class="text-lg font-bold text-purple-600">↑15<span class="text-sm text-gray-500">%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 時間帯別・曜日別分析 %>
+    <div class="mb-8">
+      <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        時間帯・曜日別分析
+      </h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <%# 曜日別予約数 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">曜日別予約数</h3>
+          
+          <div class="space-y-3">
+            <% [
+              { day: "月曜日", count: 18, rate: 85 },
+              { day: "火曜日", count: 22, rate: 100 },
+              { day: "水曜日", count: 20, rate: 91 },
+              { day: "木曜日", count: 24, rate: 109 },
+              { day: "金曜日", count: 26, rate: 118 },
+              { day: "土曜日", count: 16, rate: 73 }
+            ].each do |data| %>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 w-12"><%= data[:day] %></span>
+                <div class="flex-1 mx-4">
+                  <div class="flex items-center">
+                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                      <div class="bg-blue-500 h-2 rounded-full" style="width: <%= data[:rate] > 100 ? 100 : data[:rate] %>%"></div>
+                    </div>
+                    <span class="text-sm text-gray-600 w-8"><%= data[:count] %>件</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# 時間帯別予約数 %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">時間帯別予約数</h3>
+          
+          <div class="space-y-3">
+            <% [
+              { time: "09:00-10:00", count: 12, rate: 75 },
+              { time: "10:00-11:00", count: 15, rate: 94 },
+              { time: "11:00-12:00", count: 16, rate: 100 },
+              { time: "14:00-15:00", count: 18, rate: 113 },
+              { time: "15:00-16:00", count: 20, rate: 125 },
+              { time: "16:00-17:00", count: 22, rate: 138 },
+              { time: "17:00-18:00", count: 19, rate: 119 }
+            ].each do |data| %>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 w-20"><%= data[:time] %></span>
+                <div class="flex-1 mx-4">
+                  <div class="flex items-center">
+                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                      <div class="bg-purple-500 h-2 rounded-full" style="width: <%= data[:rate] > 100 ? 100 : data[:rate] %>%"></div>
+                    </div>
+                    <span class="text-sm text-gray-600 w-8"><%= data[:count] %>件</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# レポート出力 %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <svg class="h-5 w-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        レポート出力
+      </h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+          <span class="text-sm font-medium">PDF出力</span>
+        </button>
+        
+        <button class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="text-sm font-medium">Excel出力</span>
+        </button>
+        
+        <button class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H10"/>
+          </svg>
+          <span class="text-sm font-medium">メール送信</span>
+        </button>
+        
+        <button class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+          <span class="text-sm font-medium">共有</span>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

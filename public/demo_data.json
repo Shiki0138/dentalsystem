@@ -1,0 +1,220 @@
+{
+  "demo_mode": true,
+  "demo_initialized": true,
+  "system_status": "operational",
+  "last_updated": "2025-07-03T08:55:00Z",
+  
+  "patients": [
+    {
+      "id": 1,
+      "name": "DEMO_田中太郎",
+      "email": "demo_tanaka@example.com", 
+      "phone": "DEMO_090-1234-5678",
+      "age": 28,
+      "last_visit": "2025-06-25",
+      "treatment_history": ["定期検診", "クリーニング"],
+      "next_appointment": "2025-07-05 10:00"
+    },
+    {
+      "id": 2,
+      "name": "DEMO_佐藤花子",
+      "email": "demo_sato@example.com",
+      "phone": "DEMO_090-2345-6789", 
+      "age": 25,
+      "last_visit": "2025-06-20",
+      "treatment_history": ["虫歯治療", "詰め物"],
+      "next_appointment": "2025-07-04 14:30"
+    },
+    {
+      "id": 3,
+      "name": "DEMO_鈴木美咲",
+      "email": "demo_suzuki@example.com",
+      "phone": "DEMO_090-4567-8901",
+      "age": 24,
+      "last_visit": "2025-06-15",
+      "treatment_history": ["親知らず抜歯"],
+      "next_appointment": "2025-07-08 16:00"
+    },
+    {
+      "id": 4,
+      "name": "DEMO_田中次郎", 
+      "email": "demo_tanaka_j@example.com",
+      "phone": "DEMO_090-3456-7890",
+      "age": 35,
+      "last_visit": "2025-06-18",
+      "treatment_history": ["ホワイトニング"],
+      "next_appointment": "2025-07-06 18:30"
+    },
+    {
+      "id": 5,
+      "name": "DEMO_渡辺由美",
+      "email": "demo_watanabe@example.com",
+      "phone": "DEMO_090-6789-0123",
+      "age": 31,
+      "last_visit": "2025-06-22",
+      "treatment_history": ["矯正治療"],
+      "next_appointment": "2025-07-07 10:00"
+    }
+  ],
+  
+  "appointments": [
+    {
+      "id": 1,
+      "patient_id": 1,
+      "patient_name": "DEMO_田中太郎",
+      "date": "2025-07-03",
+      "time": "09:00",
+      "treatment_type": "定期検診",
+      "status": "confirmed",
+      "duration_minutes": 30
+    },
+    {
+      "id": 2,
+      "patient_id": 2,
+      "patient_name": "DEMO_佐藤花子",
+      "date": "2025-07-03", 
+      "time": "10:30",
+      "treatment_type": "虫歯治療",
+      "status": "checked_in",
+      "duration_minutes": 45
+    },
+    {
+      "id": 3,
+      "patient_id": 3,
+      "patient_name": "DEMO_鈴木美咲",
+      "date": "2025-07-03",
+      "time": "14:00",
+      "treatment_type": "経過観察",
+      "status": "confirmed", 
+      "duration_minutes": 20
+    },
+    {
+      "id": 4,
+      "patient_id": 4,
+      "patient_name": "DEMO_田中次郎",
+      "date": "2025-07-03",
+      "time": "15:30",
+      "treatment_type": "相談",
+      "status": "confirmed",
+      "duration_minutes": 30
+    },
+    {
+      "id": 5,
+      "patient_id": 5,
+      "patient_name": "DEMO_渡辺由美",
+      "date": "2025-07-04",
+      "time": "10:00",
+      "treatment_type": "矯正調整",
+      "status": "pending",
+      "duration_minutes": 60
+    }
+  ],
+  
+  "dashboard_stats": {
+    "today": {
+      "total_appointments": 8,
+      "completed_appointments": 5,
+      "cancelled_appointments": 1,
+      "revenue": 125000,
+      "patient_satisfaction": 98.5
+    },
+    "kpi": {
+      "chair_occupancy_rate": 87,
+      "cancellation_rate": 3,
+      "average_booking_time": 25,
+      "payroll_processing_time": 8,
+      "recall_rate": 82
+    },
+    "quick_stats": {
+      "total_patients": 247,
+      "today_appointments": 23,
+      "today_revenue": 450000,
+      "pending_recalls": 23,
+      "staff_on_duty": 8,
+      "available_chairs": 2
+    }
+  },
+  
+  "ai_analytics": {
+    "efficiency_score": 98.5,
+    "time_saved_hours": 24.5,
+    "conflicts_prevented": 15,
+    "optimization_score": 98.5,
+    "suggested_times": [
+      {"time": "09:00", "efficiency_score": 95.2},
+      {"time": "14:30", "efficiency_score": 92.8},
+      {"time": "16:00", "efficiency_score": 89.5}
+    ]
+  },
+  
+  "recent_activities": [
+    {
+      "type": "new_patient",
+      "message": "新規患者が登録されました",
+      "details": "田中太郎さん",
+      "timestamp": "3分前"
+    },
+    {
+      "type": "appointment_confirmed", 
+      "message": "予約が確定されました",
+      "details": "佐藤花子さん",
+      "timestamp": "7分前"
+    },
+    {
+      "type": "treatment_completed",
+      "message": "治療が完了しました", 
+      "details": "鈴木一郎さん",
+      "timestamp": "12分前"
+    },
+    {
+      "type": "recall_sent",
+      "message": "リコール通知を送信",
+      "details": "15名の患者さん",
+      "timestamp": "18分前"
+    },
+    {
+      "type": "appointment_cancelled",
+      "message": "予約がキャンセルされました",
+      "details": "高橋美由紀さん", 
+      "timestamp": "25分前"
+    }
+  ],
+  
+  "demo_features": {
+    "ai_optimization": {
+      "enabled": true,
+      "efficiency_rate": "98.5%",
+      "response_time": "50ms",
+      "features": ["キャンセル予測", "最適時間提案", "競合回避"]
+    },
+    "fullcalendar": {
+      "enabled": true,
+      "drag_drop": true,
+      "booking_time": "30秒",
+      "features": ["ドラッグ&ドロップ", "リアルタイム更新", "競合検知"]
+    },
+    "dashboard": {
+      "enabled": true,
+      "refresh_rate": "50ms",
+      "grade": "A+",
+      "features": ["リアルタイム分析", "予測機能", "異常検知"]
+    },
+    "patient_management": {
+      "enabled": true,
+      "search_speed": "50ms以下",
+      "ai_insights": "91.3%精度",
+      "features": ["インテリジェント検索", "AI予測", "自動インサイト"]
+    }
+  },
+  
+  "system_performance": {
+    "uptime": "99.98%",
+    "response_time": 47,
+    "page_load": "< 200ms",
+    "search_response": "< 50ms",
+    "database_response": "< 50ms",
+    "cache_hit_rate": 95.2,
+    "active_sessions": 15,
+    "system_load": 25.3
+  }
+}

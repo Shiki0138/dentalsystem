@@ -1,0 +1,274 @@
+<!-- 電話予約入力フォーム（受付スタッフ向け） -->
+<div class="phone-booking-container max-w-4xl mx-auto">
+  <!-- ヘッダー -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">📞 電話予約受付</h1>
+      <p class="text-gray-600 mt-1">患者さんからの電話予約を素早く登録</p>
+    </div>
+    <div class="text-sm text-gray-500">
+      受付時刻: <%= Time.current.strftime("%H:%M") %>
+    </div>
+  </div>
+
+  <!-- 電話予約フォーム -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <%= form_with model: [@appointment || Appointment.new], 
+        url: appointments_path, 
+        method: :post,
+        local: false,
+        data: { turbo_frame: "_top" },
+        class: "space-y-6",
+        id: "phoneBookingForm" do |form| %>
+      
+      <!-- 予約元設定 -->
+      <%= form.hidden_field :reservation_source_id, value: ReservationSource.find_by(source_type: 'phone')&.id %>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 左カラム: 患者情報 -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">👤 患者情報</h3>
+          
+          <!-- 患者検索 -->
+          <div>
+            <%= label_tag :patient_search, "患者検索", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1 relative">
+              <%= text_field_tag :patient_search, "", 
+                  placeholder: "患者名または電話番号を入力", 
+                  class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500",
+                  data: { 
+                    controller: "patient-search",
+                    action: "input->patient-search#search",
+                    patient_search_url_value: search_patients_appointments_path
+                  } %>
+              
+              <!-- 検索結果 -->
+              <div id="patient-search-results" 
+                   class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm hidden">
+              </div>
+            </div>
+            <%= form.hidden_field :patient_id, id: "selected_patient_id" %>
+          </div>
+          
+          <!-- 既存患者情報表示 -->
+          <div id="selected-patient-info" class="hidden">
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <h4 class="text-sm font-medium text-blue-900">選択された患者</h4>
+              <div id="patient-details" class="mt-2 text-sm text-blue-800">
+                <!-- 患者詳細がここに表示される -->
+              </div>
+              <button type="button" id="clear-patient" class="mt-2 text-xs text-blue-600 hover:text-blue-800">
+                クリア
+              </button>
+            </div>
+          </div>
+          
+          <!-- 新規患者情報（患者が見つからない場合） -->
+          <div id="new-patient-form" class="space-y-4">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <h4 class="text-sm font-medium text-green-900 mb-3">📝 新規患者登録</h4>
+              
+              <div class="grid grid-cols-1 gap-3">
+                <%= text_field_tag "new_patient[name]", "", 
+                    placeholder: "患者名（必須）", 
+                    class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" %>
+                
+                <%= text_field_tag "new_patient[name_kana]", "", 
+                    placeholder: "フリガナ", 
+                    class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" %>
+                
+                <%= telephone_field_tag "new_patient[phone]", "", 
+                    placeholder: "電話番号（必須）", 
+                    class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" %>
+                
+                <%= email_field_tag "new_patient[email]", "", 
+                    placeholder: "メールアドレス（リマインド用）", 
+                    class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右カラム: 予約情報 -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">📅 予約情報</h3>
+          
+          <!-- 予約日時 -->
+          <div>
+            <%= form.label :appointment_date, "予約日時", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.datetime_local_field :appointment_date, 
+                value: 1.day.from_now.strftime("%Y-%m-%dT09:00"),
+                min: Date.current.strftime("%Y-%m-%dT09:00"),
+                max: 3.months.from_now.strftime("%Y-%m-%dT17:00"),
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+          
+          <!-- 治療内容 -->
+          <div>
+            <%= form.label :treatment_type, "治療内容", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.select :treatment_type, 
+                options_for_select([
+                  ['定期検診', 'checkup'],
+                  ['一般診療', 'general'],
+                  ['相談・カウンセリング', 'consultation'],
+                  ['歯石除去・クリーニング', 'cleaning'],
+                  ['虫歯治療・詰め物', 'filling'],
+                  ['被せ物・クラウン', 'crown'],
+                  ['根管治療', 'root_canal'],
+                  ['抜歯', 'extraction'],
+                  ['矯正治療', 'orthodontics'],
+                  ['ホワイトニング', 'whitening'],
+                  ['その他', 'other']
+                ], 'checkup'),
+                {},
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+          
+          <!-- 備考・要望 -->
+          <div>
+            <%= form.label :notes, "備考・要望", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_area :notes, 
+                rows: 3,
+                placeholder: "痛みの状況、希望時間帯など...",
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+          
+          <!-- リマインド設定 -->
+          <div class="bg-purple-50 border border-purple-200 rounded-md p-4">
+            <h4 class="text-sm font-medium text-purple-900 mb-2">📧 リマインド設定</h4>
+            <div class="space-y-2">
+              <label class="inline-flex items-center">
+                <%= check_box_tag "reminder_settings[seven_days]", "1", true, 
+                    class: "rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-500 focus:ring-purple-500" %>
+                <span class="ml-2 text-sm text-gray-700">7日前にリマインドメール送信</span>
+              </label>
+              <label class="inline-flex items-center">
+                <%= check_box_tag "reminder_settings[three_days]", "1", true, 
+                    class: "rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-500 focus:ring-purple-500" %>
+                <span class="ml-2 text-sm text-gray-700">3日前にリマインドメール送信</span>
+              </label>
+            </div>
+            <p class="text-xs text-purple-600 mt-2">
+              ※ メールアドレスが登録されている場合のみ送信されます
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 予約内容確認 -->
+      <div class="bg-gray-50 border border-gray-200 rounded-md p-4">
+        <h4 class="text-sm font-medium text-gray-900 mb-2">📋 予約内容確認</h4>
+        <div id="booking-summary" class="text-sm text-gray-600">
+          予約内容を入力してください
+        </div>
+      </div>
+      
+      <!-- 送信ボタン -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "キャンセル", appointments_path, 
+            class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        
+        <%= form.submit "予約を登録", 
+            class: "bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+            data: { disable_with: "登録中..." } %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 電話対応チェックリスト -->
+  <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+    <h3 class="text-sm font-medium text-yellow-900 mb-3">☎️ 電話対応チェックリスト</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-yellow-800">
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">患者名・連絡先の確認</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">症状・要望のヒアリング</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">希望日時の確認</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">予約内容の復唱確認</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">来院時の注意事項説明</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="rounded border-yellow-300 text-yellow-600">
+        <span class="ml-2">リマインド設定の説明</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 予約内容の動的更新
+  function updateBookingSummary() {
+    const patientName = document.getElementById('selected_patient_id').value ? 
+                       document.querySelector('#patient-details')?.textContent || '選択された患者' :
+                       document.querySelector('input[name="new_patient[name]"]')?.value || '新規患者';
+    
+    const appointmentDate = document.getElementById('appointment_appointment_date').value;
+    const treatmentType = document.getElementById('appointment_treatment_type').selectedOptions[0]?.text || '';
+    
+    if (appointmentDate) {
+      const date = new Date(appointmentDate);
+      const dateStr = date.toLocaleDateString('ja-JP', { 
+        year: 'numeric', month: 'long', day: 'numeric', 
+        hour: '2-digit', minute: '2-digit' 
+      });
+      
+      document.getElementById('booking-summary').innerHTML = `
+        <strong>患者:</strong> ${patientName}<br>
+        <strong>日時:</strong> ${dateStr}<br>
+        <strong>治療:</strong> ${treatmentType}
+      `;
+    }
+  }
+  
+  // フォーム変更時の更新
+  document.addEventListener('change', updateBookingSummary);
+  document.addEventListener('input', updateBookingSummary);
+  
+  // 患者クリア機能
+  document.getElementById('clear-patient')?.addEventListener('click', function() {
+    document.getElementById('selected_patient_id').value = '';
+    document.getElementById('selected-patient-info').classList.add('hidden');
+    document.getElementById('new-patient-form').classList.remove('hidden');
+    updateBookingSummary();
+  });
+  
+  // フォーム送信時の確認
+  document.getElementById('phoneBookingForm').addEventListener('submit', function(e) {
+    const patientId = document.getElementById('selected_patient_id').value;
+    const newPatientName = document.querySelector('input[name="new_patient[name]"]')?.value;
+    
+    if (!patientId && !newPatientName) {
+      e.preventDefault();
+      alert('患者情報を入力してください');
+      return;
+    }
+    
+    const appointmentDate = document.getElementById('appointment_appointment_date').value;
+    if (!appointmentDate) {
+      e.preventDefault();
+      alert('予約日時を入力してください');
+      return;
+    }
+    
+    // 過去の日時チェック
+    if (new Date(appointmentDate) < new Date()) {
+      e.preventDefault();
+      alert('予約日時は未来の日時を指定してください');
+      return;
+    }
+  });
+});
+</script>

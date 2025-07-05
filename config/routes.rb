@@ -17,6 +17,12 @@ Rails.application.routes.draw do
     resources :treatments
     collection do
       get :search
+      get :quick_register
+      post :quick_create
+    end
+    member do
+      get :duplicates
+      post :merge
     end
   end
   
@@ -25,10 +31,18 @@ Rails.application.routes.draw do
     member do
       patch :confirm
       patch :cancel
+      patch :visit
+      patch :complete
+      patch :pay
+      patch :mark_no_show
     end
     collection do
       get :calendar
+      get :calendar_events, to: 'appointments#calendar_events'
+      get :simple_calendar
+      get :phone_booking
       get :search_patients
+      get :available_slots
     end
   end
   
@@ -40,10 +54,12 @@ Rails.application.routes.draw do
   
   # デモモード専用ルート（歯科業界革命体験）
   scope '/demo' do
-    get '/', to: 'demo#start', as: :demo_start
+    get '/', to: 'demo#start', as: :demo_start_page
+    post '/', to: 'demo#start', as: :demo_start
     get '/dashboard', to: 'demo#dashboard', as: :demo_dashboard
     post '/seed_data', to: 'demo#seed_data', as: :demo_seed_data
     post '/reset_data', to: 'demo#reset_data', as: :demo_reset_data
+    post '/reset_demo_data', to: 'demo#reset_data', as: :demo_reset_demo_data
     get '/status', to: 'demo#status', as: :demo_status
     get '/ai_demo', to: 'demo#ai_demo', as: :demo_ai
     get '/notification_demo', to: 'demo#notification_demo', as: :demo_notification

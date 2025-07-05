@@ -1,0 +1,514 @@
+<%# 設定管理UI - Mobile First Design %>
+<div class="min-h-screen bg-gray-50">
+  <%# ヘッダー %>
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900">システム設定</h1>
+            <p class="text-sm text-gray-500 hidden sm:block">診療時間・休診日・テンプレート編集</p>
+          </div>
+        </div>
+        
+        <%# 保存ステータス %>
+        <div class="flex items-center space-x-2">
+          <div class="hidden sm:flex items-center text-sm text-green-600">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            最終保存: 15:30
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 sm:px-6 lg:px-8 py-6">
+    <%# 設定ナビゲーション %>
+    <div class="mb-6">
+      <nav class="flex space-x-8 overflow-x-auto pb-2" data-controller="settings-nav">
+        <button class="whitespace-nowrap py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600" 
+                data-settings-nav-target="tab" data-action="click->settings-nav#switchTab" data-tab="schedule">
+          診療時間設定
+        </button>
+        <button class="whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" 
+                data-settings-nav-target="tab" data-action="click->settings-nav#switchTab" data-tab="holidays">
+          休診日管理
+        </button>
+        <button class="whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" 
+                data-settings-nav-target="tab" data-action="click->settings-nav#switchTab" data-tab="templates">
+          テンプレート編集
+        </button>
+        <button class="whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" 
+                data-settings-nav-target="tab" data-action="click->settings-nav#switchTab" data-tab="notifications">
+          通知設定
+        </button>
+      </nav>
+    </div>
+
+    <%# 診療時間設定 %>
+    <div id="schedule-panel" data-settings-nav-target="panel" class="block">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          診療時間設定
+        </h2>
+        
+        <div class="space-y-6">
+          <%# 平日診療時間 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">平日（月〜金）</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">午前診療</label>
+                <div class="flex items-center space-x-2">
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>08:00</option>
+                    <option selected>09:00</option>
+                    <option>09:30</option>
+                    <option>10:00</option>
+                  </select>
+                  <span class="text-gray-500">〜</span>
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>11:30</option>
+                    <option selected>12:00</option>
+                    <option>12:30</option>
+                    <option>13:00</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">午後診療</label>
+                <div class="flex items-center space-x-2">
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>13:00</option>
+                    <option>13:30</option>
+                    <option selected>14:00</option>
+                    <option>14:30</option>
+                  </select>
+                  <span class="text-gray-500">〜</span>
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>17:00</option>
+                    <option>17:30</option>
+                    <option selected>18:00</option>
+                    <option>18:30</option>
+                    <option>19:00</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# 土曜診療時間 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">土曜日</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">午前診療</label>
+                <div class="flex items-center space-x-2">
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>08:00</option>
+                    <option selected>09:00</option>
+                    <option>09:30</option>
+                    <option>10:00</option>
+                  </select>
+                  <span class="text-gray-500">〜</span>
+                  <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>11:30</option>
+                    <option selected>12:00</option>
+                    <option>12:30</option>
+                    <option>13:00</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">午後診療</label>
+                <div class="flex items-center space-x-2">
+                  <div class="flex items-center">
+                    <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label class="ml-2 text-sm text-gray-600">午後診療なし</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# 予約枠設定 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">予約枠設定</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">1コマの時間</label>
+                <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option>15分</option>
+                  <option>20分</option>
+                  <option selected>30分</option>
+                  <option>45分</option>
+                  <option>60分</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">同時予約数</label>
+                <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option selected>1名</option>
+                  <option>2名</option>
+                  <option>3名</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">休憩時間</label>
+                <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option>なし</option>
+                  <option>5分</option>
+                  <option selected>10分</option>
+                  <option>15分</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 休診日管理 %>
+    <div id="holidays-panel" data-settings-nav-target="panel" class="hidden">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg class="h-5 w-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          休診日管理
+        </h2>
+        
+        <div class="space-y-6">
+          <%# 定期休診日 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">定期休診日</h3>
+            <div class="grid grid-cols-7 gap-2">
+              <% %w[日 月 火 水 木 金 土].each_with_index do |day, index| %>
+                <div class="text-center">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"><%= day %></label>
+                  <input type="checkbox" 
+                         class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                         <%= 'checked' if [0, 3].include?(index) %>>
+                </div>
+              <% end %>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">チェックした曜日は定期的に休診となります</p>
+          </div>
+
+          <%# 臨時休診日追加 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">臨時休診日追加</h3>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+              <div class="flex-1">
+                <input type="date" 
+                       class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       value="<%= Date.current.strftime('%Y-%m-%d') %>">
+              </div>
+              <div class="flex-1">
+                <input type="text" 
+                       placeholder="休診理由（例：学会参加、院長都合）"
+                       class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium">
+                追加
+              </button>
+            </div>
+          </div>
+
+          <%# 登録済み臨時休診日 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">登録済み臨時休診日</h3>
+            <div class="space-y-2">
+              <% [
+                { date: "2025-07-15", reason: "夏季休暇" },
+                { date: "2025-08-13", reason: "お盆休み" },
+                { date: "2025-08-14", reason: "お盆休み" },
+                { date: "2025-09-20", reason: "学会参加" }
+              ].each do |holiday| %>
+                <div class="flex items-center justify-between py-2 px-4 bg-red-50 border border-red-200 rounded-md">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= Date.parse(holiday[:date]).strftime('%Y年%m月%d日(%a)') %>
+                      </div>
+                      <div class="text-xs text-gray-500"><%= holiday[:reason] %></div>
+                    </div>
+                  </div>
+                  <button class="text-red-600 hover:text-red-800 text-sm">削除</button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# テンプレート編集 %>
+    <div id="templates-panel" data-settings-nav-target="panel" class="hidden">
+      <div class="space-y-6">
+        <%# リマインドメールテンプレート %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            リマインドメールテンプレート
+          </h2>
+          
+          <div class="space-y-4">
+            <%# テンプレート選択 %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">テンプレート選択</label>
+              <select class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>7日前リマインド</option>
+                <option selected>3日前リマインド</option>
+                <option>当日リマインド</option>
+                <option>予約確認メール</option>
+              </select>
+            </div>
+
+            <%# 件名編集 %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">件名</label>
+              <input type="text" 
+                     value="【{clinic_name}】{patient_name}様 ご予約のリマインドです（{appointment_date}）"
+                     class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <%# 本文編集 %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">本文</label>
+              <textarea rows="8" 
+                        class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+{patient_name}様
+
+いつもお世話になっております。
+{clinic_name}でございます。
+
+{appointment_date} {appointment_time} にご予約をいただいております。
+お忘れなくお越しください。
+
+【ご予約詳細】
+日時: {appointment_date}（{appointment_day}）{appointment_time}
+内容: {treatment_type}
+担当: {doctor_name}
+
+【お願い】
+・ご来院の際は保険証をお持ちください
+・体調不良の場合は事前にご連絡ください
+・予約変更は前日までにお願いいたします
+
+何かご不明な点がございましたら、お気軽にお電話ください。
+
+{clinic_name}
+TEL: {clinic_phone}
+住所: {clinic_address}
+              </textarea>
+            </div>
+
+            <%# 利用可能変数 %>
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <h4 class="text-sm font-medium text-blue-800 mb-2">利用可能な変数</h4>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                <code class="bg-blue-100 px-2 py-1 rounded">{patient_name}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{clinic_name}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{appointment_date}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{appointment_time}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{appointment_day}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{treatment_type}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{doctor_name}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{clinic_phone}</code>
+                <code class="bg-blue-100 px-2 py-1 rounded">{clinic_address}</code>
+              </div>
+            </div>
+
+            <%# プレビュー・テスト送信 %>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium">
+                プレビュー
+              </button>
+              <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
+                テスト送信
+              </button>
+              <button class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors duration-200 text-sm font-medium">
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <%# LINEメッセージテンプレート %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <svg class="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            LINEメッセージテンプレート
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">メッセージ内容</label>
+              <textarea rows="6" 
+                        class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="LINEメッセージの内容を入力してください">
+こんにちは、{patient_name}様
+
+{clinic_name}です。
+{appointment_date} {appointment_time} のご予約のご確認です✨
+
+体調はいかがですか？
+何かご不明な点があればお気軽にご連絡ください😊
+
+よろしくお願いいたします🦷
+              </textarea>
+            </div>
+            
+            <div class="flex space-x-4">
+              <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
+                プレビュー
+              </button>
+              <button class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors duration-200 text-sm font-medium">
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 通知設定 %>
+    <div id="notifications-panel" data-settings-nav-target="panel" class="hidden">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg class="h-5 w-5 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM10.5 14H7a4 4 0 118 0v2.5"/>
+          </svg>
+          通知設定
+        </h2>
+        
+        <div class="space-y-6">
+          <%# リマインド通知タイミング %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">リマインド通知タイミング</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-700">7日前通知</label>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" checked class="form-checkbox h-4 w-4 text-blue-600">
+                  <span class="ml-2 text-sm text-gray-600">有効</span>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-700">3日前通知</label>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" checked class="form-checkbox h-4 w-4 text-blue-600">
+                  <span class="ml-2 text-sm text-gray-600">有効</span>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-700">当日通知</label>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" checked class="form-checkbox h-4 w-4 text-blue-600">
+                  <span class="ml-2 text-sm text-gray-600">有効</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <%# 通知方法優先順位 %>
+          <div>
+            <h3 class="text-md font-medium text-gray-800 mb-3">通知方法優先順位</h3>
+            <div class="space-y-2">
+              <div class="flex items-center p-3 bg-green-50 border border-green-200 rounded-md">
+                <span class="text-sm font-medium text-green-800 mr-2">1位</span>
+                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span class="text-sm text-gray-700">LINE通知</span>
+              </div>
+              <div class="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <span class="text-sm font-medium text-blue-800 mr-2">2位</span>
+                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-sm text-gray-700">メール通知</span>
+              </div>
+              <div class="flex items-center p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <span class="text-sm font-medium text-orange-800 mr-2">3位</span>
+                <svg class="w-5 h-5 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                <span class="text-sm text-gray-700">SMS通知（オプション）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 保存ボタン %>
+    <div class="fixed bottom-6 right-6 z-10">
+      <button class="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        設定を保存
+      </button>
+    </div>
+  </main>
+</div>
+
+<%# Stimulus Controller for Settings Navigation %>
+<script>
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["tab", "panel"]
+
+  switchTab(event) {
+    const tabName = event.currentTarget.dataset.tab
+    
+    // Reset all tabs
+    this.tabTargets.forEach(tab => {
+      tab.classList.remove("border-blue-500", "text-blue-600")
+      tab.classList.add("border-transparent", "text-gray-500")
+    })
+    
+    // Reset all panels
+    this.panelTargets.forEach(panel => {
+      panel.classList.add("hidden")
+      panel.classList.remove("block")
+    })
+    
+    // Activate selected tab
+    event.currentTarget.classList.remove("border-transparent", "text-gray-500")
+    event.currentTarget.classList.add("border-blue-500", "text-blue-600")
+    
+    // Show selected panel
+    const panel = document.getElementById(`${tabName}-panel`)
+    if (panel) {
+      panel.classList.remove("hidden")
+      panel.classList.add("block")
+    }
+  }
+}
+</script>

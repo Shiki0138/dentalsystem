@@ -1,0 +1,19 @@
+{
+  "messages": [
+    {
+      "id": 1,
+      "contact_info": "090-9999-8888",
+      "patient_id": null,
+      "patient_name": "新規患者様",
+      "patient_number": null,
+      "is_existing": false,
+      "type": "未対応",
+      "priority": 1,
+      "content": "初診の予約を取りたいのですが、今週は空いていますか？歯が痛くて困っています。",
+      "time": "7月4日 11:00",
+      "channel": "電話",
+      "contact_method": "phone"
+    }
+  ],
+  "next_id": 2
+}

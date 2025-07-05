@@ -12,6 +12,8 @@
 #  insurance_info  :text
 #  notes           :text
 #  line_user_id    :string
+#  demo_data       :boolean          default(FALSE)
+#  patient_number  :string
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #

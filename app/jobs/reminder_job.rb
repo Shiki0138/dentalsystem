@@ -1,18 +1,30 @@
+# 歯科医院予約管理システム - 自動リマインドメールジョブ
+# Sidekiqバックグラウンドジョブによる7日前・3日前・当日リマインド
+# LINE優先→fallback Mail→fallback SMS配信システム
+
 class ReminderJob < ApplicationJob
   queue_as :reminders
+  
+  # 自動リマインドの種類
+  REMINDER_TYPES = {
+    week: { days_before: 7, title: "1週間前リマインド" },
+    three_days: { days_before: 3, title: "3日前リマインド" },
+    same_day: { days_before: 0, title: "当日リマインド" }
+  }.freeze
 
-  def perform(appointment_id:, reminder_type:, delivery_method: nil)
-    appointment = Appointment.find_by(id: appointment_id)
-    return unless appointment&.booked?
-
-    Rails.logger.info "Sending #{reminder_type} for appointment #{appointment_id}"
-
-    begin
-      send_reminder(appointment, reminder_type, delivery_method)
-    rescue => e
-      Rails.logger.error "Failed to send reminder: #{e.message}"
-      raise e
+  def perform(reminder_type, appointment_id = nil)
+    case reminder_type.to_sym
+    when :week, :three_days, :same_day
+      send_scheduled_reminders(reminder_type.to_sym)
+    when :single
+      send_single_reminder(appointment_id) if appointment_id
+    else
+      Rails.logger.error "Unknown reminder type: #{reminder_type}"
     end
+  rescue => e
+    Rails.logger.error "ReminderJob failed: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    raise e
   end
 
   private

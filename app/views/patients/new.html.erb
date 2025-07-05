@@ -1,27 +1,298 @@
-<div class="patients-container min-h-screen bg-gray-50">
-  <!-- ヘッダー部分 -->
-  <div class="patients-header bg-white shadow-sm border-b border-gray-200 p-6">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">新規患者登録</h1>
-        <p class="text-sm text-gray-600 mt-1">新しい患者の基本情報を登録します</p>
+<% content_for :title, "新規患者登録" %>
+
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- ヘッダー -->
+    <div class="md:flex md:items-center md:justify-between mb-8">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center">
+          <%= link_to patients_path, class: "text-gray-500 hover:text-gray-700 mr-4" do %>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          <% end %>
+          <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            新規患者登録
+          </h1>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">
+          患者情報を入力してください
+        </p>
       </div>
-      <div>
-        <%= link_to patients_path, 
-            class: "inline-flex items-center px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors" do %>
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          患者一覧に戻る
+    </div>
+
+    <!-- 重複警告 -->
+    <% if @potential_duplicates&.any? %>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">
+                類似する患者が見つかりました
+              </h3>
+              <div class="mt-2 text-sm text-yellow-700">
+                <p>以下の患者と重複している可能性があります。既存の患者ではないか確認してください。</p>
+              </div>
+              <div class="mt-4 space-y-2">
+                <% @potential_duplicates.each do |duplicate| %>
+                  <div class="flex items-center justify-between p-3 bg-white rounded border">
+                    <div>
+                      <div class="font-medium text-gray-900"><%= duplicate.name %></div>
+                      <div class="text-sm text-gray-500">
+                        <%= duplicate.phone %> 
+                        <% if duplicate.email.present? %>
+                          | <%= duplicate.email %>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div>
+                      <%= link_to "詳細確認", patient_path(duplicate), target: "_blank", 
+                          class: "text-sm text-blue-600 hover:text-blue-800" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- 患者登録フォーム -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <%= form_with model: @patient, local: true, class: "space-y-6" do |form| %>
+          <% if @patient.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    エラーがあります
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc list-inside space-y-1">
+                      <% @patient.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- 氏名 -->
+            <div class="sm:col-span-1">
+              <%= form.label :name, "氏名", class: "block text-sm font-medium text-gray-700" %>
+              <span class="text-red-500">*</span>
+              <%= form.text_field :name, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "山田太郎",
+                  required: true %>
+            </div>
+
+            <!-- フリガナ -->
+            <div class="sm:col-span-1">
+              <%= form.label :name_kana, "フリガナ", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :name_kana, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "ヤマダタロウ" %>
+            </div>
+
+            <!-- 電話番号 -->
+            <div class="sm:col-span-1">
+              <%= form.label :phone, "電話番号", class: "block text-sm font-medium text-gray-700" %>
+              <span class="text-red-500">*</span>
+              <%= form.telephone_field :phone, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "090-1234-5678",
+                  required: true %>
+              <p class="mt-1 text-xs text-gray-500">ハイフンありでも自動的に正規化されます</p>
+            </div>
+
+            <!-- メールアドレス -->
+            <div class="sm:col-span-1">
+              <%= form.label :email, "メールアドレス", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.email_field :email, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "example@example.com" %>
+              <p class="mt-1 text-xs text-gray-500">予約リマインドメールの送信に使用されます</p>
+            </div>
+
+            <!-- 生年月日 -->
+            <div class="sm:col-span-1">
+              <%= form.label :birth_date, "生年月日", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.date_field :birth_date, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+            </div>
+
+            <!-- 性別 -->
+            <div class="sm:col-span-1">
+              <%= form.label :gender, "性別", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :gender, 
+                  options_for_select([
+                    ['選択してください', ''],
+                    ['男性', 'male'],
+                    ['女性', 'female'],
+                    ['その他', 'other']
+                  ], @patient.gender), 
+                  {}, 
+                  { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+            </div>
+
+            <!-- 住所 -->
+            <div class="sm:col-span-2">
+              <%= form.label :address, "住所", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :address, 
+                  rows: 2,
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "東京都千代田区..." %>
+            </div>
+
+            <!-- 保険情報 -->
+            <div class="sm:col-span-2">
+              <%= form.label :insurance_info, "保険情報", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :insurance_info, 
+                  rows: 2,
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "社会保険、国民健康保険など" %>
+            </div>
+
+            <!-- LINE ID -->
+            <div class="sm:col-span-1">
+              <%= form.label :line_user_id, "LINE ID", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :line_user_id, 
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "line_user_123" %>
+              <p class="mt-1 text-xs text-gray-500">LINE通知を希望される場合</p>
+            </div>
+
+            <!-- ステータス -->
+            <div class="sm:col-span-1">
+              <%= form.label :status, "ステータス", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :status, 
+                  options_for_select([
+                    ['アクティブ', 'active'],
+                    ['非アクティブ', 'inactive'],
+                    ['停止', 'suspended']
+                  ], @patient.status || 'active'), 
+                  {}, 
+                  { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+            </div>
+
+            <!-- 備考 -->
+            <div class="sm:col-span-2">
+              <%= form.label :notes, "備考", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :notes, 
+                  rows: 3,
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  placeholder: "アレルギー情報、特記事項など" %>
+            </div>
+          </div>
+
+          <!-- アクションボタン -->
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <%= link_to "キャンセル", patients_path, 
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            
+            <%= form.submit "患者を登録", 
+                class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
         <% end %>
       </div>
     </div>
-  </div>
 
-  <!-- フォーム部分 -->
-  <div class="max-w-4xl mx-auto p-6">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-      <%= render 'form', patient: @patient %>
+    <!-- クイック登録ボタン -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-lg font-medium text-blue-900">
+              急いでいますか？
+            </h3>
+            <p class="mt-1 text-sm text-blue-700">
+              名前と電話番号だけで素早く患者登録できます。後から詳細情報を追加できます。
+            </p>
+            <div class="mt-4">
+              <%= link_to quick_register_patients_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                クイック登録
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- リアルタイム重複チェック用JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const nameField = document.getElementById('patient_name');
+  const phoneField = document.getElementById('patient_phone');
+  
+  let duplicateCheckTimeout;
+  
+  function checkDuplicates() {
+    const name = nameField.value.trim();
+    const phone = phoneField.value.trim();
+    
+    if (name.length >= 2 || phone.length >= 8) {
+      clearTimeout(duplicateCheckTimeout);
+      duplicateCheckTimeout = setTimeout(() => {
+        // AJAX call to check duplicates
+        fetch(`/patients/search?q=${encodeURIComponent(name + ' ' + phone)}`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Handle duplicate results
+          if (data.length > 0) {
+            showDuplicateWarning(data);
+          } else {
+            hideDuplicateWarning();
+          }
+        })
+        .catch(error => {
+          console.error('Error checking duplicates:', error);
+        });
+      }, 500);
+    }
+  }
+  
+  function showDuplicateWarning(patients) {
+    // Implementation for showing duplicate warning
+    console.log('Potential duplicates found:', patients);
+  }
+  
+  function hideDuplicateWarning() {
+    // Implementation for hiding duplicate warning
+  }
+  
+  if (nameField) nameField.addEventListener('input', checkDuplicates);
+  if (phoneField) phoneField.addEventListener('input', checkDuplicates);
+});
+</script>

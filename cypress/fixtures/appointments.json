@@ -1,0 +1,43 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "patient_id": 1,
+      "patient_name": "田中太郎",
+      "appointment_date": "2025-07-05",
+      "appointment_time": "10:00",
+      "status": "booked",
+      "treatment_type": "定期検診",
+      "notes": "テスト予約1",
+      "created_at": "2025-07-01T09:00:00Z"
+    },
+    {
+      "id": 2,
+      "patient_id": 2,
+      "patient_name": "佐藤花子",
+      "appointment_date": "2025-07-05",
+      "appointment_time": "14:00",
+      "status": "visited",
+      "treatment_type": "虫歯治療",
+      "notes": "右上奥歯の治療",
+      "created_at": "2025-07-01T10:00:00Z"
+    },
+    {
+      "id": 3,
+      "patient_id": 3,
+      "patient_name": "山田次郎",
+      "appointment_date": "2025-07-06",
+      "appointment_time": "09:00",
+      "status": "booked",
+      "treatment_type": "クリーニング",
+      "notes": "歯石除去",
+      "created_at": "2025-07-01T11:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 3,
+    "page": 1,
+    "per_page": 10
+  }
+}

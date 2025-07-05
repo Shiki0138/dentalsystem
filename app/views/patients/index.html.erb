@@ -1,180 +1,211 @@
-<div class="patients-container min-h-screen bg-gray-50">
-  <!-- ヘッダー部分 -->
-  <div class="patients-header bg-white shadow-sm border-b border-gray-200 p-6">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">患者管理</h1>
-        <p class="text-sm text-gray-600 mt-1">患者情報の登録・検索・管理を効率的に行います</p>
+<% content_for :title, "患者一覧" %>
+
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- ヘッダー -->
+    <div class="md:flex md:items-center md:justify-between mb-8">
+      <div class="flex-1 min-w-0">
+        <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          患者一覧
+        </h1>
+        <p class="mt-1 text-sm text-gray-500">
+          登録患者: <%= @patients.total_count %>名
+        </p>
       </div>
-      <div class="flex space-x-3">
-        <%= link_to new_patient_path, 
-            class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      <div class="mt-4 flex md:mt-0 md:ml-4">
+        <%= link_to new_patient_path, class: "ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
           </svg>
           新規患者登録
         <% end %>
-        
-        <%= link_to patients_path(format: :csv), 
-            class: "inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm" do %>
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          CSV出力
+      </div>
+    </div>
+
+    <!-- 検索フォーム -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <%= form_with url: patients_path, method: :get, local: true, class: "space-y-4 sm:space-y-0 sm:flex sm:items-end sm:space-x-4" do |form| %>
+          <div class="flex-1">
+            <%= form.label :search, "患者検索", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :search, value: params[:search], placeholder: "名前、カナ、電話番号、メールアドレスで検索", 
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+          </div>
+          
+          <div class="sm:w-32">
+            <%= form.label :status, "ステータス", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.select :status, options_for_select([
+              ['すべて', ''],
+              ['アクティブ', 'active'],
+              ['非アクティブ', 'inactive'],
+              ['停止', 'suspended']
+            ], params[:status]), {}, { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+          </div>
+          
+          <div class="sm:w-24">
+            <%= form.label :sort, "並び順", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.select :sort, options_for_select([
+              ['名前順', 'name'],
+              ['登録日順', 'created_at'],
+              ['最終来院日順', 'last_visit']
+            ], params[:sort]), {}, { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+          </div>
+          
+          <div class="flex space-x-2">
+            <%= form.submit "検索", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            <%= link_to "クリア", patients_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
         <% end %>
       </div>
     </div>
-  </div>
 
-  <!-- 検索・フィルター部分 -->
-  <div class="patients-search bg-gray-50 p-6 border-b border-gray-200">
-    <div class="max-w-7xl mx-auto">
-      <%= form_with url: patients_path, method: :get, local: true, 
-          class: "max-w-4xl mx-auto",
-          data: { controller: "patient-search", action: "submit->patient-search#search" } do |form| %>
-        <div class="flex space-x-4">
-          <div class="flex-1 relative">
-            <%= form.text_field :search, 
-                value: params[:search],
-                placeholder: "患者名・電話番号・メールアドレスで検索...",
-                class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg placeholder-gray-400",
-                id: "patient-search-input",
-                autocomplete: "off",
-                data: { "patient-search-target": "input" } %>
-            
-            <!-- リアルタイム検索結果表示エリア -->
-            <div id="search-results" 
-                 class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1"
-                 style="display: none;">
-              <!-- 検索結果がここに動的に表示される -->
-            </div>
-          </div>
-          
-          <button type="submit" 
-                  class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            検索
-          </button>
-          
-          <% if params[:search].present? %>
-            <%= link_to patients_path, 
-                class: "px-4 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors flex items-center" do %>
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-              クリア
+    <!-- 患者一覧テーブル -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <% if @patients.any? %>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                患者情報
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                連絡先
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                来院情報
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                ステータス
+              </th>
+              <th scope="col" class="relative px-6 py-3">
+                <span class="sr-only">操作</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @patients.each do |patient| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span class="text-sm font-medium text-blue-800">
+                          <%= patient.name.first %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= link_to patient.name, patient_path(patient), class: "text-blue-600 hover:text-blue-900" %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        <%= patient.name_kana if patient.name_kana.present? %>
+                      </div>
+                      <div class="text-xs text-gray-400">
+                        <%= patient.patient_number %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <div class="flex items-center">
+                      <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21L6.8 10.9a11.952 11.952 0 005.5 5.5l1.513-3.424a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <%= patient.phone %>
+                    </div>
+                    <% if patient.email.present? %>
+                      <div class="flex items-center mt-1">
+                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <%= patient.email %>
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <% if patient.age %>
+                      <div><%= patient.age %>歳</div>
+                    <% end %>
+                    <% if patient.last_visit %>
+                      <div class="text-xs text-gray-500">
+                        最終来院: <%= patient.last_visit.strftime('%Y/%m/%d') %>
+                      </div>
+                    <% end %>
+                    <div class="text-xs text-gray-500">
+                      予約回数: <%= patient.appointments.count %>回
+                    </div>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% case patient.status %>
+                  <% when 'active' %>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      アクティブ
+                    </span>
+                  <% when 'inactive' %>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                      非アクティブ
+                    </span>
+                  <% when 'suspended' %>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                      停止
+                    </span>
+                  <% end %>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <%= link_to patient_path(patient), class: "text-blue-600 hover:text-blue-900" do %>
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    <% end %>
+                    <%= link_to edit_patient_path(patient), class: "text-gray-600 hover:text-gray-900" do %>
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    <% end %>
+                    <%= link_to new_patient_appointment_path(patient), class: "text-green-600 hover:text-green-900" do %>
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
             <% end %>
-          <% end %>
+          </tbody>
+        </table>
+
+        <!-- ページネーション -->
+        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+          <%= paginate @patients, theme: 'twitter_bootstrap_4' if respond_to?(:paginate) %>
         </div>
-        
-        <% if params[:search].present? %>
-          <div class="mt-3 text-sm text-gray-600">
-            「<span class="font-medium text-gray-900"><%= params[:search] %></span>」の検索結果: 
-            <span class="font-medium text-blue-600"><%= @patients.total_count %></span>件
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">患者が見つかりません</h3>
+          <p class="mt-1 text-sm text-gray-500">検索条件を変更するか、新しい患者を登録してください。</p>
+          <div class="mt-6">
+            <%= link_to new_patient_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              新規患者登録
+            <% end %>
           </div>
-        <% end %>
+        </div>
       <% end %>
     </div>
-  </div>
-
-  <!-- 患者テーブル -->
-  <%= turbo_frame_tag "patients" do %>
-    <div id="patients-grid" class="mt-8 flex flex-col">
-      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-          <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    患者番号
-                  </th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    氏名
-                  </th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    カナ
-                  </th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    電話番号
-                  </th>
-                  <th scope="col" class="hidden md:table-cell px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    メール
-                  </th>
-                  <th scope="col" class="hidden lg:table-cell px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    最終来院日
-                  </th>
-                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                    <span class="sr-only">操作</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                <% @patients.each do |patient| %>
-                  <tr>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                      <%= patient.patient_number %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                      <%= link_to patient.name, patient_path(patient), 
-                          class: "text-indigo-600 hover:text-indigo-900" %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <%= patient.name_kana %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <%= patient.phone %>
-                    </td>
-                    <td class="hidden md:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <%= patient.email %>
-                    </td>
-                    <td class="hidden lg:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <% last_appointment = patient.appointments.maximum(:appointment_date) %>
-                      <%= last_appointment ? l(last_appointment, format: :short) : "未来院" %>
-                    </td>
-                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <%= link_to "編集", edit_patient_path(patient), 
-                          class: "text-indigo-600 hover:text-indigo-900" %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ページネーション -->
-    <% if @patients.total_pages > 1 %>
-      <div class="mt-4 flex items-center justify-between">
-        <div class="flex flex-1 justify-between sm:hidden">
-          <%= link_to_prev_page @patients, "前へ", 
-              class: "relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-          <%= link_to_next_page @patients, "次へ", 
-              class: "ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-        </div>
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-          <div>
-            <p class="text-sm text-gray-700">
-              全<span class="font-medium"><%= @patients.total_count %></span>件中
-              <span class="font-medium"><%= @patients.offset_value + 1 %></span> -
-              <span class="font-medium"><%= @patients.offset_value + @patients.length %></span>件を表示
-            </p>
-          </div>
-          <div>
-            <%= paginate @patients %>
-          </div>
-        </div>
-      </div>
-    <% end %>
-  <% end %>
-
-  <!-- CSVエクスポート -->
-  <div class="mt-8 flex justify-end">
-    <%= link_to "CSVエクスポート", patients_path(format: :csv, search: params[:search]), 
-        class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" %>
   </div>
 </div>

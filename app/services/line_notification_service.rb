@@ -1,112 +1,180 @@
+# 歯科医院予約管理システム - LINE通知配信サービス
+# LINE Messaging API統合による優先配信システム
+# Flex Messages対応・既読確認・リッチメニュー連携
+
 class LineNotificationService
+  include ActiveModel::Model
+
+  attr_accessor :client, :channel_access_token, :channel_secret
+
+  # LINE Bot初期化
   def initialize
-    @client = Line::Bot::Client.new do |config|
-      config.channel_secret = ENV['LINE_CHANNEL_SECRET']
-      config.channel_token = ENV['LINE_CHANNEL_ACCESS_TOKEN']
-    end
-  end
-
-  def send_reminder(delivery)
-    return false unless valid_delivery?(delivery)
+    @channel_access_token = Rails.application.credentials.dig(:line, :channel_access_token) || ENV['LINE_CHANNEL_ACCESS_TOKEN']
+    @channel_secret = Rails.application.credentials.dig(:line, :channel_secret) || ENV['LINE_CHANNEL_SECRET']
     
+    raise "LINE credentials not configured" if @channel_access_token.blank? || @channel_secret.blank?
+    
+    @client = Line::Bot::Client.new do |config|
+      config.channel_token = @channel_access_token
+      config.channel_secret = @channel_secret
+    end
+  end
+
+  # メイン配信メソッド
+  def send_message(user_id:, message:, appointment: nil)
+    return { success: false, error: 'LINE user ID is blank' } if user_id.blank?
+
     begin
-      message = build_message(delivery)
-      response = @client.push_message(delivery.patient.line_user_id, message)
+      delivery_log = create_delivery_log(user_id, appointment)
       
-      if response.is_a?(Net::HTTPOK)
-        delivery.update!(
-          status: 'sent',
-          sent_at: Time.current,
-          error_message: nil
-        )
-        Rails.logger.info "LINE送信成功 - Delivery ID: #{delivery.id}"
-        true
-      else
-        handle_error(delivery, "LINE API Error: #{response.code} - #{response.body}")
-        false
-      end
+      # メッセージ形式に応じて配信方法を選択
+      result = case message
+               when Hash
+                 send_flex_message(user_id, message, delivery_log)
+               when String
+                 send_text_message(user_id, message, delivery_log)
+               else
+                 send_text_message(user_id, message.to_s, delivery_log)
+               end
+
+      update_delivery_log(delivery_log, result)
+      result
+
     rescue => e
-      handle_error(delivery, e.message)
-      false
-    end
-  end
-
-  # Webhook処理（既読・開封通知）
-  def process_webhook(events)
-    events.each do |event|
-      case event['type']
-      when 'message'
-        # メッセージ受信時の処理
-        handle_message_event(event)
-      when 'postback'
-        # ポストバックイベント（ボタン押下など）
-        handle_postback_event(event)
-      when 'read'
-        # 既読イベント
-        handle_read_event(event)
-      end
-    end
-  end
-
-  # 汎用メッセージ送信メソッド
-  def send_message(user_id, message)
-    begin
-      response = @client.push_message(user_id, message)
+      Rails.logger.error "LINE notification error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
       
-      if response.is_a?(Net::HTTPOK)
-        Rails.logger.info "LINE message sent successfully to #{user_id}"
-        true
-      else
-        Rails.logger.error "Failed to send LINE message to #{user_id}: #{response.code} - #{response.body}"
-        false
-      end
-    rescue => e
-      Rails.logger.error "LINE message send error to #{user_id}: #{e.message}"
-      false
+      error_result = { success: false, error: e.message, sent_at: Time.current }
+      update_delivery_log(delivery_log, error_result) if delivery_log
+      error_result
     end
   end
 
-  private
+  # テキストメッセージ送信
+  def send_text_message(user_id, text, delivery_log = nil)
+    message = {
+      type: 'text',
+      text: text.to_s.truncate(5000) # LINE text message limit
+    }
 
-  def valid_delivery?(delivery)
-    return false unless delivery.patient.line_user_id.present?
-    return false unless delivery.delivery_method == 'line'
-    return false if delivery.sent?
-    true
-  end
-
-  def build_message(delivery)
-    case delivery.reminder_type
-    when 'seven_day_reminder'
-      build_seven_day_message(delivery)
-    when 'three_day_reminder'
-      build_three_day_message(delivery)
-    when 'one_day_reminder'
-      build_one_day_message(delivery)
+    response = @client.push_message(user_id, message)
+    
+    if response.is_a?(Net::HTTPSuccess)
+      {
+        success: true,
+        method: 'line_text',
+        line_response: response,
+        sent_at: Time.current,
+        delivery_log: delivery_log
+      }
     else
-      build_default_message(delivery)
+      {
+        success: false,
+        error: "LINE API Error: #{response.code} #{response.message}",
+        line_response: response,
+        sent_at: Time.current,
+        delivery_log: delivery_log
+      }
     end
   end
 
-  def build_seven_day_message(delivery)
+  # Flex Message送信
+  def send_flex_message(user_id, flex_content, delivery_log = nil)
+    message = flex_content.is_a?(Hash) ? flex_content : build_default_flex_message(flex_content)
+
+    response = @client.push_message(user_id, message)
+    
+    if response.is_a?(Net::HTTPSuccess)
+      {
+        success: true,
+        method: 'line_flex',
+        line_response: response,
+        sent_at: Time.current,
+        delivery_log: delivery_log
+      }
+    else
+      {
+        success: false,
+        error: "LINE Flex API Error: #{response.code} #{response.message}",
+        line_response: response,
+        sent_at: Time.current,
+        delivery_log: delivery_log
+      }
+    end
+  end
+
+  # リマインダー送信（ReminderJobから呼び出し）
+  def send_reminder(delivery)
     appointment = delivery.appointment
+    patient = delivery.patient
+    
+    return false unless patient.line_user_id.present?
+
+    message_content = build_reminder_flex_message(appointment, delivery.reminder_type)
+    
+    result = send_flex_message(patient.line_user_id, message_content, delivery)
+    
+    if result[:success]
+      delivery.update!(
+        status: 'sent',
+        sent_at: result[:sent_at],
+        response_data: result.except(:delivery_log)
+      )
+      true
+    else
+      delivery.update!(
+        status: 'failed',
+        error_message: result[:error],
+        response_data: result.except(:delivery_log)
+      )
+      false
+    end
+  end
+
+  # リマインダー用Flex Message構築
+  def build_reminder_flex_message(appointment, reminder_type)
+    clinic_name = Rails.application.config.clinic_name || "歯科クリニック"
+    patient_name = appointment.patient.name
+    appointment_time = appointment.appointment_date&.strftime('%Y年%m月%d日(%a) %H:%M') || '未設定'
+    
+    title, subtitle, color = case reminder_type
+                             when 'week', 'seven_day_reminder'
+                               ['予約確認（1週間前）', 'ご準備をお願いします', '#2563EB']
+                             when 'three_days', 'three_day_reminder'  
+                               ['予約確認（3日前）', '保険証の準備をお忘れなく', '#F59E0B']
+                             when 'same_day', 'one_day_reminder'
+                               ['本日の診療予約', 'お待ちしております', '#10B981']
+                             else
+                               ['診療予約のお知らせ', 'ご確認ください', '#6B7280']
+                             end
+
     {
       type: 'flex',
-      altText: '【予約確認】診療予約のお知らせ',
+      altText: "【#{title}】#{clinic_name} - #{patient_name}様",
       contents: {
         type: 'bubble',
+        size: 'kilo',
         header: {
           type: 'box',
           layout: 'vertical',
           contents: [
             {
               type: 'text',
-              text: '診療予約のお知らせ',
+              text: clinic_name,
               weight: 'bold',
               size: 'xl',
-              color: '#1DB446'
+              color: '#ffffff'
+            },
+            {
+              type: 'text',
+              text: title,
+              size: 'sm',
+              color: '#ffffff',
+              margin: 'xs'
             }
-          ]
+          ],
+          backgroundColor: color,
+          paddingAll: 'lg'
         },
         body: {
           type: 'box',
@@ -114,16 +182,17 @@ class LineNotificationService
           contents: [
             {
               type: 'text',
-              text: "#{delivery.patient.name}様",
-              size: 'md',
-              weight: 'bold'
+              text: "#{patient_name}様",
+              weight: 'bold',
+              size: 'lg',
+              color: '#1a1a1a'
             },
             {
               type: 'text',
-              text: '1週間後に診療予約がございます。',
+              text: subtitle,
               size: 'sm',
-              margin: 'md',
-              wrap: true
+              color: '#666666',
+              margin: 'md'
             },
             {
               type: 'separator',
@@ -133,38 +202,52 @@ class LineNotificationService
               type: 'box',
               layout: 'vertical',
               margin: 'lg',
+              spacing: 'sm',
               contents: [
                 {
-                  type: 'text',
-                  text: '予約日時',
-                  size: 'sm',
-                  color: '#666666'
+                  type: 'box',
+                  layout: 'baseline',
+                  spacing: 'sm',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '日時',
+                      color: '#666666',
+                      size: 'sm',
+                      flex: 2
+                    },
+                    {
+                      type: 'text',
+                      text: appointment_time,
+                      wrap: true,
+                      color: '#1a1a1a',
+                      size: 'md',
+                      weight: 'bold',
+                      flex: 5
+                    }
+                  ]
                 },
                 {
-                  type: 'text',
-                  text: appointment.scheduled_at.strftime('%Y年%m月%d日 %H:%M'),
-                  size: 'md',
-                  weight: 'bold',
-                  margin: 'sm'
-                }
-              ]
-            },
-            {
-              type: 'box',
-              layout: 'vertical',
-              margin: 'lg',
-              contents: [
-                {
-                  type: 'text',
-                  text: '診療内容',
-                  size: 'sm',
-                  color: '#666666'
-                },
-                {
-                  type: 'text',
-                  text: appointment.treatment_type || '一般診療',
-                  size: 'md',
-                  margin: 'sm'
+                  type: 'box',
+                  layout: 'baseline',
+                  spacing: 'sm',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '治療',
+                      color: '#666666',
+                      size: 'sm',
+                      flex: 2
+                    },
+                    {
+                      type: 'text',
+                      text: appointment.treatment_type || '一般診療',
+                      wrap: true,
+                      color: '#1a1a1a',
+                      size: 'md',
+                      flex: 5
+                    }
+                  ]
                 }
               ]
             }
@@ -173,24 +256,26 @@ class LineNotificationService
         footer: {
           type: 'box',
           layout: 'vertical',
+          spacing: 'sm',
           contents: [
             {
               type: 'button',
               style: 'primary',
+              height: 'sm',
               action: {
                 type: 'uri',
-                label: '予約を確認',
-                uri: "#{ENV['APP_URL']}/appointments/#{appointment.id}"
-              }
+                label: '予約詳細を確認',
+                uri: "#{Rails.application.config.app_base_url || 'https://clinic.example.com'}/appointments/#{appointment.id}"
+              },
+              color: color
             },
             {
-              type: 'button',
-              style: 'link',
-              action: {
-                type: 'postback',
-                label: '予約を変更',
-                data: "action=change_appointment&appointment_id=#{appointment.id}"
-              }
+              type: 'text',
+              text: '変更・キャンセルはお電話でお願いします',
+              size: 'xs',
+              color: '#999999',
+              align: 'center',
+              margin: 'md'
             }
           ]
         }
@@ -198,100 +283,233 @@ class LineNotificationService
     }
   end
 
-  def build_three_day_message(delivery)
-    appointment = delivery.appointment
-    {
-      type: 'text',
-      text: <<~TEXT
-        【予約確認】#{delivery.patient.name}様
-        
-        3日後（#{appointment.scheduled_at.strftime('%m/%d %H:%M')}）に診療予約がございます。
-        
-        ■持ち物
-        ・保険証
-        ・診察券
-        ・お薬手帳（お持ちの方）
-        
-        ご都合が悪くなった場合は、お早めにご連絡ください。
-        TEL: #{ENV['CLINIC_PHONE']}
-      TEXT
-    }
-  end
-
-  def build_one_day_message(delivery)
-    appointment = delivery.appointment
-    {
-      type: 'text',
-      text: <<~TEXT
-        【明日の予約】#{delivery.patient.name}様
-        
-        明日（#{appointment.scheduled_at.strftime('%H:%M')}）診療予約です。
-        
-        ■注意事項
-        ・遅刻されそうな場合は必ずご連絡ください
-        ・体調不良の場合は無理せずキャンセルをお願いします
-        
-        お待ちしております。
-      TEXT
-    }
-  end
-
-  def build_default_message(delivery)
-    {
-      type: 'text',
-      text: delivery.content
-    }
-  end
-
-  def handle_error(delivery, error_message)
-    Rails.logger.error "LINE送信エラー - Delivery ID: #{delivery.id}, Error: #{error_message}"
+  # デフォルトFlex Message構築
+  def build_default_flex_message(content)
+    clinic_name = Rails.application.config.clinic_name || "歯科クリニック"
     
-    delivery.increment!(:retry_count)
-    delivery.update!(
-      status: 'failed',
-      error_message: error_message
+    {
+      type: 'flex',
+      altText: "【お知らせ】#{clinic_name}",
+      contents: {
+        type: 'bubble',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: clinic_name,
+              weight: 'bold',
+              size: 'xl',
+              color: '#2563EB'
+            },
+            {
+              type: 'separator',
+              margin: 'lg'
+            },
+            {
+              type: 'text',
+              text: content.to_s,
+              wrap: true,
+              margin: 'lg'
+            }
+          ]
+        }
+      }
+    }
+  end
+
+  # 予約確認メッセージ送信
+  def send_appointment_confirmation(user_id, appointment)
+    message_content = build_confirmation_flex_message(appointment)
+    send_flex_message(user_id, message_content)
+  end
+
+  # 予約キャンセル通知送信
+  def send_appointment_cancellation(user_id, appointment)
+    clinic_name = Rails.application.config.clinic_name || "歯科クリニック"
+    patient_name = appointment.patient.name
+    
+    message = "【#{clinic_name}】\n#{patient_name}様\n\nご予約をキャンセルいたしました。\n\nまたのご利用をお待ちしております。"
+    send_text_message(user_id, message)
+  end
+
+  # Webhookメッセージ処理
+  def handle_webhook(body, signature)
+    unless @client.validate_signature(body, signature)
+      return { success: false, error: 'Invalid signature' }
+    end
+
+    events = @client.parse_events_from(body)
+    
+    events.each do |event|
+      case event
+      when Line::Bot::Event::Message
+        handle_message_event(event)
+      when Line::Bot::Event::Postback
+        handle_postback_event(event)
+      when Line::Bot::Event::Follow
+        handle_follow_event(event)
+      when Line::Bot::Event::Unfollow
+        handle_unfollow_event(event)
+      end
+    end
+
+    { success: true, processed_events: events.size }
+  end
+
+  private
+
+  # 配信ログ作成
+  def create_delivery_log(user_id, appointment)
+    return nil unless appointment
+
+    DeliveryLog.create!(
+      appointment: appointment,
+      patient: appointment.patient,
+      delivery_type: 'line_notification',
+      notification_type: 'reminder',
+      delivery_method: 'line',
+      status: 'pending',
+      line_user_id: user_id,
+      created_at: Time.current
     )
-    
-    # リトライ回数が3回未満の場合は再実行をスケジュール
-    if delivery.retry_count < 3
-      ReminderJob.set(wait: (delivery.retry_count * 10).minutes).perform_later(
-        appointment_id: delivery.appointment_id,
-        reminder_type: delivery.reminder_type,
-        delivery_method: 'line'
-      )
-    end
+  rescue => e
+    Rails.logger.warn "Failed to create delivery log: #{e.message}"
+    nil
   end
 
+  # 配信ログ更新
+  def update_delivery_log(delivery_log, result)
+    return unless delivery_log
+
+    delivery_log.update!(
+      status: result[:success] ? 'sent' : 'failed',
+      sent_at: result[:sent_at],
+      response_data: result.except(:success, :delivery_log),
+      error_message: result[:error]
+    )
+  rescue => e
+    Rails.logger.warn "Failed to update delivery log: #{e.message}"
+  end
+
+  # 確認メッセージFlex構築
+  def build_confirmation_flex_message(appointment)
+    clinic_name = Rails.application.config.clinic_name || "歯科クリニック"
+    patient_name = appointment.patient.name
+    appointment_time = appointment.appointment_date&.strftime('%Y年%m月%d日(%a) %H:%M') || '未設定'
+
+    {
+      type: 'flex',
+      altText: "【予約確定】#{clinic_name} - #{patient_name}様",
+      contents: {
+        type: 'bubble',
+        header: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: clinic_name,
+              weight: 'bold',
+              size: 'xl',
+              color: '#ffffff'
+            },
+            {
+              type: 'text',
+              text: '予約確定',
+              size: 'sm',
+              color: '#ffffff'
+            }
+          ],
+          backgroundColor: '#10B981',
+          paddingAll: 'lg'
+        },
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: "#{patient_name}様",
+              weight: 'bold',
+              size: 'lg'
+            },
+            {
+              type: 'text',
+              text: 'ご予約を確定いたしました',
+              margin: 'md'
+            },
+            {
+              type: 'separator',
+              margin: 'lg'
+            },
+            {
+              type: 'text',
+              text: appointment_time,
+              weight: 'bold',
+              size: 'lg',
+              margin: 'lg',
+              align: 'center'
+            }
+          ]
+        }
+      }
+    }
+  end
+
+  # メッセージイベント処理
   def handle_message_event(event)
-    # ユーザーからのメッセージ受信時の処理
-    Rails.logger.info "LINE Message Event: #{event}"
+    user_id = event['source']['userId']
+    message_text = event.message['text']
+    
+    # 簡単な自動応答
+    case message_text&.downcase
+    when /予約|よやく/
+      reply_text = "予約に関するお問い合わせは、お電話でお受けしております。\n#{Rails.application.config.clinic_phone || 'お電話番号未設定'}"
+    when /キャンセル|きゃんせる/
+      reply_text = "キャンセルのご連絡は、お電話でお願いいたします。\n#{Rails.application.config.clinic_phone || 'お電話番号未設定'}"
+    else
+      reply_text = "メッセージありがとうございます。お問い合わせはお電話でお受けしております。"
+    end
+
+    reply_message = {
+      type: 'text',
+      text: reply_text
+    }
+
+    @client.reply_message(event['replyToken'], reply_message)
   end
 
+  # ポストバックイベント処理
   def handle_postback_event(event)
-    # ボタン押下時の処理
-    data = Rack::Utils.parse_query(event['postback']['data'])
+    user_id = event['source']['userId']
+    postback_data = event['postback']['data']
     
-    case data['action']
-    when 'change_appointment'
-      # 予約変更の処理
-      appointment_id = data['appointment_id']
-      # TODO: 予約変更画面へのリンクを返信
+    # ポストバックデータに応じた処理
+    case postback_data
+    when 'confirm_appointment'
+      # 予約確認処理
+    when 'cancel_appointment'
+      # キャンセル処理
     end
   end
 
-  def handle_read_event(event)
-    # 既読イベントの処理
-    line_user_id = event['source']['userId']
-    patient = Patient.find_by(line_user_id: line_user_id)
+  # フォローイベント処理
+  def handle_follow_event(event)
+    user_id = event['source']['userId']
     
-    if patient
-      # 最新の送信済みメッセージを既読にする
-      delivery = patient.deliveries
-        .where(delivery_method: 'line', status: 'sent')
-        .order(sent_at: :desc)
-        .first
-        
-      delivery&.mark_read
-    end
+    welcome_message = {
+      type: 'text',
+      text: "#{Rails.application.config.clinic_name || '歯科クリニック'}公式LINEへようこそ！\n\n予約の確認やリマインドをお送りいたします。"
+    }
+
+    @client.reply_message(event['replyToken'], welcome_message)
+  end
+
+  # アンフォローイベント処理
+  def handle_unfollow_event(event)
+    user_id = event['source']['userId']
+    Rails.logger.info "User unfollowed: #{user_id}"
   end
 end

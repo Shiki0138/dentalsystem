@@ -1,0 +1,275 @@
+# 🚀 160倍高速化システム専用 超高速アラートルール
+# worker4の革命的高速化成果に最適化された監視設定
+
+groups:
+  - name: ultra_speed_revolution_critical
+    interval: 1s  # 1秒間隔の超高速監視
+    rules:
+      # 160倍高速化システム専用アラート
+      - alert: SpeedRevolutionFailure
+        expr: speed_improvement_ratio{job="dental-system"} < 150
+        for: 10s  # 10秒で即座に検知
+        labels:
+          severity: critical
+          revolution_impact: extreme
+          worker4_achievement: threatened
+        annotations:
+          summary: "🚨 160倍高速化システム性能劣化"
+          description: "worker4が実現した160倍高速化が {{ $value }}倍に低下！即座に対応が必要です"
+          runbook_url: "https://dental-revolution.com/runbooks/speed-degradation"
+          
+      # 超高速レスポンス監視（ミリ秒単位）
+      - alert: UltraFastResponseDegradation
+        expr: |
+          histogram_quantile(0.99, 
+            rate(http_request_duration_seconds_bucket{job="dental-system"}[30s])
+          ) * 1000 > 10
+        for: 30s
+        labels:
+          severity: critical
+          performance_tier: ultra_fast
+          optimization_level: maximum
+        annotations:
+          summary: "⚡ 超高速レスポンス劣化検出"
+          description: "99%タイルが {{ $value }}msに達しています（目標: 10ms以下）"
+          context: "160倍高速化の恩恵が失われる可能性があります"
+          
+      # 革命的スループット監視
+      - alert: RevolutionaryThroughputDrop
+        expr: |
+          rate(http_requests_total{job="dental-system"}[1m]) * 60 < 
+          rate(http_requests_total{job="dental-system"}[1h] offset 1h) * 60 * 0.8
+        for: 2m
+        labels:
+          severity: warning
+          throughput_category: revolutionary
+          impact_scope: user_experience
+        annotations:
+          summary: "📉 革命的スループット低下"
+          description: "スループットが過去1時間の平均から20%以上低下しています"
+          
+  - name: ultra_speed_database_performance
+    interval: 5s
+    rules:
+      # 超高速DB監視（worker4最適化対応）
+      - alert: UltraFastQueryDegradation
+        expr: |
+          avg(pg_stat_statements_mean_time_seconds{job="postgresql"}) * 1000 > 2
+        for: 30s
+        labels:
+          severity: warning
+          component: database
+          optimization_level: ultra_fast
+        annotations:
+          summary: "🗄️ 超高速クエリ性能劣化"
+          description: "平均クエリ実行時間が {{ $value }}msです（目標: 2ms以下）"
+          
+      # インデックス効率監視（160倍高速化対応）
+      - alert: IndexEfficiencyDrop
+        expr: |
+          avg(
+            pg_stat_database_tup_fetched{job="postgresql"} / 
+            (pg_stat_database_tup_returned{job="postgresql"} + 1)
+          ) * 100 < 95
+        for: 5m
+        labels:
+          severity: warning
+          optimization_area: indexing
+        annotations:
+          summary: "📊 インデックス効率低下"
+          description: "インデックス効率が {{ $value }}%に低下（目標: 95%以上）"
+          
+  - name: ultra_speed_cache_optimization
+    interval: 10s
+    rules:
+      # 超高速キャッシュ監視
+      - alert: CacheHitRatioDrop
+        expr: cache_hit_ratio{job="dental-system"} * 100 < 98
+        for: 1m
+        labels:
+          severity: warning
+          optimization_component: cache
+          speed_impact: high
+        annotations:
+          summary: "💾 キャッシュヒット率低下"
+          description: "キャッシュヒット率が {{ $value }}%（目標: 98%以上）"
+          impact: "160倍高速化効果が減少する可能性があります"
+          
+      # Redis性能監視（超高速対応）
+      - alert: RedisPerformanceDegradation
+        expr: redis_commands_duration_seconds_total{job="redis"} > 0.001
+        for: 30s
+        labels:
+          severity: critical
+          component: redis
+          speed_tier: ultra_fast
+        annotations:
+          summary: "🔴 Redis性能劣化"
+          description: "Redisコマンド実行時間が {{ $value }}秒（目標: 1ms以下）"
+          
+  - name: revolutionary_quality_speed_balance
+    interval: 30s
+    rules:
+      # 品質×高速化バランス監視
+      - alert: QualitySpeedImbalance
+        expr: |
+          (quality_score{job="dental-system"} < 95) and 
+          (speed_improvement_ratio{job="dental-system"} > 160)
+        for: 5m
+        labels:
+          severity: warning
+          balance_type: quality_speed
+          optimization_concern: true
+        annotations:
+          summary: "⚖️ 品質×高速化バランス警告"
+          description: "高速化は維持されているが品質スコアが {{ $value }}点に低下"
+          
+      # 革命的効率監視
+      - alert: RevolutionaryEfficiencyDrop
+        expr: |
+          clinic_efficiency_improvement{job="dental-system"} < 
+          speed_improvement_ratio{job="dental-system"} * 2
+        for: 10m
+        labels:
+          severity: warning
+          efficiency_category: revolutionary
+          business_impact: medium
+        annotations:
+          summary: "📈 革命的効率改善の不整合"
+          description: "160倍高速化に対して効率改善が追いついていません"
+          
+  - name: user_experience_ultra_optimization
+    interval: 15s
+    rules:
+      # 超高速ユーザーエクスペリエンス
+      - alert: UltraFastUXDegradation
+        expr: |
+          avg(page_load_time_seconds{job="dental-system"}) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+          ux_tier: ultra_fast
+          user_impact: high
+        annotations:
+          summary: "🖥️ 超高速UX劣化"
+          description: "ページロード時間が {{ $value }}秒（目標: 0.5秒以下）"
+          
+      # API応答速度（超高速基準）
+      - alert: APIResponseSpeedDrop
+        expr: |
+          histogram_quantile(0.95, 
+            rate(api_request_duration_seconds_bucket{job="dental-system"}[1m])
+          ) * 1000 > 50
+        for: 2m
+        labels:
+          severity: warning
+          api_performance: ultra_fast
+          service_tier: premium
+        annotations:
+          summary: "🔌 API応答速度低下"
+          description: "API 95%タイルが {{ $value }}ms（目標: 50ms以下）"
+          
+  - name: concurrent_load_ultra_handling
+    interval: 5s
+    rules:
+      # 超高速同時処理能力
+      - alert: ConcurrentLoadHandlingDrop
+        expr: |
+          active_connections{job="dental-system"} > 1000 and
+          avg(response_time_under_load_ms{job="dental-system"}) > 100
+        for: 1m
+        labels:
+          severity: critical
+          load_category: concurrent_ultra
+          scalability_impact: high
+        annotations:
+          summary: "🔄 超高速同時処理能力低下"
+          description: "高負荷時({{ $labels.active_connections }}接続)の応答時間が劣化"
+          
+# 160倍高速化専用通知設定
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+            
+# 超高速システム用グローバル設定
+global:
+  evaluation_interval: 1s  # 1秒評価間隔（最高精度）
+  external_labels:
+    monitor: 'dental-revolution-160x'
+    optimization_level: 'ultra_fast'
+    worker4_achievement: 'enabled'
+
+# 革命的通知ルーティング
+route:
+  group_by: ['alertname', 'severity', 'revolution_impact']
+  group_wait: 1s     # 1秒待機（即座通知）
+  group_interval: 5s  # 5秒間隔（高頻度更新）
+  repeat_interval: 30m # 30分間隔（適度な再通知）
+  receiver: 'revolution-team'
+  
+  routes:
+    # 160倍高速化関連は最優先
+    - match:
+        worker4_achievement: threatened
+      receiver: 'speed-revolution-emergency'
+      group_wait: 0s
+      continue: true
+      
+    # 超高速システム専用ルート
+    - match:
+        optimization_level: ultra_fast
+      receiver: 'ultra-speed-team'
+      
+    # 革命インパクト極大は経営層へ
+    - match:
+        revolution_impact: extreme
+      receiver: 'executive-team'
+
+# 160倍高速化専用通知先
+receivers:
+  - name: 'revolution-team'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#dental-revolution-160x'
+        title: '🚀 160倍高速化システム監視'
+        text: |
+          worker4実現の160倍高速化システムアラート
+          {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+        send_resolved: true
+        
+  - name: 'speed-revolution-emergency'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#speed-revolution-emergency'
+        title: '🚨 160倍高速化緊急事態'
+        color: 'danger'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SPEED_REVOLUTION_KEY}'
+        description: '160倍高速化システムの性能劣化緊急事態'
+        
+  - name: 'ultra-speed-team'
+    email_configs:
+      - to: 'ultra-speed-team@dental-revolution.com'
+        subject: '⚡ 超高速システム監視アラート'
+        
+  - name: 'executive-team'
+    email_configs:
+      - to: 'executives@dental-revolution.com'
+        subject: '🏆 歯科業界革命システム重要アラート'
+
+# 抑制ルール（偽陽性防止）
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'job']
+    
+  # 160倍高速化劣化時は他の警告を抑制
+  - source_match:
+      worker4_achievement: 'threatened'
+    target_match_re:
+      severity: 'warning|info'
+    equal: ['job']

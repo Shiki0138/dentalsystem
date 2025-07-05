@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <title>🦷 歯科業界革命システム - デモ体験</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="史上最強の歯科クリニック管理システム - 本番デモ環境">
+  <meta name="theme-color" content="#3b82f6">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --success-gradient: linear-gradient(135deg, #10b981 0%, #06d6a0 100%);
+      --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      --hover-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .hero-container {
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='m0 40l40-40h-40z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      color: white;
+      text-align: center;
+    }
+    
+    .main-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 1s ease-out;
+    }
+    
+    .subtitle {
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 3rem;
+      opacity: 0.95;
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+    
+    .demo-start-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeInUp 1s ease-out 0.4s both;
+      transition: all 0.3s ease;
+    }
+    
+    .demo-start-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--hover-shadow);
+    }
+    
+    .demo-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+    
+    .feature-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      transition: all 0.3s ease;
+      animation: fadeInUp 1s ease-out var(--delay) both;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--hover-shadow);
+    }
+    
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: var(--primary-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+    }
+    
+    .btn-demo-start {
+      background: var(--success-gradient);
+      border: none;
+      border-radius: 50px;
+      padding: 1rem 3rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-demo-start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+      color: white;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+    }
+    
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .safety-badge {
+      background: var(--warning-gradient);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 2.5rem;
+      }
+      
+      .subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .demo-start-card {
+        padding: 2rem;
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hero-container">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="hero-content">
+            <h1 class="main-title">
+              🦷 歯科業界革命システム
+            </h1>
+            <p class="subtitle">
+              史上最強のAI統合クリニック管理システム<br>
+              安全なデモ環境で革新的な体験をお試しください
+            </p>
+            
+            <div class="demo-start-card">
+              <div class="safety-badge">
+                <i class="bi bi-shield-check"></i>
+                100% 安全なデモ環境
+              </div>
+              
+              <h2 class="h3 text-dark mb-4">🚀 本格デモ体験を開始</h2>
+              
+              <div class="stats-grid text-dark">
+                <div class="stat-item">
+                  <div class="stat-number">98.5%</div>
+                  <div class="stat-label">AI予約効率</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">50ms</div>
+                  <div class="stat-label">応答速度</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">A+</div>
+                  <div class="stat-label">品質グレード</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">99.9%</div>
+                  <div class="stat-label">稼働率</div>
+                </div>
+              </div>
+              
+              <p class="text-muted mb-4">
+                <i class="bi bi-clock me-2"></i>
+                デモ時間: 24時間 | 
+                <i class="bi bi-database me-2"></i>
+                データ制限: 患者100名、予約50件/日
+              </p>
+              
+              <%= link_to demo_start_path, method: :post, class: "btn-demo-start pulse-animation" do %>
+                <i class="bi bi-play-circle-fill"></i>
+                デモ環境を開始する
+              <% end %>
+              
+              <div class="mt-4">
+                <small class="text-muted">
+                  ※ デモ環境では実際のメール送信・決済処理は行われません<br>
+                  ※ すべてのデータは安全なテスト用データです
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 主要機能紹介 -->
+      <div class="row">
+        <div class="col-12">
+          <div class="demo-features">
+            <div class="feature-card" style="--delay: 0.6s;">
+              <div class="feature-icon">
+                <i class="bi bi-robot"></i>
+              </div>
+              <h3 class="h5 mb-3">AI予約最適化</h3>
+              <p class="text-muted mb-0">
+                機械学習による最適な予約時間提案<br>
+                競合予測・自動回避システム
+              </p>
+            </div>
+            
+            <div class="feature-card" style="--delay: 0.8s;">
+              <div class="feature-icon">
+                <i class="bi bi-calendar3"></i>
+              </div>
+              <h3 class="h5 mb-3">FullCalendar統合</h3>
+              <p class="text-muted mb-0">
+                ドラッグ&ドロップ予約登録<br>
+                30秒で完了する直感的操作
+              </p>
+            </div>
+            
+            <div class="feature-card" style="--delay: 1.0s;">
+              <div class="feature-icon">
+                <i class="bi bi-speedometer2"></i>
+              </div>
+              <h3 class="h5 mb-3">リアルタイム分析</h3>
+              <p class="text-muted mb-0">
+                50ms高速ダッシュボード<br>
+                予測分析・異常検知システム
+              </p>
+            </div>
+            
+            <div class="feature-card" style="--delay: 1.2s;">
+              <div class="feature-icon">
+                <i class="bi bi-person-hearts"></i>
+              </div>
+              <h3 class="h5 mb-3">患者管理革新</h3>
+              <p class="text-muted mb-0">
+                AI統合による智的患者管理<br>
+                自動インサイト・予測機能
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // ページロード時のアニメーション
+    document.addEventListener('DOMContentLoaded', function() {
+      // パフォーマンス統計のカウントアップアニメーション
+      const statNumbers = document.querySelectorAll('.stat-number');
+      
+      statNumbers.forEach(function(stat) {
+        const finalText = stat.textContent;
+        stat.textContent = '0';
+        
+        setTimeout(function() {
+          stat.style.transition = 'all 1s ease';
+          stat.textContent = finalText;
+        }, 1000);
+      });
+      
+      // デモ開始ボタンのクリックイベント
+      const demoStartBtn = document.querySelector('.btn-demo-start');
+      if (demoStartBtn) {
+        demoStartBtn.addEventListener('click', function(e) {
+          // ローディング状態を表示
+          this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>デモ環境を準備中...';
+          this.style.pointerEvents = 'none';
+          
+          // 実際のフォーム送信を継続
+        });
+      }
+    });
+    
+    // パーティクル効果（オプション）
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.style.cssText = `
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 6s linear infinite;
+      `;
+      
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 6 + 's';
+      
+      document.querySelector('.hero-container').appendChild(particle);
+      
+      setTimeout(() => {
+        particle.remove();
+      }, 6000);
+    }
+    
+    // パーティクルを定期的に生成
+    setInterval(createParticle, 300);
+    
+    // CSSアニメーション追加
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

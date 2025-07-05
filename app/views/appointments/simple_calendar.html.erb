@@ -1,0 +1,292 @@
+<!-- シンプル予約カレンダー（受付スタッフ向け） -->
+<div class="appointments-calendar">
+  <!-- ヘッダー -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">📅 予約カレンダー</h1>
+      <p class="text-gray-600 mt-1">今日は <%= Date.current.strftime("%Y年%m月%d日 (%A)") %></p>
+    </div>
+    <div class="flex space-x-3">
+      <%= link_to new_appointment_path, 
+          class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium" do %>
+        <i class="bi bi-plus-circle me-2"></i>
+        新規予約
+      <% end %>
+      <%= link_to appointments_path, 
+          class: "inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium" do %>
+        <i class="bi bi-list me-2"></i>
+        リスト表示
+      <% end %>
+    </div>
+  </div>
+
+  <!-- クイック統計 -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-calendar-event text-blue-600 text-2xl"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-500">今日の予約</p>
+          <p class="text-lg font-semibold text-gray-900"><%= @today_appointments_count || 8 %>件</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-check-circle text-green-600 text-2xl"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-500">確認済み</p>
+          <p class="text-lg font-semibold text-gray-900"><%= @confirmed_appointments_count || 6 %>件</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-clock text-yellow-600 text-2xl"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-500">待機中</p>
+          <p class="text-lg font-semibold text-gray-900"><%= @pending_appointments_count || 2 %>件</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-bell text-purple-600 text-2xl"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-500">リマインド</p>
+          <p class="text-lg font-semibold text-gray-900"><%= @reminders_sent_today || 12 %>件</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- カレンダー表示 -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+      <!-- カレンダーコントロール -->
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-4">
+          <h2 id="current-month" class="text-xl font-semibold text-gray-900"></h2>
+          <div class="flex space-x-2">
+            <button id="prev-month" class="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button id="next-month" class="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex space-x-2">
+          <button id="today-btn" class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+            今日
+          </button>
+          <select id="view-selector" class="px-3 py-2 text-sm border border-gray-300 rounded-md">
+            <option value="month">月表示</option>
+            <option value="week">週表示</option>
+            <option value="day">日表示</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- カレンダーグリッド -->
+      <div id="calendar-grid" class="border border-gray-200 rounded-lg overflow-hidden">
+        <!-- FullCalendarがここに表示される -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 予約元チャネル統計 -->
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- 予約チャネル別統計 -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 予約チャネル別統計</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-600">📞 電話予約</span>
+          <div class="flex items-center">
+            <span class="text-sm font-medium text-gray-900 mr-2">45件</span>
+            <div class="w-20 bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-600 h-2 rounded-full" style="width: 60%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-600">🌐 ホームページ</span>
+          <div class="flex items-center">
+            <span class="text-sm font-medium text-gray-900 mr-2">23件</span>
+            <div class="w-20 bg-gray-200 rounded-full h-2">
+              <div class="bg-green-600 h-2 rounded-full" style="width: 30%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-600">🍖 ホットペッパー</span>
+          <div class="flex items-center">
+            <span class="text-sm font-medium text-gray-900 mr-2">8件</span>
+            <div class="w-20 bg-gray-200 rounded-full h-2">
+              <div class="bg-orange-600 h-2 rounded-full" style="width: 10%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 今日の予約リスト -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 今日の予約</h3>
+      <div class="space-y-3 max-h-64 overflow-y-auto">
+        <% (@today_appointments || []).each do |appointment| %>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+            <div class="flex items-center space-x-3">
+              <div class="text-sm font-medium text-gray-900">
+                <%= appointment[:time] || "09:00" %>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= appointment[:patient_name] || "患者名" %></p>
+                <p class="text-xs text-gray-500"><%= appointment[:treatment] || "定期検診" %></p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-1 text-xs rounded-full <%= appointment[:status] == 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
+                <%= appointment[:status] == 'confirmed' ? '確認済' : '予約済' %>
+              </span>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- サンプルデータ（実際のデータがない場合） -->
+        <% if (@today_appointments || []).empty? %>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <div class="text-sm font-medium text-gray-900">09:00</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">田中太郎</p>
+                <p class="text-xs text-gray-500">定期検診</p>
+              </div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">確認済</span>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <div class="text-sm font-medium text-gray-900">10:30</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">佐藤花子</p>
+                <p class="text-xs text-gray-500">虫歯治療</p>
+              </div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">予約済</span>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <div class="text-sm font-medium text-gray-900">14:00</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">鈴木美咲</p>
+                <p class="text-xs text-gray-500">歯石除去</p>
+              </div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">待機中</span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FullCalendar統合 -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendar-grid');
+  
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'ja',
+    height: 'auto',
+    headerToolbar: false,
+    
+    // イベントデータ（予約情報）
+    events: [
+      {
+        title: '田中太郎 - 定期検診',
+        start: new Date().toISOString().split('T')[0] + 'T09:00:00',
+        color: '#3B82F6',
+        textColor: 'white'
+      },
+      {
+        title: '佐藤花子 - 虫歯治療',
+        start: new Date().toISOString().split('T')[0] + 'T10:30:00',
+        color: '#10B981',
+        textColor: 'white'
+      },
+      {
+        title: '鈴木美咲 - 歯石除去',
+        start: new Date().toISOString().split('T')[0] + 'T14:00:00',
+        color: '#F59E0B',
+        textColor: 'white'
+      }
+    ],
+    
+    // 予約クリック時の処理
+    eventClick: function(info) {
+      alert('予約詳細:\n' + info.event.title + '\n' + info.event.start.toLocaleString());
+    },
+    
+    // 日付クリック時の処理（新規予約作成）
+    dateClick: function(info) {
+      if (confirm('この日に新しい予約を作成しますか？\n日付: ' + info.dateStr)) {
+        window.location.href = '<%= new_appointment_path %>?date=' + info.dateStr;
+      }
+    }
+  });
+  
+  calendar.render();
+  
+  // カレンダーコントロール
+  document.getElementById('prev-month').addEventListener('click', function() {
+    calendar.prev();
+    updateCurrentMonth();
+  });
+  
+  document.getElementById('next-month').addEventListener('click', function() {
+    calendar.next();
+    updateCurrentMonth();
+  });
+  
+  document.getElementById('today-btn').addEventListener('click', function() {
+    calendar.today();
+    updateCurrentMonth();
+  });
+  
+  document.getElementById('view-selector').addEventListener('change', function() {
+    var view = this.value + 'Grid';
+    if (this.value === 'week') view = 'timeGridWeek';
+    if (this.value === 'day') view = 'timeGridDay';
+    
+    calendar.changeView(view);
+  });
+  
+  function updateCurrentMonth() {
+    var currentDate = calendar.getDate();
+    document.getElementById('current-month').textContent = 
+      currentDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' });
+  }
+  
+  // 初期月表示設定
+  updateCurrentMonth();
+});
+</script>

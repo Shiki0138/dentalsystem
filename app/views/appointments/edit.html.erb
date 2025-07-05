@@ -1,0 +1,209 @@
+<%# 歯科医院予約管理システム - 予約編集画面 %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+    
+    <!-- ヘッダー部分 -->
+    <div class="md:flex md:items-center md:justify-between mb-6">
+      <div class="flex-1 min-w-0">
+        <nav class="flex" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-4">
+            <li>
+              <%= link_to appointments_path, class: "text-sm font-medium text-gray-500 hover:text-gray-700" do %>
+                予約一覧
+              <% end %>
+            </li>
+            <li>
+              <div class="flex items-center">
+                <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                <%= link_to appointment_path(@appointment), class: "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700" do %>
+                  予約詳細
+                <% end %>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center">
+                <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500">編集</span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+        
+        <h1 class="mt-2 text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          予約編集
+        </h1>
+        <p class="mt-1 text-sm text-gray-500">
+          <%= @appointment.patient.name %>様の予約を編集します
+        </p>
+      </div>
+    </div>
+
+    <!-- メインフォーム -->
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <%= form_with model: @appointment, local: true, class: "space-y-6" do |form| %>
+          
+          <!-- エラー表示 -->
+          <% if @appointment.errors.any? %>
+            <div class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    入力内容にエラーがあります
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <% @appointment.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            
+            <!-- 患者選択 -->
+            <div class="sm:col-span-2">
+              <%= form.label :patient_id, "患者", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :patient_id, 
+                  @patients, :id, :name, 
+                  { selected: @appointment.patient_id },
+                  { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" } %>
+            </div>
+
+            <!-- 予約日時 -->
+            <div>
+              <%= form.label :appointment_date, "予約日時", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.datetime_local_field :appointment_date, 
+                  value: @appointment.appointment_date&.strftime('%Y-%m-%dT%H:%M'),
+                  class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+            </div>
+
+            <!-- 診療時間 -->
+            <div>
+              <%= form.label :duration, "診療時間（分）", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :duration, 
+                  options_for_select([
+                    ['30分', 30],
+                    ['60分', 60],
+                    ['90分', 90],
+                    ['120分', 120]
+                  ], @appointment.duration),
+                  {},
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- 治療内容 -->
+            <div>
+              <%= form.label :treatment_type, "治療内容", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :treatment_type, 
+                  options_for_select([
+                    ['一般診療', 'general'],
+                    ['初診・相談', 'consultation'],
+                    ['定期検診', 'checkup'],
+                    ['クリーニング', 'cleaning'],
+                    ['虫歯治療', 'filling'],
+                    ['被せ物・詰め物', 'crown'],
+                    ['根管治療', 'root_canal'],
+                    ['抜歯', 'extraction'],
+                    ['矯正治療', 'orthodontics'],
+                    ['ホワイトニング', 'whitening'],
+                    ['その他', 'other']
+                  ], @appointment.treatment_type),
+                  { prompt: '治療内容を選択してください' },
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- ステータス -->
+            <div>
+              <%= form.label :status, "ステータス", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :status, 
+                  options_for_select([
+                    ['予約済み', 'booked'],
+                    ['確認済み', 'visited'],
+                    ['完了', 'completed'],
+                    ['キャンセル', 'cancelled'],
+                    ['無断キャンセル', 'no_show']
+                  ], @appointment.status),
+                  {},
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- 優先度 -->
+            <div>
+              <%= form.label :priority, "優先度", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :priority, 
+                  options_for_select([
+                    ['通常', 'normal'],
+                    ['高', 'high'],
+                    ['緊急', 'urgent'],
+                    ['低', 'low']
+                  ], @appointment.priority || 'normal'),
+                  {},
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- リマインダー設定 -->
+            <div class="sm:col-span-2">
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <%= form.check_box :reminder_enabled, 
+                      class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded",
+                      checked: @appointment.reminder_enabled %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= form.label :reminder_enabled, "自動リマインダーを有効にする", class: "font-medium text-gray-700" %>
+                  <p class="text-gray-500">7日前、3日前、当日にLINE・メール・SMSで通知します</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 備考 -->
+            <div class="sm:col-span-2">
+              <%= form.label :notes, "備考", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :notes, 
+                  rows: 4,
+                  placeholder: "特記事項があれば入力してください",
+                  class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+            </div>
+          </div>
+
+          <!-- フォームアクション -->
+          <div class="flex justify-between">
+            <div>
+              <%= link_to appointment_path(@appointment), method: :delete,
+                  data: { confirm: '本当に削除しますか？' },
+                  class: "bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                <svg class="mr-2 h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                削除
+              <% end %>
+            </div>
+            
+            <div class="flex space-x-3">
+              <%= link_to "キャンセル", appointment_path(@appointment), 
+                  class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              
+              <%= form.submit "変更を保存", 
+                  class: "bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

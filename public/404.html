@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>404 - ページが見つかりません | 歯科クリニック予約管理システム</title>
+  <meta name="description" content="お探しのページは見つかりませんでした。歯科クリニック予約管理システムのメインページに戻ってください。">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'dental-blue': '#3b82f6',
+            'dental-green': '#10b981',
+            'dental-purple': '#8b5cf6'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.8s ease-in-out',
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-gentle': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+
+<body class="h-full gradient-bg flex items-center justify-center px-4">
+  <div class="max-w-lg w-full animate-fade-in">
+    <!-- Error Card -->
+    <div class="glass-effect rounded-2xl shadow-2xl p-8 text-center">
+      <!-- Floating Tooth Icon -->
+      <div class="flex justify-center mb-6">
+        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg animate-float">
+          <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4M9 7h6m-6 4h6m-6 4h6"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Error Title -->
+      <h1 class="text-6xl font-bold text-gray-800 mb-4">404</h1>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">ページが見つかりません</h2>
+      
+      <!-- Error Message -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <p class="text-gray-600 leading-relaxed">
+          申し訳ございません。<br>
+          お探しのページは存在しないか、移動された可能性があります。
+        </p>
+      </div>
+      
+      <!-- Suggested Actions -->
+      <div class="space-y-4 mb-6">
+        <div class="text-left">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">以下をお試しください：</h3>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              URLのスペルを確認してください
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              ブラウザの戻るボタンをクリック
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              下のボタンからメインページへ
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <button onclick="window.location.href='/'" 
+                class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+          </svg>
+          ダッシュボードに戻る
+        </button>
+        
+        <button onclick="history.back()" 
+                class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          前のページに戻る
+        </button>
+      </div>
+      
+      <!-- Contact Info -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <p class="text-xs text-gray-500">
+          問題が解決しない場合は、システム管理者にお問い合わせください。<br>
+          <span class="font-medium">歯科クリニック予約管理システム</span>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Additional Help -->
+    <div class="mt-6 text-center">
+      <p class="text-white text-sm opacity-90">
+        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        エラーが繰り返し発生する場合は、ブラウザのキャッシュをクリアしてください
+      </p>
+    </div>
+  </div>
+
+  <!-- Background Animation -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-white bg-opacity-10 rounded-full animate-pulse-gentle"></div>
+    <div class="absolute top-3/4 right-1/4 w-24 h-24 bg-white bg-opacity-10 rounded-full animate-pulse-gentle" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-3/4 w-16 h-16 bg-white bg-opacity-10 rounded-full animate-pulse-gentle" style="animation-delay: 2s;"></div>
+  </div>
+</body>
+</html>

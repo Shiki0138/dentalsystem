@@ -1,0 +1,63 @@
+[2025-07-04 16:25:08] INFO  WEBrick 1.4.4
+[2025-07-04 16:25:08] INFO  ruby 2.6.10 (2022-04-12) [universal.x86_64-darwin24]
+[2025-07-04 16:25:08] INFO  WEBrick::HTTPServer#start: pid=19678 port=3000
+::1 - - [04/Jul/2025:16:25:19 JST] "GET /health HTTP/1.1" 200 417
+- -> /health
+::1 - - [04/Jul/2025:16:57:27 JST] "GET / HTTP/1.1" 200 3115
+- -> /
+::1 - - [04/Jul/2025:16:57:29 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [04/Jul/2025:16:57:32 JST] "GET /dashboard HTTP/1.1" 200 3740
+http://localhost:3000/ -> /dashboard
+::1 - - [04/Jul/2025:16:57:34 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [04/Jul/2025:16:57:39 JST] "GET /patients HTTP/1.1" 200 2220
+http://localhost:3000/dashboard -> /patients
+::1 - - [04/Jul/2025:16:57:41 JST] "GET /appointments HTTP/1.1" 200 2442
+http://localhost:3000/patients -> /appointments
+::1 - - [04/Jul/2025:16:57:41 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [04/Jul/2025:16:57:42 JST] "GET /appointments/calendar HTTP/1.1" 200 2044
+http://localhost:3000/appointments -> /appointments/calendar
+::1 - - [04/Jul/2025:16:57:42 JST] "GET /api/appointments?start=2025-06-29T00%3A00%3A00%2B09%3A00&end=2025-08-10T00%3A00%3A00%2B09%3A00 HTTP/1.1" 200 1365
+http://localhost:3000/appointments/calendar -> /api/appointments?start=2025-06-29T00%3A00%3A00%2B09%3A00&end=2025-08-10T00%3A00%3A00%2B09%3A00
+::1 - - [04/Jul/2025:16:57:43 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [04/Jul/2025:16:57:44 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:30:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:35:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:41:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:46:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:52:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:09:57:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:03:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:08:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:14:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:19:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:25:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:30:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:36:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:41:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:47:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:52:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:10:58:15 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js
+::1 - - [05/Jul/2025:11:03:45 JST] "GET /sw.js HTTP/1.1" 200 3115
+http://localhost:3000/sw.js -> /sw.js

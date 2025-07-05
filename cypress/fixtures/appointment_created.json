@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "message": "予約を作成しました",
+  "data": {
+    "id": 4,
+    "patient_id": 1,
+    "patient_name": "テスト患者",
+    "appointment_date": "2025-07-05",
+    "appointment_time": "10:00",
+    "status": "booked",
+    "treatment_type": "定期検診",
+    "notes": "Cypressテスト予約",
+    "created_at": "2025-07-04T15:30:00Z"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "name": "田中太郎",
+      "phone": "090-1234-5678",
+      "email": "tanaka@example.com",
+      "birth_date": "1980-01-01",
+      "address": "東京都渋谷区",
+      "insurance_number": "INS123456789",
+      "emergency_contact": "田中花子",
+      "emergency_phone": "090-8765-4321",
+      "medical_history": "高血圧",
+      "allergies": "ペニシリン",
+      "created_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "佐藤花子",
+      "phone": "080-9876-5432",
+      "email": "sato@example.com",
+      "birth_date": "1985-05-15",
+      "address": "東京都新宿区",
+      "insurance_number": "INS987654321",
+      "emergency_contact": "佐藤太郎",
+      "emergency_phone": "080-1111-2222",
+      "medical_history": "",
+      "allergies": "",
+      "created_at": "2025-01-15T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "山田次郎",
+      "phone": "070-5555-6666",
+      "email": "yamada@example.com",
+      "birth_date": "1990-12-20",
+      "address": "東京都世田谷区",
+      "insurance_number": "INS555666777",
+      "emergency_contact": "山田三郎",
+      "emergency_phone": "070-7777-8888",
+      "medical_history": "糖尿病",
+      "allergies": "卵",
+      "created_at": "2025-02-01T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 3,
+    "page": 1,
+    "per_page": 10
+  }
+}

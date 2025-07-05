@@ -1,281 +1,385 @@
+# 歯科医院予約管理システム - AppointmentsController
+# 予約管理の中核となるコントローラー
+# 実用的な予約システムの完全実装
+
 class AppointmentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_appointment, only: [:show, :edit, :update, :destroy, :visit, :cancel]
-
-  # GET /appointments
+  before_action :set_appointment, only: [:show, :edit, :update, :destroy, :cancel]
+  before_action :load_patients, only: [:new, :edit, :create, :update]
+  
+  # 予約一覧表示
   def index
-    @appointments = Appointment.includes(:patient, :reminders)
-                              .joins(:patient)
-                              .select('appointments.*, patients.name as patient_name, patients.phone as patient_phone')
-                              .order(:appointment_date)
-
-    # フィルタリング最適化
-    @appointments = @appointments.by_status(params[:status]) if params[:status].present?
-    @appointments = @appointments.where(appointment_date: date_range) if date_params_present?
-
-    # 患者検索最適化 - JOINを使用してN+1を回避
-    if params[:patient_search].present?
-      @appointments = @appointments.where(
-        "patients.name ILIKE :query OR patients.phone LIKE :query OR patients.email ILIKE :query",
-        query: "%#{params[:patient_search]}%"
-      )
-    end
-
-    # ページネーション（パフォーマンス最適化）
-    @appointments = @appointments.page(params[:page]).per(20)
-
+    @appointments = filter_appointments
+    
     respond_to do |format|
       format.html
-      format.json { render json: appointments_json }
+      format.json { render json: @appointments.map { |apt| appointment_json(apt) } }
     end
   end
 
-  # GET /appointments/calendar
+  # カレンダー表示
   def calendar
     @appointments = Appointment.includes(:patient)
-                              .joins(:patient)
-                              .where(appointment_date: calendar_date_range)
-                              .order(:appointment_date)
-
+                               .where(appointment_date: 3.months.ago..3.months.from_now)
+    
     respond_to do |format|
       format.html
       format.json { render json: calendar_events_json }
     end
   end
 
-  # GET /appointments/1
+  # 予約詳細表示
   def show
+    respond_to do |format|
+      format.html
+      format.json { render json: appointment_json(@appointment) }
+    end
   end
 
-  # GET /appointments/new
+  # 新規予約フォーム
   def new
     @appointment = Appointment.new
-    @patients = Patient.all.limit(100) # 検索用
+    @appointment.appointment_date = params[:date] if params[:date]
+    @appointment.duration = 60 # デフォルト60分
   end
 
-  # GET /appointments/1/edit
+  # 予約編集フォーム
   def edit
   end
 
-  # POST /appointments
+  # 予約作成
   def create
     @appointment = Appointment.new(appointment_params)
-
+    
     if @appointment.save
-      # リマインダー配信スケジュール
-      schedule_reminders(@appointment)
+      # リマインダージョブをスケジュール
+      schedule_reminder_jobs(@appointment)
       
-      redirect_to @appointment, notice: '予約が正常に作成されました。'
+      # 通知送信
+      send_appointment_confirmation(@appointment)
+      
+      respond_to do |format|
+        format.html { redirect_to @appointment, notice: '予約が正常に作成されました。' }
+        format.json { render json: appointment_json(@appointment), status: :created }
+        format.turbo_stream
+      end
     else
-      @patients = Patient.all.limit(100)
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @appointment.errors, status: :unprocessable_entity }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("appointment_form", partial: "form_errors") }
+      end
     end
   end
 
-  # PATCH/PUT /appointments/1
+  # 予約更新
   def update
     if @appointment.update(appointment_params)
-      redirect_to @appointment, notice: '予約が正常に更新されました。'
+      # リマインダージョブを再スケジュール
+      reschedule_reminder_jobs(@appointment)
+      
+      # 変更通知送信
+      send_appointment_update(@appointment)
+      
+      respond_to do |format|
+        format.html { redirect_to @appointment, notice: '予約が正常に更新されました。' }
+        format.json { render json: appointment_json(@appointment) }
+        format.turbo_stream
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @appointment.errors, status: :unprocessable_entity }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("appointment_form", partial: "form_errors") }
+      end
     end
   end
 
-  # DELETE /appointments/1
+  # 予約削除
   def destroy
     @appointment.destroy
-    redirect_to appointments_url, notice: '予約が削除されました。'
-  end
-
-  # POST /appointments/1/visit
-  def visit
-    if @appointment.visit
-      redirect_to @appointment, notice: '来院として記録されました。'
-    else
-      redirect_to @appointment, alert: 'ステータスの更新に失敗しました。'
+    
+    respond_to do |format|
+      format.html { redirect_to appointments_url, notice: '予約が削除されました。' }
+      format.json { head :no_content }
+      format.turbo_stream { render turbo_stream: turbo_stream.remove("appointment_#{@appointment.id}") }
     end
   end
 
-  # PATCH /appointments/1/cancel
+  # 予約キャンセル
   def cancel
     if @appointment.update(status: 'cancelled')
+      send_appointment_cancellation(@appointment)
+      
       respond_to do |format|
-        format.html { redirect_to @appointment, notice: '予約がキャンセルされました。' }
-        format.json { head :ok }
+        format.html { redirect_to appointments_url, notice: '予約がキャンセルされました。' }
+        format.json { render json: appointment_json(@appointment) }
+        format.turbo_stream
       end
     else
       respond_to do |format|
-        format.html { redirect_to @appointment, alert: 'キャンセル処理に失敗しました。' }
-        format.json { head :unprocessable_entity }
+        format.html { redirect_to @appointment, alert: 'キャンセルに失敗しました。' }
+        format.json { render json: @appointment.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # GET /appointments/search_patients
+  # 患者検索API
   def search_patients
-    query = params[:q]
+    query = params[:q].to_s.strip
     
-    if query.present?
-      patients = Patient.where(
-        "name ILIKE :query OR phone LIKE :query OR email ILIKE :query",
-        query: "%#{query}%"
-      ).limit(10)
+    if query.length >= 2
+      @patients = Patient.where("name ILIKE ? OR phone ILIKE ?", "%#{query}%", "%#{query}%")
+                         .limit(10)
+      
+      render json: @patients.map { |p| patient_json(p) }
     else
-      patients = Patient.limit(10)
+      render json: []
     end
-    
-    render json: patients.map { |p| 
-      { 
-        id: p.id, 
-        name: p.name,
-        phone: p.phone,
-        email: p.email
-      } 
-    }
   end
 
-  # GET /appointments/available_slots
+  # カレンダーイベント用JSON
+  def calendar_events
+    start_date = Date.parse(params[:start]) if params[:start]
+    end_date = Date.parse(params[:end]) if params[:end]
+    
+    appointments = Appointment.includes(:patient)
+    
+    if start_date && end_date
+      appointments = appointments.where(appointment_date: start_date..end_date)
+    end
+    
+    render json: appointments.map { |apt| calendar_event_json(apt) }
+  end
+
+  # 空き時間検索
   def available_slots
     date = Date.parse(params[:date])
-    booked_slots = Appointment.where(appointment_date: date.beginning_of_day..date.end_of_day)
-                             .pluck(:appointment_date)
-                             .map { |dt| dt.strftime('%H:%M') }
-
-    # 診療時間スロット（9:00-18:00、1時間間隔）
-    all_slots = (9..17).map { |hour| sprintf('%02d:00', hour) }
-    available_slots = all_slots - booked_slots
-
-    render json: { available_slots: available_slots }
+    duration = params[:duration].to_i || 60
+    
+    slots = find_available_slots(date, duration)
+    
+    render json: slots.map { |slot| 
+      {
+        time: slot.strftime('%H:%M'),
+        datetime: slot.iso8601,
+        available: true
+      }
+    }
   end
 
   private
 
   def set_appointment
-    @appointment = Appointment.includes(:patient, :reminders).find(params[:id])
+    @appointment = Appointment.find(params[:id])
   end
 
-  # パフォーマンス最適化用ヘルパーメソッド
-  def date_params_present?
-    params[:from_date].present? || params[:to_date].present?
-  end
-
-  def date_range
-    from_date = params[:from_date].present? ? Date.parse(params[:from_date]) : Date.current.beginning_of_month
-    to_date = params[:to_date].present? ? Date.parse(params[:to_date]) : Date.current.end_of_month
-    from_date..to_date
-  end
-
-  def appointments_json
-    @appointments.as_json(
-      only: [:id, :appointment_date, :status, :treatment_type, :notes],
-      include: {
-        patient: {
-          only: [:id, :name, :phone, :email]
-        }
-      }
-    )
+  def load_patients
+    @patients = Patient.order(:name)
   end
 
   def appointment_params
     params.require(:appointment).permit(
-      :patient_id, :appointment_date, :treatment_type, :notes
+      :patient_id, :appointment_date, :duration, :treatment_type,
+      :status, :notes, :priority, :reminder_enabled
     )
   end
 
-  def schedule_reminders(appointment)
+  def filter_appointments
+    appointments = Appointment.includes(:patient)
+    
+    # 日付フィルター
+    if params[:date].present?
+      date = Date.parse(params[:date])
+      appointments = appointments.where(
+        appointment_date: date.beginning_of_day..date.end_of_day
+      )
+    end
+    
+    # ステータスフィルター
+    if params[:status].present?
+      appointments = appointments.where(status: params[:status])
+    end
+    
+    # 患者名検索
+    if params[:search].present?
+      appointments = appointments.joins(:patient)
+                                 .where("patients.name ILIKE ?", "%#{params[:search]}%")
+    end
+    
+    # ソート
+    case params[:sort]
+    when 'date_asc'
+      appointments = appointments.order(:appointment_date)
+    when 'date_desc'
+      appointments = appointments.order(appointment_date: :desc)
+    when 'patient'
+      appointments = appointments.joins(:patient).order('patients.name')
+    else
+      appointments = appointments.order(:appointment_date)
+    end
+    
+    appointments.limit(100)
+  end
+
+  def appointment_json(appointment)
+    {
+      id: appointment.id,
+      patient_id: appointment.patient_id,
+      patient_name: appointment.patient.name,
+      patient_phone: appointment.patient.phone,
+      appointment_date: appointment.appointment_date.iso8601,
+      duration: appointment.duration,
+      treatment_type: appointment.treatment_type,
+      status: appointment.status,
+      notes: appointment.notes,
+      priority: appointment.priority,
+      reminder_enabled: appointment.reminder_enabled,
+      created_at: appointment.created_at.iso8601,
+      updated_at: appointment.updated_at.iso8601
+    }
+  end
+
+  def calendar_event_json(appointment)
+    {
+      id: appointment.id,
+      title: "#{appointment.patient.name} - #{appointment.treatment_type || '診療'}",
+      start: appointment.appointment_date.iso8601,
+      end: (appointment.appointment_date + appointment.duration.minutes).iso8601,
+      backgroundColor: status_color(appointment.status),
+      borderColor: priority_color(appointment.priority),
+      textColor: '#ffffff',
+      classNames: ["status-#{appointment.status}", "priority-#{appointment.priority}"],
+      extendedProps: {
+        patientId: appointment.patient_id,
+        patientName: appointment.patient.name,
+        patientPhone: appointment.patient.phone,
+        treatmentType: appointment.treatment_type,
+        status: appointment.status,
+        priority: appointment.priority,
+        notes: appointment.notes,
+        duration: appointment.duration
+      }
+    }
+  end
+
+  def patient_json(patient)
+    {
+      id: patient.id,
+      name: patient.name,
+      phone: patient.phone,
+      email: patient.email
+    }
+  end
+
+  def calendar_events_json
+    @appointments.map { |apt| calendar_event_json(apt) }
+  end
+
+  def status_color(status)
+    case status
+    when 'booked' then '#3B82F6'      # blue
+    when 'visited' then '#10B981'     # green
+    when 'completed' then '#6B7280'   # gray
+    when 'cancelled' then '#EF4444'   # red
+    when 'no_show' then '#F59E0B'     # amber
+    else '#6366F1'                    # indigo
+    end
+  end
+
+  def priority_color(priority)
+    case priority
+    when 'urgent' then '#DC2626'      # red-600
+    when 'high' then '#F59E0B'        # amber-500
+    when 'normal' then '#6B7280'      # gray-500
+    when 'low' then '#9CA3AF'         # gray-400
+    else '#6B7280'
+    end
+  end
+
+  def find_available_slots(date, duration)
+    # 営業時間設定
+    start_time = date.beginning_of_day + 9.hours   # 9:00
+    end_time = date.beginning_of_day + 18.hours    # 18:00
+    slot_interval = 30.minutes
+    
+    # 既存の予約を取得
+    existing_appointments = Appointment.where(appointment_date: date.beginning_of_day..date.end_of_day)
+                                      .order(:appointment_date)
+    
+    available_slots = []
+    current_slot = start_time
+    
+    while current_slot + duration.minutes <= end_time
+      slot_end = current_slot + duration.minutes
+      
+      # この時間枠が空いているかチェック
+      is_available = existing_appointments.none? do |apt|
+        apt_start = apt.appointment_date
+        apt_end = apt_start + apt.duration.minutes
+        
+        # 重複チェック
+        (current_slot < apt_end) && (slot_end > apt_start)
+      end
+      
+      available_slots << current_slot if is_available
+      current_slot += slot_interval
+    end
+    
+    available_slots
+  end
+
+  def schedule_reminder_jobs(appointment)
+    return unless appointment.reminder_enabled
+    
+    appointment_date = appointment.appointment_date
+    
     # 7日前リマインダー
-    reminder_7d = Delivery.create!(
-      patient: appointment.patient,
-      appointment: appointment,
-      delivery_type: preferred_delivery_type(appointment.patient),
-      subject: '予約リマインダー（7日前）',
-      content: generate_reminder_content(appointment, 7)
-    )
+    if appointment_date > 7.days.from_now
+      ReminderJob.set(wait_until: appointment_date - 7.days)
+                 .perform_later('seven_day_reminder', appointment.id)
+    end
     
     # 3日前リマインダー
-    reminder_3d = Delivery.create!(
+    if appointment_date > 3.days.from_now
+      ReminderJob.set(wait_until: appointment_date - 3.days)
+                 .perform_later('three_day_reminder', appointment.id)
+    end
+    
+    # 当日リマインダー
+    if appointment_date > 1.day.from_now
+      ReminderJob.set(wait_until: appointment_date.beginning_of_day + 9.hours)
+                 .perform_later('one_day_reminder', appointment.id)
+    end
+  end
+
+  def reschedule_reminder_jobs(appointment)
+    # 既存のジョブをキャンセル（実装は使用するジョブキューに依存）
+    # 新しいリマインダーをスケジュール
+    schedule_reminder_jobs(appointment)
+  end
+
+  def send_appointment_confirmation(appointment)
+    NotificationService.send_notification(
       patient: appointment.patient,
       appointment: appointment,
-      delivery_type: preferred_delivery_type(appointment.patient),
-      subject: '予約リマインダー（3日前）',
-      content: generate_reminder_content(appointment, 3)
+      notification_type: :appointment_confirmation
     )
-
-    # バックグラウンドジョブでスケジュール
-    ReminderJob.set(wait_until: appointment.appointment_date - 7.days)
-               .perform_later(reminder_7d.id)
-    ReminderJob.set(wait_until: appointment.appointment_date - 3.days)
-               .perform_later(reminder_3d.id)
   end
 
-  def preferred_delivery_type(patient)
-    return 'line' if patient.line_user_id.present?
-    return 'email' if patient.email.present?
-    'sms'
+  def send_appointment_update(appointment)
+    NotificationService.send_notification(
+      patient: appointment.patient,
+      appointment: appointment,
+      notification_type: :appointment_change
+    )
   end
 
-  def generate_reminder_content(appointment, days_before)
-    <<~CONTENT
-      #{appointment.patient.name}様
-
-      #{appointment.appointment_date.strftime('%-m月%-d日 %H:%M')}にご予約をお取りしております。
-
-      治療内容: #{appointment.treatment_type}
-
-      ご来院をお待ちしております。
-
-      ※このメッセージは#{days_before}日前の自動配信です。
-    CONTENT
-  end
-
-  # カレンダー用の日付範囲
-  def calendar_date_range
-    start_date = params[:start].present? ? Date.parse(params[:start]) : Date.current.beginning_of_month
-    end_date = params[:end].present? ? Date.parse(params[:end]) : Date.current.end_of_month
-    start_date..end_date
-  end
-
-  # カレンダーイベント用JSON
-  def calendar_events_json
-    @appointments.map do |appointment|
-      duration = appointment.duration_minutes || 60
-      {
-        id: appointment.id,
-        title: "#{appointment.patient.name} - #{appointment.treatment_type || '診療'}",
-        start: appointment.appointment_date.iso8601,
-        end: (appointment.appointment_date + duration.minutes).iso8601,
-        url: appointment_path(appointment),
-        backgroundColor: appointment_status_color(appointment.status),
-        borderColor: appointment_status_color(appointment.status),
-        textColor: '#ffffff',
-        extendedProps: {
-          patientId: appointment.patient.id,
-          patientName: appointment.patient.name,
-          patientPhone: appointment.patient.phone,
-          treatmentType: appointment.treatment_type,
-          status: appointment.status,
-          notes: appointment.notes,
-          duration: duration
-        }
-      }
-    end
-  end
-
-  # ステータス別カラー
-  def appointment_status_color(status)
-    case status
-    when 'scheduled'
-      '#3B82F6'  # Blue
-    when 'confirmed'
-      '#10B981'  # Green
-    when 'completed'
-      '#6B7280'  # Gray
-    when 'cancelled'
-      '#EF4444'  # Red
-    when 'no_show'
-      '#F59E0B'  # Amber
-    else
-      '#6366F1'  # Indigo
-    end
+  def send_appointment_cancellation(appointment)
+    NotificationService.send_notification(
+      patient: appointment.patient,
+      appointment: appointment,
+      notification_type: :appointment_cancellation
+    )
   end
 end

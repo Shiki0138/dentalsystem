@@ -1,79 +1,154 @@
-<div class="appointments-new">
-  <div class="max-w-2xl mx-auto">
-    <div class="mb-8">
-      <h1 class="text-2xl font-semibold text-gray-900">新規予約</h1>
-      <p class="mt-1 text-sm text-gray-600">予約情報を入力してください</p>
+<%# 歯科医院予約管理システム - 新規予約作成画面 %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+    
+    <!-- ヘッダー部分 -->
+    <div class="md:flex md:items-center md:justify-between mb-6">
+      <div class="flex-1 min-w-0">
+        <nav class="flex" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-4">
+            <li>
+              <%= link_to appointments_path, class: "text-sm font-medium text-gray-500 hover:text-gray-700" do %>
+                予約一覧
+              <% end %>
+            </li>
+            <li>
+              <div class="flex items-center">
+                <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500">新規予約</span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+        
+        <h1 class="mt-2 text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          新規予約作成
+        </h1>
+        <p class="mt-1 text-sm text-gray-500">
+          患者様の診療予約を作成します
+        </p>
+      </div>
     </div>
 
-    <%= form_with model: @appointment, local: true, class: "space-y-6" do |f| %>
-      <% if @appointment.errors.any? %>
-        <div class="rounded-md bg-red-50 p-4">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">エラーが発生しました</h3>
-              <div class="mt-2 text-sm text-red-700">
-                <ul role="list" class="list-disc space-y-1 pl-5">
-                  <% @appointment.errors.full_messages.each do |message| %>
-                    <li><%= message %></li>
-                  <% end %>
-                </ul>
+    <!-- メインフォーム -->
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <%= form_with model: @appointment, local: true, class: "space-y-6" do |form| %>
+          
+          <!-- エラー表示 -->
+          <% if @appointment.errors.any? %>
+            <div class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    入力内容にエラーがあります
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <% @appointment.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      <% end %>
+          <% end %>
 
-      <div class="bg-white shadow sm:rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <div class="grid grid-cols-6 gap-6">
-            <div class="col-span-6">
-              <label for="appointment_patient_id" class="block text-sm font-medium text-gray-700">
-                患者 <span class="text-red-500">*</span>
-              </label>
-              <%= f.collection_select :patient_id, Patient.active.order(:name), :id, :name,
-                  { prompt: "患者を選択してください", selected: params[:patient_id] },
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            
+            <!-- 患者選択 -->
+            <div class="sm:col-span-2">
+              <%= form.label :patient_id, "患者", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :patient_id, 
+                  @patients, :id, :name, 
+                  { prompt: '患者を選択してください' },
                   { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" } %>
             </div>
 
-            <div class="col-span-6 sm:col-span-3">
-              <label for="appointment_appointment_date" class="block text-sm font-medium text-gray-700">
-                予約日時 <span class="text-red-500">*</span>
-              </label>
-              <%= f.datetime_local_field :appointment_date, 
-                  class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+            <!-- 予約日時 -->
+            <div>
+              <%= form.label :appointment_date, "予約日時", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.datetime_local_field :appointment_date, 
+                  class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md",
+                  min: Time.current.strftime('%Y-%m-%dT%H:%M') %>
             </div>
 
-            <div class="col-span-6 sm:col-span-3">
-              <label for="appointment_user_id" class="block text-sm font-medium text-gray-700">
-                担当スタッフ
-              </label>
-              <%= f.collection_select :user_id, User.all.order(:name), :id, :name,
-                  { prompt: "スタッフを選択", include_blank: true },
-                  { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" } %>
+            <!-- 診療時間 -->
+            <div>
+              <%= form.label :duration, "診療時間（分）", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :duration, 
+                  options_for_select([
+                    ['30分', 30],
+                    ['60分', 60],
+                    ['90分', 90],
+                    ['120分', 120]
+                  ], @appointment.duration || 60),
+                  {},
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
             </div>
 
-            <div class="col-span-6">
-              <label for="appointment_notes" class="block text-sm font-medium text-gray-700">
-                メモ
-              </label>
-              <%= f.text_area :notes, rows: 3, 
+            <!-- 治療内容 -->
+            <div>
+              <%= form.label :treatment_type, "治療内容", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :treatment_type, 
+                  options_for_select([
+                    ['一般診療', 'general'],
+                    ['初診・相談', 'consultation'],
+                    ['定期検診', 'checkup'],
+                    ['クリーニング', 'cleaning'],
+                    ['虫歯治療', 'filling'],
+                    ['被せ物・詰め物', 'crown'],
+                    ['根管治療', 'root_canal'],
+                    ['抜歯', 'extraction'],
+                    ['矯正治療', 'orthodontics'],
+                    ['ホワイトニング', 'whitening'],
+                    ['その他', 'other']
+                  ], @appointment.treatment_type),
+                  { prompt: '治療内容を選択してください' },
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- ステータス -->
+            <div>
+              <%= form.label :status, "ステータス", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :status, 
+                  options_for_select([
+                    ['予約済み', 'booked'],
+                    ['確認済み', 'visited']
+                  ], @appointment.status || 'booked'),
+                  {},
+                  class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" %>
+            </div>
+
+            <!-- 備考 -->
+            <div class="sm:col-span-2">
+              <%= form.label :notes, "備考", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :notes, 
+                  rows: 4,
+                  placeholder: "特記事項があれば入力してください",
                   class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
             </div>
           </div>
-        </div>
 
-        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-          <%= link_to "キャンセル", appointments_path, 
-              class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-          <%= f.submit "予約を作成", 
-              class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-        </div>
+          <!-- フォームアクション -->
+          <div class="flex justify-end space-x-3">
+            <%= link_to "キャンセル", appointments_path, 
+                class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            
+            <%= form.submit "予約を作成", 
+                class: "bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        <% end %>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>

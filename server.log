@@ -1,0 +1,29 @@
+[2025-07-05 11:04:50] INFO  WEBrick 1.4.4
+[2025-07-05 11:04:50] INFO  ruby 2.6.10 (2022-04-12) [universal.x86_64-darwin24]
+[2025-07-05 11:04:50] INFO  WEBrick::HTTPServer#start: pid=57842 port=3003
+::1 - - [05/Jul/2025:11:05:02 JST] "GET /patients/1 HTTP/1.1" 200 10711
+- -> /patients/1
+::1 - - [05/Jul/2025:11:05:07 JST] "GET / HTTP/1.1" 200 16874
+- -> /
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /patients HTTP/1.1" 200 9573
+- -> /patients
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /patients/new HTTP/1.1" 200 8901
+- -> /patients/new
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /patients/1 HTTP/1.1" 200 10711
+- -> /patients/1
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /calendar HTTP/1.1" 200 22418
+- -> /calendar
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /calendar?view=week HTTP/1.1" 200 8427
+- -> /calendar?view=week
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /calendar?view=month HTTP/1.1" 200 8427
+- -> /calendar?view=month
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /reminders HTTP/1.1" 200 7733
+- -> /reminders
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /settings HTTP/1.1" 200 17152
+- -> /settings
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /api/appointments.json HTTP/1.1" 200 451
+- -> /api/appointments.json
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /api/time_slots.json?date=2025-07-05 HTTP/1.1" 200 257
+- -> /api/time_slots.json?date=2025-07-05
+::1 - - [05/Jul/2025:11:05:07 JST] "GET /patients/export HTTP/1.1" 200 382
+- -> /patients/export

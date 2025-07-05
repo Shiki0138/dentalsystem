@@ -1,364 +1,182 @@
-<!-- 本番デモモード専用ダッシュボード -->
-<div class="demo-dashboard-container min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-  <!-- デモヘッダー -->
-  <div class="demo-header bg-gradient-to-r from-purple-600 to-blue-700 text-white shadow-2xl">
-    <div class="container mx-auto px-4 py-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <div class="p-4 bg-white bg-opacity-20 rounded-2xl">
-            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-4xl font-bold mb-2">🦷 歯科クリニック管理システム - デモ環境</h1>
-            <p class="text-xl opacity-90">
-              革新的AI統合システムの安全な体験環境
-            </p>
-            <div class="flex items-center space-x-6 mt-3">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-400 text-green-900">
-                <div class="w-2 h-2 bg-green-600 rounded-full mr-2 animate-pulse"></div>
-                デモモード稼働中
-              </span>
-              <span class="text-sm opacity-75">
-                最終テスト: <%= Time.current.strftime('%Y-%m-%d %H:%M:%S') %>
-              </span>
-            </div>
-          </div>
+<!-- デモモードダッシュボード -->
+<div class="min-h-screen bg-gray-50">
+  <!-- デモモードヘッダー -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">🦷 歯科医院予約管理システム - デモモード</h1>
+          <p class="text-sm opacity-90 mt-1">実際の操作感をお試しください</p>
         </div>
-        
-        <div class="text-right">
-          <div class="demo-stats grid grid-cols-2 gap-4">
-            <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div class="text-3xl font-bold">100%</div>
-              <div class="text-sm opacity-90">テスト成功率</div>
-            </div>
-            <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div class="text-3xl font-bold">A+</div>
-              <div class="text-sm opacity-90">パフォーマンス</div>
-            </div>
-          </div>
+        <div class="flex space-x-3">
+          <%= button_to "デモデータ追加", demo_seed_data_path, method: :post, 
+              class: "bg-white text-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100" %>
+          <%= button_to "データリセット", demo_reset_data_path, method: :post,
+              data: { confirm: "デモデータをリセットしますか？" },
+              class: "bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-600" %>
+          <%= button_to "デモ終了", demo_end_session_path, method: :post,
+              class: "bg-gray-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-900" %>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- デモ機能紹介 -->
-  <div class="container mx-auto px-4 py-8">
-    <!-- 主要機能カード -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-      <!-- 患者管理機能 -->
-      <div class="demo-feature-card bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mx-auto flex items-center justify-center mb-4">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <!-- メインコンテンツ -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- 統計カード -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-500">デモ患者数</p>
+            <p class="text-2xl font-bold text-gray-900"><%= @stats[:total_patients] %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-green-100 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-500">今日の予約</p>
+            <p class="text-2xl font-bold text-gray-900"><%= @stats[:today_appointments] %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-purple-100 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-500">今週の予約</p>
+            <p class="text-2xl font-bold text-gray-900"><%= @stats[:this_week_appointments] %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-yellow-100 rounded-lg">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-500">未送信リマインド</p>
+            <p class="text-2xl font-bold text-gray-900"><%= @stats[:pending_reminders] %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 機能ボタン -->
+    <div class="bg-white rounded-lg shadow mb-8">
+      <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">主要機能を試す</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <%= link_to phone_booking_appointments_path, class: "flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition" do %>
+            <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+            <div>
+              <h3 class="font-medium text-gray-900">電話予約受付</h3>
+              <p class="text-sm text-gray-500">受付スタッフ向けの簡単予約登録</p>
+            </div>
+          <% end %>
+
+          <%= link_to calendar_appointments_path, class: "flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition" do %>
+            <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <div>
+              <h3 class="font-medium text-gray-900">予約カレンダー</h3>
+              <p class="text-sm text-gray-500">月表示・週表示・日表示対応</p>
+            </div>
+          <% end %>
+
+          <%= link_to patients_path, class: "flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition" do %>
+            <svg class="w-8 h-8 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
             </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-800 mb-3">患者管理システム</h3>
-          <p class="text-gray-600 mb-6">AI統合による革新的な患者管理体験</p>
+            <div>
+              <h3 class="font-medium text-gray-900">患者管理</h3>
+              <p class="text-sm text-gray-500">患者情報の登録・検索・編集</p>
+            </div>
+          <% end %>
         </div>
-        
-        <div class="feature-highlights space-y-3 mb-6">
-          <div class="flex items-center space-x-3">
-            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span class="text-sm text-gray-700">リアルタイム検索（50ms以下）</span>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span class="text-sm text-gray-700">AI予測インサイト（91.3%精度）</span>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span class="text-sm text-gray-700">レスポンシブUI</span>
-          </div>
-        </div>
-        
-        <%= link_to patients_path, 
-            class: "w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300" do %>
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          患者管理を体験
-        <% end %>
-      </div>
-
-      <!-- AI統合機能 -->
-      <div class="demo-feature-card bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full mx-auto flex items-center justify-center mb-4">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-800 mb-3">AI予測エンジン</h3>
-          <p class="text-gray-600 mb-6">機械学習による次世代予測システム</p>
-        </div>
-        
-        <div class="ai-metrics grid grid-cols-2 gap-4 mb-6">
-          <div class="text-center p-3 bg-purple-50 rounded-lg">
-            <div class="text-2xl font-bold text-purple-600">85.2%</div>
-            <div class="text-xs text-gray-600">キャンセル予測</div>
-          </div>
-          <div class="text-center p-3 bg-blue-50 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600">92.1%</div>
-            <div class="text-xs text-gray-600">最適時間提案</div>
-          </div>
-          <div class="text-center p-3 bg-green-50 rounded-lg">
-            <div class="text-2xl font-bold text-green-600">88.7%</div>
-            <div class="text-xs text-gray-600">治療完了予測</div>
-          </div>
-          <div class="text-center p-3 bg-orange-50 rounded-lg">
-            <div class="text-2xl font-bold text-orange-600">47ms</div>
-            <div class="text-xs text-gray-600">AI応答時間</div>
-          </div>
-        </div>
-        
-        <button class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300"
-                onclick="showAIDemo()">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-          AI機能をテスト
-        </button>
-      </div>
-
-      <!-- パフォーマンス指標 -->
-      <div class="demo-feature-card bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full mx-auto flex items-center justify-center mb-4">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-800 mb-3">パフォーマンス</h3>
-          <p class="text-gray-600 mb-6">最適化された高速システム</p>
-        </div>
-        
-        <div class="performance-metrics space-y-4 mb-6">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">ページロード</span>
-            <span class="font-bold text-green-600">< 200ms</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">検索応答</span>
-            <span class="font-bold text-blue-600">< 50ms</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-500 h-2 rounded-full" style="width: 98%"></div>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">システム稼働率</span>
-            <span class="font-bold text-purple-600">99.98%</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-purple-500 h-2 rounded-full" style="width: 99.98%"></div>
-          </div>
-        </div>
-        
-        <button class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300"
-                onclick="runPerformanceTest()">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-          </svg>
-          パフォーマンステスト
-        </button>
       </div>
     </div>
 
-    <!-- デモデータ管理 -->
-    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-800">デモデータ管理</h2>
-          <p class="text-gray-600 mt-2">安全にテストデータをリセット・管理できます</p>
-        </div>
-        <div class="demo-data-stats grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-2xl font-bold text-blue-600">10名</div>
-            <div class="text-sm text-gray-500">サンプル患者</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-green-600">45件</div>
-            <div class="text-sm text-gray-500">予約履歴</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-purple-600">36件</div>
-            <div class="text-sm text-gray-500">配信記録</div>
+    <!-- デモ患者リスト -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- 患者一覧 -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">デモ患者</h2>
+          <div class="space-y-3">
+            <% @demo_patients.each do |patient| %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p class="font-medium text-gray-900"><%= patient.name %></p>
+                  <p class="text-sm text-gray-500"><%= patient.phone %></p>
+                </div>
+                <div class="flex space-x-2">
+                  <%= link_to "詳細", patient_path(patient), 
+                      class: "text-blue-600 hover:text-blue-800 text-sm font-medium" %>
+                  <%= link_to "予約", new_patient_appointment_path(patient), 
+                      class: "text-green-600 hover:text-green-800 text-sm font-medium" %>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button class="demo-action-btn bg-blue-50 text-blue-700 hover:bg-blue-100"
-                onclick="resetDemoData()">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          デモデータリセット
-        </button>
-        
-        <button class="demo-action-btn bg-green-50 text-green-700 hover:bg-green-100"
-                onclick="generateSampleData()">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          サンプルデータ生成
-        </button>
-        
-        <button class="demo-action-btn bg-purple-50 text-purple-700 hover:bg-purple-100"
-                onclick="exportDemoResults()">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          テスト結果出力
-        </button>
+
+      <!-- 予約一覧 -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">今後の予約</h2>
+          <div class="space-y-3">
+            <% @demo_appointments.each do |appointment| %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p class="font-medium text-gray-900">
+                    <%= appointment.appointment_date.strftime("%m/%d %H:%M") %> - <%= appointment.patient.name %>
+                  </p>
+                  <p class="text-sm text-gray-500"><%= appointment.treatment_type %></p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                  <%= appointment.status %>
+                </span>
+              </div>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 技術仕様 -->
-    <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 border border-gray-200">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">技術仕様・アーキテクチャ</h2>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <h3 class="text-lg font-semibold text-gray-700 mb-4">フロントエンド技術</h3>
-          <ul class="space-y-2 text-sm text-gray-600">
-            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>TailwindCSS（レスポンシブデザイン）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>Stimulus.js（リアルタイム機能）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>AJAX（非同期通信）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>WebSocket対応（リアルタイム更新）</li>
-          </ul>
-        </div>
-        
-        <div>
-          <h3 class="text-lg font-semibold text-gray-700 mb-4">バックエンド・AI</h3>
-          <ul class="space-y-2 text-sm text-gray-600">
-            <li class="flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>Ruby on Rails 6.1（安定性重視）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>SQLite（高速開発環境）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>AI予測エンジン（機械学習）</li>
-            <li class="flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>RESTful API設計</li>
-          </ul>
-        </div>
-      </div>
+    <!-- 機能説明 -->
+    <div class="mt-8 bg-blue-50 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-blue-900 mb-2">デモモードの使い方</h3>
+      <ul class="space-y-2 text-sm text-blue-800">
+        <li>• 「デモデータ追加」ボタンで、サンプル患者と予約を追加できます</li>
+        <li>• 各機能ボタンから、実際の画面を操作できます</li>
+        <li>• デモデータは本番データとは完全に分離されています</li>
+        <li>• すべての機能を自由にお試しください</li>
+      </ul>
     </div>
   </div>
 </div>
-
-<script>
-// デモ機能用JavaScript
-function showAIDemo() {
-  alert('🤖 AI機能デモを開始します！\n\n• キャンセルリスク予測\n• 最適予約時間提案\n• 治療完了率予測\n\n実際の患者データでAI機能をお試しください。');
-  window.location.href = '/patients';
-}
-
-function runPerformanceTest() {
-  const startTime = performance.now();
-  
-  // パフォーマンステスト実行
-  fetch('/demo/performance_test')
-    .then(response => response.json())
-    .then(data => {
-      const endTime = performance.now();
-      const totalTime = endTime - startTime;
-      
-      alert(`⚡ パフォーマンステスト完了！\n\n総合スコア: ${data.overall_score?.overall || 'A+'}グレード\n応答時間: ${totalTime.toFixed(2)}ms\n\n詳細結果をコンソールで確認できます。`);
-      console.log('パフォーマンステスト結果:', data);
-    })
-    .catch(error => {
-      console.error('パフォーマンステストエラー:', error);
-    });
-}
-
-function resetDemoData() {
-  if (confirm('🔄 デモデータをリセットしますか？\n\n現在のデータが削除され、新しいサンプルデータが作成されます。')) {
-    fetch('/demo/reset_demo_data', { method: 'POST' })
-      .then(response => {
-        if (response.ok) {
-          alert('✅ デモデータリセット完了！\n\n新しいサンプルデータで体験を開始できます。');
-          location.reload();
-        }
-      })
-      .catch(error => {
-        alert('❌ リセットに失敗しました。');
-        console.error('リセットエラー:', error);
-      });
-  }
-}
-
-function generateSampleData() {
-  alert('📊 サンプルデータ生成機能\n\n• 10名のリアルな患者データ\n• 45件の予約履歴\n• AI分析用データセット\n\nリセット機能で新しいデータを生成できます。');
-}
-
-function exportDemoResults() {
-  // テスト結果をJSON形式でダウンロード
-  const demoResults = {
-    timestamp: new Date().toISOString(),
-    performance: {
-      overall_score: '100.0%',
-      grade: 'A+',
-      database_response: '< 50ms',
-      ui_rendering: '< 100ms',
-      search_speed: '< 50ms'
-    },
-    features: {
-      patient_management: '100%',
-      ai_integration: '100%',
-      search_functionality: '100%',
-      ui_responsiveness: '100%'
-    },
-    technical_specs: {
-      framework: 'Ruby on Rails 6.1',
-      frontend: 'TailwindCSS + Stimulus.js',
-      ai_engine: 'Custom ML Predictions',
-      database: 'SQLite (Development)'
-    }
-  };
-  
-  const blob = new Blob([JSON.stringify(demoResults, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `demo_results_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  alert('📄 テスト結果をダウンロードしました！');
-}
-
-// ページロード時のアニメーション
-document.addEventListener('DOMContentLoaded', function() {
-  // カードアニメーション
-  const cards = document.querySelectorAll('.demo-feature-card');
-  cards.forEach((card, index) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    
-    setTimeout(() => {
-      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, index * 200);
-  });
-});
-</script>
-
-<style>
-  .demo-action-btn {
-    @apply flex items-center justify-center px-4 py-3 rounded-lg font-medium transition-colors duration-200;
-  }
-  
-  .demo-feature-card {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95);
-  }
-  
-  .demo-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-</style>

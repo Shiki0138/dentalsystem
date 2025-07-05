@@ -1,0 +1,13 @@
+{
+  "status": "success",
+  "message": "ログインしました",
+  "user": {
+    "id": 1,
+    "email": "test@dental.com",
+    "name": "テスト歯科医師",
+    "role": "doctor",
+    "two_factor_enabled": true
+  },
+  "token": "jwt-token-cypress-test-123",
+  "expires_at": "2025-07-05T00:00:00Z"
+}
