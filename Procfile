@@ -1,2 +1,1 @@
-web: bundle exec puma -C config/puma.rb
-release: bundle exec rails db:migrate && bundle exec rails beta:setup
+web: ruby complete_dental_system.rb -p $PORT

@@ -2254,15 +2254,18 @@ class CompleteDentalServlet < WEBrick::HTTPServlet::AbstractServlet
 end
 
 # サーバー起動
+port = ENV['PORT'] || 3003
+bind_address = ENV['RACK_ENV'] == 'production' ? '0.0.0.0' : 'localhost'
 server = WEBrick::HTTPServer.new(
-  Port: 3003,
+  Port: port.to_i,
+  BindAddress: bind_address,
   DocumentRoot: File.dirname(__FILE__)
 )
 
 server.mount('/', CompleteDentalServlet)
 
 puts "🦷 完全版歯科医院管理システム起動中..."
-puts "🌐 http://localhost:3003 でアクセスしてください"
+puts "🌐 http://#{bind_address}:#{port} でアクセスしてください"
 puts "📊 全機能実装: CRUD・メッセージ返信・設定保存・データ永続化"
 puts "💾 データは data/ フォルダに保存されます"
 

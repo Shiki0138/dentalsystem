@@ -1,0 +1,18 @@
+[build]
+builder = "heroku/buildpacks:20"
+
+[deploy]
+startCommand = "ruby complete_dental_system.rb"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[environments.production]
+PORT = "$PORT"
+RACK_ENV = "production"
+RAILS_ENV = "production"
+
+[environments.production.variables]
+RACK_ENV = "production"
+RAILS_ENV = "production"
